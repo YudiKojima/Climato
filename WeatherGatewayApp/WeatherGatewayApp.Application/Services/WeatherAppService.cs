@@ -39,7 +39,8 @@ namespace WeatherGatewayApp.Application.Services
                 WindSpeed = Convert.ToDouble(result["windSpeed"]),
                 WindDirection = Convert.ToInt32(result["windDirection"]),
                 Sunrise = DateTime.Parse(result["sunrise"]?.ToString() ?? DateTime.MinValue.ToString()),
-                Sunset = DateTime.Parse(result["sunset"]?.ToString() ?? DateTime.MinValue.ToString())
+                Sunset = DateTime.Parse(result["sunset"]?.ToString() ?? DateTime.MinValue.ToString()),
+                ImageUrl = result["imageUrl"]?.ToString()
             };
 
             var city = await cityRepository.GetByNameAsync(weather.City);

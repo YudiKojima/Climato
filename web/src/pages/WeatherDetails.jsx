@@ -43,70 +43,78 @@ const WeatherDetails = () => {
   }
 
   return (
-    <div className="weather-details-card">
-      {notFound ? (
-        <>
-          <Empty
-            image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
-            styles={{ image: { height: 140 } }}
-            description={
-              <Typography.Text>
-                Cidade "<strong>{cityName}</strong>" não encontrada.
-              </Typography.Text>
-            }
-          ></Empty>
-        </>
-      ) : (
-        <>
-          <h2>{`Clima em ${weather.city}, ${weather.country}`}</h2>
+    <div
+      className="weather-details-background"
+      style={{
+        backgroundImage: `url(${weather?.imageUrl})`,
+      }}
+    >
+      <div className="weather-details-card">
+        {notFound ? (
+          <>
+            <Empty
+              image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+              styles={{ image: { height: 140 } }}
+              description={
+                <Typography.Text>
+                  Cidade "<strong>{cityName}</strong>" não encontrada.
+                </Typography.Text>
+              }
+            ></Empty>
+          </>
+        ) : (
+          <>
+            <h2>{`Clima em ${weather.city} - ${weather.country}`}</h2>
 
-          <div className="weather-main-info">
-            <img
-              src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
-              alt={weather.description}
-            />
-            <p className="temp">{weather.temperature}°C</p>
-            <p className="desc">{weather.description}</p>
-          </div>
+            <div className="weather-main-info">
+              <img
+                src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                alt={weather.description}
+              />
+              <p className="temp">{weather.temperature}°C</p>
+              <p className="desc">{weather.description}</p>
+            </div>
 
-          <div className="weather-grid">
-            <div>
-              <strong>Mín:</strong> {weather.tempMin}°C
+            <div className="weather-grid">
+              <div>
+                <strong>Mín:</strong> {weather.tempMin}°C
+              </div>
+              <div>
+                <strong>Máx:</strong> {weather.tempMax}°C
+              </div>
+              <div>
+                <strong>Sensação:</strong> {weather.feelsLike}°C
+              </div>
+              <div>
+                <strong>Umidade:</strong> {weather.humidity}%
+              </div>
+              <div>
+                <strong>Pressão:</strong> {weather.pressure} hPa
+              </div>
+              <div>
+                <strong>Vento:</strong> {weather.windSpeed} km/h
+              </div>
+              <div>
+                <strong>Direção:</strong> {weather.windDirection}°
+              </div>
+              <div>
+                <strong>Nascer do Sol:</strong>{" "}
+                {formatDatetime(weather.sunrise)}
+              </div>
+              <div>
+                <strong>Pôr do Sol:</strong> {formatDatetime(weather.sunset)}
+              </div>
             </div>
-            <div>
-              <strong>Máx:</strong> {weather.tempMax}°C
-            </div>
-            <div>
-              <strong>Sensação:</strong> {weather.feelsLike}°C
-            </div>
-            <div>
-              <strong>Umidade:</strong> {weather.humidity}%
-            </div>
-            <div>
-              <strong>Pressão:</strong> {weather.pressure} hPa
-            </div>
-            <div>
-              <strong>Vento:</strong> {weather.windSpeed} km/h
-            </div>
-            <div>
-              <strong>Direção:</strong> {weather.windDirection}°
-            </div>
-            <div>
-              <strong>Nascer do Sol:</strong> {formatDatetime(weather.sunrise)}
-            </div>
-            <div>
-              <strong>Pôr do Sol:</strong> {formatDatetime(weather.sunset)}
-            </div>
-          </div>
-        </>
-      )}
-      <Button
-        style={{ marginTop: 20 }}
-        type="primary"
-        onClick={() => navigate("/")}
-      >
-        Voltar
-      </Button>
+          </>
+        )}
+        <Button
+          style={{ marginTop: 20 }}
+          type="primary"
+          onClick={() => navigate("/")}
+        >
+          Voltar
+        </Button>
+      </div>
     </div>
   );
 };

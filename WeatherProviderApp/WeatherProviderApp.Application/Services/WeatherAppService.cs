@@ -8,11 +8,13 @@ namespace WeatherProviderApp.Application.Services
     {
         private readonly HttpClient client;
         private readonly string apiKey;
+        private readonly ICityImageAppService cityImageAppService;
 
-        public WeatherAppService(HttpClient httpClient, IConfiguration config)
+        public WeatherAppService(HttpClient httpClient, IConfiguration config, ICityImageAppService cityImageAppService)
         {
             client = httpClient;
             apiKey = config["OpenWeather:ApiKey"]!;
+            this.cityImageAppService = cityImageAppService;
         }
 
         public async Task<Weather> GetByCityAsync(string cityName)
@@ -23,8 +25,7 @@ namespace WeatherProviderApp.Application.Services
             response.EnsureSuccessStatusCode();
 
             var result = await response.ReadContentAsDictionaryAsync();
-
-            return new Weather
+            var weather = new Weather
             {
                 City = result["name"]?.ToString(),
                 Country = ((Dictionary<string, object>)result["sys"])["country"]?.ToString(),
@@ -41,6 +42,11 @@ namespace WeatherProviderApp.Application.Services
                 Sunrise = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(((Dictionary<string, object>)result["sys"])["sunrise"])).DateTime,
                 Sunset = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(((Dictionary<string, object>)result["sys"])["sunset"])).DateTime,
             };
+
+            var cityImageUrl = await cityImageAppService.GetImageUrlAsync(weather.City);
+            weather.ImageUrl = cityImageUrl;
+
+            return weather;
         }
     }
 }

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Input, Button, Typography, Row, Col, Space } from "antd";
 import { StarOutlined } from "@ant-design/icons";
 import Loading from "../components/Loading";
+import img from "../assets/Climato sem fundo preto.png";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -64,11 +65,17 @@ const Home = () => {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: 1000, margin: "0 auto" }}>
+    <div style={{ padding: "1rem", maxWidth: 1000, margin: "0 auto" }}>
       <Space direction="vertical" style={{ width: "100%" }} size="large">
-        <Title level={1} style={{ textAlign: "center" }}>
-          Climato
-        </Title>
+        <img
+          src={img}
+          alt="Climato Logo"
+          style={{
+            display: "block",
+            margin: "0 auto",
+            maxWidth: "200px",
+          }}
+        />
 
         <Button
           type="primary"
