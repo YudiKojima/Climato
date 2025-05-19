@@ -16,6 +16,6 @@
         public int WindDirection { get; set; }
         public DateTime Sunrise { get; set; }
         public DateTime Sunset { get; set; }
+        public string? ImageUrl { get; set; }
     }
-
 }

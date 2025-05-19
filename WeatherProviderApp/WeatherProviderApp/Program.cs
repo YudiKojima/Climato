@@ -12,6 +12,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient<IWeatherAppService, WeatherAppService>();
 builder.Services.AddHttpClient<IWeatherAppService, WeatherAppService>();
+builder.Services.AddTransient<ICityImageAppService, CityImageAppService>();
+builder.Services.AddHttpClient<ICityImageAppService, CityImageAppService>();
 
 var app = builder.Build();
 

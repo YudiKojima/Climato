@@ -20,8 +20,11 @@ const CityCard = ({ city, onToggleFavorite, onClick, onDelete }) => {
       return;
     }
 
-    await DeleteCity(city.id);
-    onDelete();
+    try {
+      await DeleteCity(city.id);
+    } finally {
+      onDelete();
+    }
   };
 
   return (
