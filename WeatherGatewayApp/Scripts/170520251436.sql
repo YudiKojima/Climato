@@ -1,7 +1,22 @@
 CREATE TABLE city (
     id UUID PRIMARY KEY,
+    userid UUID NOT NULL,
     name VARCHAR(255) NOT NULL,
     country VARCHAR(255) NOT NULL,
     isfavorite BOOLEAN NOT NULL DEFAULT FALSE,
     createdat TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+
+    CONSTRAINT fk_city_user FOREIGN KEY (userid)
+        REFERENCES "user"(id)
+        ON DELETE CASCADE
 );
+
+CREATE TABLE "user" (
+    id UUID PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    createdat TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX ix_user_email ON "user" (email);

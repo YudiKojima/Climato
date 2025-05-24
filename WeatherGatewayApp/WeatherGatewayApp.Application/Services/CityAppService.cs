@@ -18,25 +18,30 @@ namespace WeatherGatewayApp.Application.Services
 
         public async void DeleteAsync(Guid id)
         {
-            var city = await cityRepository.GetAsync(id) ?? throw new Exception("Cidade não encontrada");
+            var city = await cityRepository.GetAsync(id) ?? throw new ArgumentException("Cidade não encontrada");
             await cityRepository.DeleteAsync(city);
         }
 
-        public async Task<List<CityDto>> GetAllAsync()
+        public async Task<List<CityDto>> GetAllAsync(Guid userId)
         {
-            var cities = await cityRepository.GetAllAsync();
+            var cities = await cityRepository.GetAllAsync(userId);
             return autoMapper.Map<List<CityDto>>(cities);
         }
 
-        public async Task<List<CityDto>> GetAllFavoritesAsync()
+        public async Task<List<CityDto>> GetAllFavoritesAsync(Guid userId)
         {
-            var cities = await cityRepository.GetAllFavoritesAsync();
+            var cities = await cityRepository.GetAllFavoritesAsync(userId);
             return autoMapper.Map<List<CityDto>>(cities);
         }
 
-        public async Task<CityDto> ToggleFavoriteAsync(Guid id)
+        public async Task<CityDto?> ToggleFavoriteAsync(Guid id)
         {
-            var city = await cityRepository.GetAsync(id) ?? throw new Exception("Cidade não encontrada");
+            var city = await cityRepository.GetAsync(id);
+
+            if (city == null)
+            {
+                return null;
+            }
 
             city.IsFavorite = !city.IsFavorite;
             await cityRepository.UpdateAsync(city);

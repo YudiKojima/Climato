@@ -2,6 +2,7 @@ using WeatherGatewayApp.Application.Contracts;
 using WeatherGatewayApp.Application.Core.Mappings;
 using WeatherGatewayApp.Application.Services;
 using WeatherGatewayApp.Domain.Cities;
+using WeatherGatewayApp.Domain.Users;
 using WeatherGatewayApp.Infrastructure.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Services.AddTransient<ICityRepository, CityRepository>();
 builder.Services.AddTransient<ICityAppService, CityAppService>();
 builder.Services.AddTransient<IWeatherAppService, WeatherAppService>();
 builder.Services.AddHttpClient<IWeatherAppService, WeatherAppService>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IUserAppService, UserAppService>();
 
 builder.Services.AddCors(options =>
 {

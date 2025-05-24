@@ -15,7 +15,7 @@ namespace WeatherGatewayApp.Application.Services
             client = httpClient;
         }
 
-        public async Task<Weather> GetByCityAsync(string cityName)
+        public async Task<Weather> GetByCityAsync(string cityName, Guid userId)
         {
             var url = $"https://localhost:44313/weathers?cityName={cityName}";
             var response = await client.GetAsync(url);
@@ -43,11 +43,11 @@ namespace WeatherGatewayApp.Application.Services
                 ImageUrl = result["imageUrl"]?.ToString()
             };
 
-            var city = await cityRepository.GetByNameAsync(weather.City);
+            var city = await cityRepository.GetByNameAsync(weather.City, userId);
 
             if (city == null)
             {
-                var newCity = new City(weather.City, weather.Country);
+                var newCity = new City(weather.City, weather.Country, userId);
                 await cityRepository.CreateAsync(newCity);
             }
 

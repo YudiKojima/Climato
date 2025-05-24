@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, Button, Typography, message } from "antd";
 import { StarFilled, StarOutlined, CloseOutlined } from "@ant-design/icons";
 import { toggleFavorite, DeleteCity } from "../services/api";

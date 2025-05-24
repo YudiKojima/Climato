@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { getAllCities } from "../services/api";
 import CityCard from "../components/CityCard";
-import { useNavigate } from "react-router-dom";
-import { Input, Button, Typography, Row, Col, Space } from "antd";
+import { Link, useNavigate } from "react-router-dom";
+import { Input, Button, Row, Col, Typography, Divider } from "antd";
 import { StarOutlined } from "@ant-design/icons";
 import Loading from "../components/Loading";
 import img from "../assets/Climato sem fundo preto.png";
+import Footer from "../components/Footer";
 
-const { Title } = Typography;
 const { Search } = Input;
+const { Title } = Typography;
 
 const Home = () => {
   const [cities, setCities] = useState([]);
@@ -40,12 +41,17 @@ const Home = () => {
 
   const handleSearch = () => {
     if (search.trim() !== "") {
-      navigate(`/weather/${encodeURIComponent(search)}`);
+      navigate(`/p/weather/${encodeURIComponent(search)}`);
     }
   };
 
   const handleCardClick = (city) => {
-    navigate(`/weather/${encodeURIComponent(city.name)}`);
+    navigate(`/p/weather/${encodeURIComponent(city.name)}`);
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("userId");
+    navigate("/signin");
   };
 
   if (isLoading) {
@@ -56,7 +62,6 @@ const Home = () => {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
-          width: "100vw",
         }}
       >
         <Loading fontSize={120} />
@@ -65,54 +70,82 @@ const Home = () => {
   }
 
   return (
-    <div style={{ padding: "1rem", maxWidth: 1000, margin: "0 auto" }}>
-      <Space direction="vertical" style={{ width: "100%" }} size="large">
-        <img
-          src={img}
-          alt="Climato Logo"
-          style={{
-            display: "block",
-            margin: "0 auto",
-            maxWidth: "200px",
-          }}
-        />
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0rem 2rem",
+          backgroundColor: "#fff",
+        }}
+      >
+        <Link to="/p">
+          <img
+            src={img}
+            alt="Climato Logo"
+            style={{ height: "80px", cursor: "pointer" }}
+          />
+        </Link>
+        <div>
+          <Button
+            type="primary"
+            icon={<StarOutlined />}
+            style={{ marginRight: 8 }}
+            onClick={() => navigate("/p/favorites")}
+          >
+            Ver Favoritos
+          </Button>
+          <Button onClick={handleSignOut}>Sair</Button>
+        </div>
+      </div>
 
-        <Button
-          type="primary"
-          icon={<StarOutlined />}
-          onClick={() => navigate("/favorites")}
-        >
-          Ver Favoritos
-        </Button>
+      <div
+        style={{
+          width: 1000,
+          margin: "3rem auto",
+          padding: "0 1rem",
+          flex: 1,
+        }}
+      >
+        <Title level={3} style={{ textAlign: "center" }}>
+          Pesquise agora o clima da sua cidade!
+        </Title>
 
         <Search
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            maxWidth: "100%",
-          }}
           placeholder="Buscar cidade..."
           enterButton="Buscar"
           size="large"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onSearch={handleSearch}
+          style={{ marginBottom: "2rem" }}
         />
 
-        <Row gutter={[16, 16]}>
-          {cities.map((city) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={city.id}>
-              <CityCard
-                city={city}
-                onToggleFavorite={fetchCities}
-                onClick={() => handleCardClick(city)}
-                onDelete={fetchCities}
-              />
-            </Col>
-          ))}
-        </Row>
-      </Space>
+        <Divider orientation="left">Cidades pesquisadas</Divider>
+        {notFound ? (
+          <p style={{ textAlign: "center", color: "#999" }}>
+            Nenhuma cidade encontrada.
+          </p>
+        ) : (
+          <Row gutter={[24, 24]}>
+            {cities.map((city) => (
+              <Col xs={24} sm={12} md={8} lg={6} key={city.id}>
+                <CityCard
+                  city={city}
+                  onToggleFavorite={fetchCities}
+                  onClick={() => handleCardClick(city)}
+                  onDelete={fetchCities}
+                />
+              </Col>
+            ))}
+          </Row>
+        )}
+      </div>
+
+      <Footer />
     </div>
   );
 };

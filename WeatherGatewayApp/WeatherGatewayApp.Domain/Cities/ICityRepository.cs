@@ -3,9 +3,9 @@
     public interface ICityRepository
     {
         Task<City> GetAsync(Guid id);
-        Task<List<City>> GetAllAsync();
-        Task<List<City>> GetAllFavoritesAsync();
-        Task<City> GetByNameAsync(string cityName);
+        Task<List<City>> GetAllAsync(Guid userId);
+        Task<List<City>> GetAllFavoritesAsync(Guid userId);
+        Task<City> GetByNameAsync(string cityName, Guid userId);
         Task CreateAsync(City city);
         Task UpdateAsync(City city);
         Task DeleteAsync(City city);

@@ -26,25 +26,26 @@ namespace WeatherGatewayApp.Infrastructure.Data.Repositories
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<City>> GetAllAsync()
+        public async Task<List<City>> GetAllAsync(Guid userId)
         {
             return await context.City
+                .Where(c => c.UserId == userId)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
         }
 
-        public async Task<List<City>> GetAllFavoritesAsync()
+        public async Task<List<City>> GetAllFavoritesAsync(Guid userId)
         {
             return await context.City
-                .Where(c => c.IsFavorite)
+                .Where(c => c.UserId == userId && c.IsFavorite)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
         }
 
-        public async Task<City?> GetByNameAsync(string cityName)
+        public async Task<City?> GetByNameAsync(string cityName, Guid userId)
         {
             return await context.City
-                .Where(c => c.Name == cityName)
+                .Where(c => c.Name == cityName && c.UserId == userId)
                 .FirstOrDefaultAsync();
         }
 
