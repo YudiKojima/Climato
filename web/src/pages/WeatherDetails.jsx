@@ -110,7 +110,7 @@ const WeatherDetails = () => {
         <Button
           style={{ marginTop: 20 }}
           type="primary"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/p")}
         >
           Voltar
         </Button>

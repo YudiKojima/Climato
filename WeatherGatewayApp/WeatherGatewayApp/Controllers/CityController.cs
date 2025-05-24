@@ -17,17 +17,17 @@ namespace WeatherProviderApp.Controllers
 
         /// <summary>Retorna todas as cidades cadastradas no sistema.</summary>
         [HttpGet]
-        public async Task<ActionResult<List<CityDto>>> GetAll()
+        public async Task<ActionResult<List<CityDto>>> GetAll(Guid userId)
         {
-            var result = await appService.GetAllAsync();
+            var result = await appService.GetAllAsync(userId);
             return Ok(result);
         }
 
         /// <summary>Retorna todas as cidades favoritas no sistema.</summary>
         [HttpGet("favorites")]
-        public async Task<ActionResult<List<CityDto>>> GetAllFavorites()
+        public async Task<ActionResult<List<CityDto>>> GetAllFavorites(Guid userId)
         {
-            var result = await appService.GetAllFavoritesAsync();
+            var result = await appService.GetAllFavoritesAsync(userId);
             return Ok(result);
         }
 
@@ -36,7 +36,14 @@ namespace WeatherProviderApp.Controllers
         [HttpPatch("{id}/favorite")]
         public async Task<IActionResult> ToggleFavorite(Guid id)
         {
-            return Ok(await appService.ToggleFavoriteAsync(id));
+            var city = await appService.ToggleFavoriteAsync(id);
+
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(city);
         }
 
         /// <summary>Remover cidade informada.</summary>

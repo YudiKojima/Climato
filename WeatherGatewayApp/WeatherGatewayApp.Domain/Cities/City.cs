@@ -8,6 +8,7 @@ namespace WeatherGatewayApp.Domain.Cities
     {
         [Key]
         public Guid Id { get; set; }
+        public Guid UserId { get; set; }
         public string Name { get; set; }
         public string Country { get; set; }
         public bool IsFavorite { get; set; }
@@ -15,9 +16,10 @@ namespace WeatherGatewayApp.Domain.Cities
 
         public City() { }
 
-        public City(string name, string country)
+        public City(string name, string country, Guid userId)
         {
             Id = Guid.NewGuid();
+            UserId = userId;
             Name = name ?? string.Empty;
             Country = country ?? string.Empty;
             IsFavorite = false;
