@@ -1,11 +1,10 @@
-﻿namespace Climato.Gateway.Application.Cities
+﻿namespace Climato.Gateway.Application.Cities;
+
+public class CityDto
 {
-    public class CityDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Country { get; set; }
-        public bool IsFavorite { get; set; }
-        public DateTime CreatedAt { get; set; }
-    }
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public string Country { get; set; }
+    public bool IsFavorite { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

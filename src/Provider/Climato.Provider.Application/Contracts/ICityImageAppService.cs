@@ -1,7 +1,6 @@
-﻿namespace Climato.Provider.Application.Contracts
+﻿namespace Climato.Provider.Application.Contracts;
+
+public interface ICityImageAppService
 {
-    public interface ICityImageAppService
-    {
-        Task<string?> GetImageUrlAsync(string cityName);
-    }
+    Task<string?> GetImageUrlAsync(string cityName);
 }

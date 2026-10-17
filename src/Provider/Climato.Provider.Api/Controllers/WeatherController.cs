@@ -2,36 +2,35 @@
 using Climato.Provider.Application.Contracts;
 using Climato.Provider.Domain.Weathers;
 
-namespace Climato.Provider.Api.Controllers
-{
-    [ApiController]
-    [Route("weathers")]
-    public class WeatherController : ControllerBase
-    {
-        private readonly IWeatherAppService appService;
+namespace Climato.Provider.Api.Controllers;
 
-        public WeatherController(IWeatherAppService appService)
+[ApiController]
+[Route("weathers")]
+public class WeatherController : ControllerBase
+{
+    private readonly IWeatherAppService appService;
+
+    public WeatherController(IWeatherAppService appService)
+    {
+        this.appService = appService;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<Weather>> Get([FromQuery] string cityName)
+    {
+        if (string.IsNullOrWhiteSpace(cityName))
         {
-            this.appService = appService;
+            return BadRequest("Parâmetro 'city' é obrigatório.");
         }
 
-        [HttpGet]
-        public async Task<ActionResult<Weather>> Get([FromQuery] string cityName)
+        try
         {
-            if (string.IsNullOrWhiteSpace(cityName))
-            {
-                return BadRequest("Parâmetro 'city' é obrigatório.");
-            }
-
-            try
-            {
-                var result = await appService.GetByCityAsync(cityName);
-                return Ok(result);
-            }
-            catch (HttpRequestException)
-            {
-                return NotFound($"Não foi possível obter dados para a cidade '{cityName}'.");
-            }
+            var result = await appService.GetByCityAsync(cityName);
+            return Ok(result);
+        }
+        catch (HttpRequestException)
+        {
+            return NotFound($"Não foi possível obter dados para a cidade '{cityName}'.");
         }
     }
 }

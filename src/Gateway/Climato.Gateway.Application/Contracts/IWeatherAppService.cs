@@ -1,9 +1,8 @@
 ﻿using Climato.Gateway.Domain.Weathers;
 
-namespace Climato.Gateway.Application.Contracts
+namespace Climato.Gateway.Application.Contracts;
+
+public interface IWeatherAppService
 {
-    public interface IWeatherAppService
-    {
-        Task<Weather> GetByCityAsync(string cityName, Guid userId);
-    }
+    Task<Weather> GetByCityAsync(string cityName, Guid userId);
 }

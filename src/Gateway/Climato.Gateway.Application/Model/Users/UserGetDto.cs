@@ -1,8 +1,7 @@
-﻿namespace Climato.Gateway.Application.Users
+﻿namespace Climato.Gateway.Application.Users;
+
+public class UserGetDto
 {
-    public class UserGetDto
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
+    public string Email { get; set; }
+    public string Password { get; set; }
 }
