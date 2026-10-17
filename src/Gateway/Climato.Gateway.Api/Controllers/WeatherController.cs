@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
 using Climato.Gateway.Application.Contracts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Climato.Gateway.Api.Controllers;
 
@@ -16,10 +16,12 @@ public class WeatherController : ControllerBase
 
     /// <summary>Retorna os dados climáticos da cidade informada.</summary>
     /// <param name="cityName">Nome da cidade, exemplo: Cuiabá</param>
+    /// <param name="userId">Id do usuário que pesquisou</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     [HttpGet("{cityName}")]
-    public async Task<IActionResult> GetWeather(string cityName, [FromQuery] Guid userId)
+    public async Task<IActionResult> GetWeather(string cityName, [FromQuery] Guid userId, CancellationToken cancellationToken)
     {
-        var weather = await appService.GetByCityAsync(cityName, userId);
+        var weather = await appService.GetByCityAsync(cityName, userId, cancellationToken);
 
         if (weather == null)
         {

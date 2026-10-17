@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" />
-    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="Mapster.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Climato.Gateway.Domain\Climato.Gateway.Domain.csproj" />
-    <ProjectReference Include="..\Climato.Gateway.Infrastructure\Climato.Gateway.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

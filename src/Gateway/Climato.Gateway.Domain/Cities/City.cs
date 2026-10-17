@@ -1,16 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace Climato.Gateway.Domain.Cities;
 
-[Table("city")]
 public class City
 {
-    [Key]
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public string Name { get; set; }
-    public string Country { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
     public bool IsFavorite { get; set; }
     public DateTime CreatedAt { get; set; }
 

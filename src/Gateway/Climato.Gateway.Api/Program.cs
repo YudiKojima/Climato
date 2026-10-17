@@ -1,26 +1,17 @@
-using Climato.Gateway.Application.Contracts;
-using Climato.Gateway.Application.Core.Mappings;
-using Climato.Gateway.Application.Services;
-using Climato.Gateway.Domain.Cities;
-using Climato.Gateway.Domain.Users;
-using Climato.Gateway.Infrastructure.Data.Repositories;
+using Climato.Gateway.Application;
+using Climato.Gateway.Infrastructure;
+using Climato.Gateway.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddAutoMapper(typeof(ApplicationAutoMapperProfile).Assembly);
-
-builder.Services.AddTransient<ICityRepository, CityRepository>();
-builder.Services.AddTransient<ICityAppService, CityAppService>();
-builder.Services.AddTransient<IWeatherAppService, WeatherAppService>();
-builder.Services.AddHttpClient<IWeatherAppService, WeatherAppService>();
-builder.Services.AddTransient<IUserRepository, UserRepository>();
-builder.Services.AddTransient<IUserAppService, UserAppService>();
+builder.Services
+    .AddGatewayApplication()
+    .AddGatewayInfrastructure(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
@@ -33,7 +24,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+if (!app.Environment.IsProduction())
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ClimatoDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

@@ -1,41 +1,46 @@
-﻿using Microsoft.EntityFrameworkCore;
 using Climato.Gateway.Domain.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace Climato.Gateway.Infrastructure.Data.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly ConnectionContext context = new ConnectionContext();
+    private readonly ClimatoDbContext context;
 
-    public async Task CreateAsync(User user)
+    public UserRepository(ClimatoDbContext context)
     {
-        await context.User.AddAsync(user);
-        await context.SaveChangesAsync();
+        this.context = context;
     }
 
-    public async Task<User> GetAsync(string email)
+    public async Task CreateAsync(User user, CancellationToken cancellationToken)
     {
-        return await context.User
+        await context.Users.AddAsync(user, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<User?> GetAsync(string email, CancellationToken cancellationToken)
+    {
+        return await context.Users
             .Where(c => c.Email == email)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<User> GetAsync(Guid id)
+    public async Task<User?> GetAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await context.User
+        return await context.Users
             .Where(c => c.Id == id)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(User user)
+    public async Task DeleteAsync(User user, CancellationToken cancellationToken)
     {
-        context.User.Remove(user);
-        await context.SaveChangesAsync();
+        context.Users.Remove(user);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> AllowCreateAsync(string email)
+    public async Task<bool> AllowCreateAsync(string email, CancellationToken cancellationToken)
     {
-        var exists = await context.User.AnyAsync(c => c.Email == email);
+        var exists = await context.Users.AnyAsync(c => c.Email == email, cancellationToken);
         return !exists;
     }
 }

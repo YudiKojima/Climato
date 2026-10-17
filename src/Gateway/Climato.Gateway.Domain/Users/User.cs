@@ -1,16 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace Climato.Gateway.Domain.Users;
 
-[Table("user")]
 public class User
 {
-    [Key]
     public Guid Id { get; set; }
-    public string Email { get; set; }
-    public string Name { get; set; }
-    public string Password { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 
     public User() { }

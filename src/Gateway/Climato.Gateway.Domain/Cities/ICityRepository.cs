@@ -1,12 +1,12 @@
-﻿namespace Climato.Gateway.Domain.Cities;
+namespace Climato.Gateway.Domain.Cities;
 
 public interface ICityRepository
 {
-    Task<City> GetAsync(Guid id);
-    Task<List<City>> GetAllAsync(Guid userId);
-    Task<List<City>> GetAllFavoritesAsync(Guid userId);
-    Task<City> GetByNameAsync(string cityName, Guid userId);
-    Task CreateAsync(City city);
-    Task UpdateAsync(City city);
-    Task DeleteAsync(City city);
+    Task<City?> GetAsync(Guid id, CancellationToken cancellationToken);
+    Task<List<City>> GetAllAsync(Guid userId, CancellationToken cancellationToken);
+    Task<List<City>> GetAllFavoritesAsync(Guid userId, CancellationToken cancellationToken);
+    Task<City?> GetByNameAsync(string cityName, Guid userId, CancellationToken cancellationToken);
+    Task CreateAsync(City city, CancellationToken cancellationToken);
+    Task UpdateAsync(City city, CancellationToken cancellationToken);
+    Task DeleteAsync(City city, CancellationToken cancellationToken);
 }

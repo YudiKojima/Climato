@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Climato.Gateway.Application.Core.Collections;
+namespace Climato.Gateway.Infrastructure.Http;
 
 public class JsonDictionary : Dictionary<string, object>
 {

@@ -1,57 +1,62 @@
-﻿using Microsoft.EntityFrameworkCore;
 using Climato.Gateway.Domain.Cities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Climato.Gateway.Infrastructure.Data.Repositories;
 
 public class CityRepository : ICityRepository
 {
-    private readonly ConnectionContext context = new ConnectionContext();
+    private readonly ClimatoDbContext context;
 
-    public async Task<City?> GetAsync(Guid id)
+    public CityRepository(ClimatoDbContext context)
     {
-        return await context.City
+        this.context = context;
+    }
+
+    public async Task<City?> GetAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.Cities
             .Where(c => c.Id == id)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task CreateAsync(City city)
+    public async Task CreateAsync(City city, CancellationToken cancellationToken)
     {
-        await context.City.AddAsync(city);
-        await context.SaveChangesAsync();
+        await context.Cities.AddAsync(city, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(City city)
+    public async Task UpdateAsync(City city, CancellationToken cancellationToken)
     {
-        context.City.Update(city);
-        await context.SaveChangesAsync();
+        context.Cities.Update(city);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<List<City>> GetAllAsync(Guid userId)
+    public async Task<List<City>> GetAllAsync(Guid userId, CancellationToken cancellationToken)
     {
-        return await context.City
+        return await context.Cities
             .Where(c => c.UserId == userId)
             .OrderBy(c => c.Name)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<City>> GetAllFavoritesAsync(Guid userId)
+    public async Task<List<City>> GetAllFavoritesAsync(Guid userId, CancellationToken cancellationToken)
     {
-        return await context.City
+        return await context.Cities
             .Where(c => c.UserId == userId && c.IsFavorite)
             .OrderBy(c => c.Name)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<City?> GetByNameAsync(string cityName, Guid userId)
+    public async Task<City?> GetByNameAsync(string cityName, Guid userId, CancellationToken cancellationToken)
     {
-        return await context.City
+        return await context.Cities
             .Where(c => c.Name == cityName && c.UserId == userId)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(City city)
+    public async Task DeleteAsync(City city, CancellationToken cancellationToken)
     {
-        context.City.Remove(city);
-        await context.SaveChangesAsync();
+        context.Cities.Remove(city);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
