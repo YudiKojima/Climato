@@ -61,7 +61,7 @@ API ──▶ Application ──▶ Domain
 
 ### Controllers
 - Finos: validam a entrada (via FluentValidation, Fase 02), chamam um AppService e traduzem o resultado em status HTTP.
-- `ActionResult<T>` com o DTO de resposta; XML doc (`/// <summary>`) em português em cada action — aparece no Swagger.
+- `ActionResult<T>` com o DTO de resposta; XML doc (`/// <summary>`) em português em cada action — aparece na documentação OpenAPI/Scalar.
 - Rotas no plural e minúsculas (`/cities`, `/weathers`, `/auth`).
 - **(a partir da Fase 02)** `[Authorize]` em todo controller; `[AllowAnonymous]` explícito só em registro, login e health checks. O usuário atual vem das claims, nunca de parâmetro.
 
