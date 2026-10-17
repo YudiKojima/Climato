@@ -6,11 +6,11 @@ Projeto de portfólio: app de clima em **microsserviços** (.NET + React). O obj
 
 | Documento | Quando ler |
 |---|---|
-| [`docs/architecture/backend.md`](docs/architecture/backend.md) | **Obrigatório** antes de qualquer tarefa em `WeatherGatewayApp/` ou `WeatherProviderApp/` — camadas, convenções de código, decisões técnicas |
+| [`docs/architecture/backend.md`](docs/architecture/backend.md) | **Obrigatório** antes de qualquer tarefa em `src/Gateway/` ou `src/Provider/` — camadas, convenções de código, decisões técnicas |
 | [`docs/architecture/frontend.md`](docs/architecture/frontend.md) | **Obrigatório** antes de qualquer tarefa em `web/` — estrutura, tema do Ant Design, chamadas à API |
 | [`docs/architecture/system-design.md`](docs/architecture/system-design.md) | Para entender os serviços, a comunicação entre eles e a arquitetura-alvo |
 | [`docs/project-overview.md`](docs/project-overview.md) | Estado atual, fases concluídas e próximas — **não é fonte de padrões de código** |
-| [`docs/features/00-roteiro-portfolio/`](docs/features/00-roteiro-portfolio/) | Roteiro aprovado (`design.md`) e auditoria inicial (`auditoria-inicial.md`, códigos `A1`…`A27`) |
+| [`docs/features/00-roteiro-portfolio/`](docs/features/00-roteiro-portfolio/) | Roteiro aprovado (`design.md`) e auditoria inicial (`auditoria-inicial.md`, códigos `A1`…`A28`) |
 | [`docs/architecture/review-checklist.md`](docs/architecture/review-checklist.md) | Regras aplicadas pela skill `/revisar-padrao` |
 | [`docs/runbook.md`](docs/runbook.md) | Como subir banco, serviços e web localmente |
 | [`docs/README.md`](docs/README.md) | Índice da pasta `docs/` |
@@ -51,16 +51,13 @@ Plugin: **`superpowers`** (`superpowers@claude-plugins-official`).
 
 ### Verificação
 
-Enquanto a Fase 01 não unificar a solução, os comandos são por serviço:
-
 ```bash
-dotnet build WeatherGatewayApp/WeatherGatewayApp/WeatherGatewayApp.csproj
-dotnet build WeatherProviderApp/WeatherProviderApp/WeatherProviderApp.csproj
+dotnet build Climato.slnx
 npm --prefix web run lint
 npm --prefix web run build
 ```
 
-Cada fase que mudar isso (solução única na 01, `dotnet test` na 04, `docker compose` na 05) atualiza esta seção e o [`runbook.md`](docs/runbook.md).
+Cada fase que mudar isso (`dotnet test` na 04, `docker compose` na 05) atualiza esta seção e o [`runbook.md`](docs/runbook.md).
 
 ---
 

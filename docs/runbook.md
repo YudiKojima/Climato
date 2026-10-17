@@ -1,49 +1,82 @@
 # Runbook — Ambiente local
 
-Estado **atual** (antes da Fase 01). Cada fase que mudar a forma de rodar atualiza esta página (regra GE-07). Alvo: `docker compose up` (Fase 05).
+Alvo futuro: `docker compose up` (Fase 05). Até lá, os serviços sobem com `dotnet run`.
 
 ## Pré-requisitos
 
-- .NET SDK 10 (compila os projetos `net8.0`; para **executar** é preciso o runtime ASP.NET Core 8 até a Fase 01 migrar para .NET 10)
+- .NET SDK 10 (versão fixada em `global.json`)
 - Node.js LTS (≥ 20)
 - PostgreSQL rodando em `localhost:5432`
 - Certificado HTTPS de desenvolvimento confiável: `dotnet dev-certs https --trust`
 - Chaves gratuitas da [OpenWeather](https://openweathermap.org/api) e da [Pexels](https://www.pexels.com/api/)
 
-## 1. Arquivos que não estão no repositório (A23)
+## 1. Ferramentas
 
-O `.gitignore` atual ignora arquivos necessários. Até a Fase 01, criar localmente:
+```bash
+dotnet tool restore
+```
 
-| Arquivo | Conteúdo mínimo |
-|---|---|
-| `WeatherProviderApp/WeatherProviderApp/appsettings.json` | `{ "OpenWeather": { "ApiKey": "<sua chave>" }, "Pexels": { "ApiKey": "<sua chave>" }, "AllowedHosts": "*" }` |
-| `WeatherGatewayApp/WeatherGatewayApp/appsettings.json` | `{ "AllowedHosts": "*" }` |
-| `*.sln` e `Properties/launchSettings.json` | Gerados pelo Visual Studio ao abrir os `.csproj` |
+Instala o `dotnet-ef` na versão do `.config/dotnet-tools.json`.
 
-## 2. Banco de dados
+## 2. Segredos (user-secrets)
 
-1. Criar o banco `weather-app` no PostgreSQL.
-2. Ajustar usuário/senha na connection string fixa em [`ConnectionContext.cs`](../WeatherGatewayApp/WeatherGatewayApp.Infrastructure/ConnectionContext.cs) (A5 — **não commitar a senha**).
-3. Rodar [`Scripts/170520251436.sql`](../WeatherGatewayApp/Scripts/170520251436.sql) criando **primeiro a tabela `"user"`** e depois `city` (A9).
+Nada de segredo vai para o repositório. Configurar uma vez por máquina:
 
-## 3. Subir os serviços
+```bash
+dotnet user-secrets set "ConnectionStrings:Climato" "Host=localhost;Port=5432;Database=climato;Username=postgres;Password=<sua senha>" --project src/Gateway/Climato.Gateway.Api
+dotnet user-secrets set "OpenWeather:ApiKey" "<sua chave>" --project src/Provider/Climato.Provider.Api
+dotnet user-secrets set "Pexels:ApiKey" "<sua chave>" --project src/Provider/Climato.Provider.Api
+```
 
-As portas são fixas no código: o web chama o Gateway em `https://localhost:44394` e o Gateway chama o Provider em `https://localhost:44313` — as portas SSL do perfil **IIS Express**.
+Se faltar alguma, a API não sobe e informa qual chave está ausente. `Provider:BaseUrl`, `OpenWeather:BaseUrl` e `Pexels:BaseUrl` precisam terminar com `/` — os clients usam caminhos relativos.
 
-| Serviço | Como subir | URL |
+Frontend: copiar `web/.env.example` para `web/.env` — **obrigatório**: sem `VITE_API_URL` as chamadas vão para `undefined/...`.
+
+## 3. Banco de dados
+
+O banco `climato` é criado e migrado **automaticamente** quando o Gateway sobe fora de `Production`. Para aplicar manualmente:
+
+```bash
+dotnet ef database update --project src/Gateway/Climato.Gateway.Infrastructure --startup-project src/Gateway/Climato.Gateway.Api
+```
+
+### Criando uma migration
+
+Mudou entidade ou configuration → nova migration no mesmo PR:
+
+```bash
+dotnet ef migrations add <NomeEmPascalCase> --project src/Gateway/Climato.Gateway.Infrastructure --startup-project src/Gateway/Climato.Gateway.Api --output-dir Data/Migrations
+```
+
+> Bancos `weather-app` criados antes da Fase 01 (script SQL) não são usados mais — podem ser apagados.
+
+## 4. Subir a aplicação
+
+Em três terminais:
+
+```bash
+dotnet run --project src/Provider/Climato.Provider.Api --launch-profile https
+dotnet run --project src/Gateway/Climato.Gateway.Api --launch-profile https
+npm --prefix web install && npm --prefix web run dev
+```
+
+| Serviço | URL | Documentação |
 |---|---|---|
-| Provider | Visual Studio, perfil IIS Express | `https://localhost:44313/swagger` |
-| Gateway | Visual Studio, perfil IIS Express | `https://localhost:44394/swagger` |
-| Web | `npm --prefix web install` e `npm --prefix web run dev` | `http://localhost:5173` |
+| Provider | `https://localhost:7002` | `https://localhost:7002/scalar` |
+| Gateway | `https://localhost:7001` | `https://localhost:7001/scalar` |
+| Web | `http://localhost:5173` | — |
 
-## 4. Problemas comuns
+Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
+
+## 5. Problemas comuns
 
 | Sintoma | Causa |
 |---|---|
-| Toda busca mostra "cidade não encontrada" | Provider fora do ar ou chave da OpenWeather inválida — erros viram 404/500 indistintos (A14, A15) |
-| Erro de FK ao rodar o script SQL | Ordem das tabelas no script (A9) |
-| `ERR_CERT_AUTHORITY_INVALID` no navegador | Certificado de dev não confiável — `dotnet dev-certs https --trust` e abrir o Swagger do Gateway uma vez |
+| `OptionsValidationException: OpenWeather:ApiKey não configurada` | Faltou o user-secret do Provider (seção 2) |
+| `ConnectionStrings:Climato não configurada` | Faltou o user-secret do Gateway |
+| Toda busca mostra "cidade não encontrada" | Provider fora do ar ou chave inválida — erros ainda viram 404/500 indistintos (A14, A15, Fase 03) |
+| `ERR_CERT_AUTHORITY_INVALID` no navegador | `dotnet dev-certs https --trust` e abrir `https://localhost:7001/scalar` uma vez |
 
-## 5. Verificação antes de PR
+## 6. Verificação antes de PR
 
 Comandos na seção [Verificação do CLAUDE.md](../CLAUDE.md#verificação).

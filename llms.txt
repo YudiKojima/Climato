@@ -3,8 +3,8 @@
 App de clima em microsserviços: busca o clima atual (OpenWeather) e uma imagem da cidade (Pexels), guarda o histórico de cidades pesquisadas e os favoritos de cada usuário. Projeto de portfólio com foco em backend .NET.
 
 Serviços:
-- `WeatherProviderApp/` — .NET; integra OpenWeather + Pexels; sem estado (cache a partir da Fase 03).
-- `WeatherGatewayApp/` — .NET + EF Core + PostgreSQL; usuários, cidades, favoritos; único ponto de entrada do frontend.
+- `src/Provider/` — .NET 10; integra OpenWeather + Pexels; sem estado (cache a partir da Fase 03).
+- `src/Gateway/` — .NET 10 + EF Core + PostgreSQL; usuários, cidades, favoritos; único ponto de entrada do frontend.
 - `web/` — React 19 + Vite + Ant Design.
 
 ## Leia primeiro

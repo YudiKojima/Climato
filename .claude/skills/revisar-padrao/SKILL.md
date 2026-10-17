@@ -22,7 +22,7 @@ Considerar: commits da branch + alterações não commitadas + arquivos novos n�
 
 1. Ler `docs/architecture/review-checklist.md` inteiro.
 2. Descobrir a fase atual: maior `NN` em `docs/features/NN-*/` com `design.md`. Regras com **Desde** maior que a fase atual só se aplicam se o diff introduz aquele assunto (ver "Vigência" no checklist).
-3. Arquivos em `WeatherGatewayApp/**` ou `WeatherProviderApp/**`: ler as seções de `docs/architecture/backend.md` linkadas pelas regras BE aplicáveis. Arquivos em `web/**`: as de `docs/architecture/frontend.md` (regras FE).
+3. Arquivos em `src/**`: ler as seções de `docs/architecture/backend.md` linkadas pelas regras BE aplicáveis. Arquivos em `web/**`: as de `docs/architecture/frontend.md` (regras FE).
 4. Regras GE valem sempre.
 5. Avaliar cada regra **somente sobre linhas adicionadas ou alteradas** e arquivos novos. Código não tocado não gera achado — mesmo que esteja na auditoria.
 6. Se o diff resolve códigos da auditoria (`A*`), conferir se `docs/features/00-roteiro-portfolio/auditoria-inicial.md` foi marcado (GE-06 no commit final da fase).
@@ -35,7 +35,7 @@ Considerar: commits da branch + alterações não commitadas + arquivos novos n�
 ### 🔴 Bloqueantes
 | ID | Local | Problema | Sugestão |
 |---|---|---|---|
-| BE-02 | `WeatherGatewayApp/.../CityAppService.cs:20` | ... | ... |
+| BE-02 | `src/Gateway/.../CityAppService.cs:20` | ... | ... |
 
 ### 🟡 Avisos
 | ID | Local | Problema | Sugestão |

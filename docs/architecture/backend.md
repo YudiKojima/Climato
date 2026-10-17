@@ -1,15 +1,15 @@
 # Backend — Arquitetura e Padrões
 
-Vale para `WeatherGatewayApp/` e `WeatherProviderApp/`. Seções marcadas **(a partir da Fase NN)** descrevem padrões já decididos que ainda não estão no código; ao implementá-los, remover a marcação.
+Vale para `src/Gateway/` e `src/Provider/`. Seções marcadas **(a partir da Fase NN)** descrevem padrões já decididos que ainda não estão no código; ao implementá-los, remover a marcação.
 
 ## Stack
 
 | | Atual | Alvo |
 |---|---|---|
-| Runtime | .NET 8 | .NET 10 (Fase 01, [ADR 0004](decisions/0004-dotnet-10.md)) |
-| API | ASP.NET Core com controllers | idem |
-| Persistência (Gateway) | EF Core 9 + Npgsql, `new ConnectionContext()` | EF Core + Npgsql via `AddDbContext`, Migrations (Fase 01) |
-| Mapeamento | AutoMapper | idem (só no Gateway) |
+| Runtime | .NET 10 ([ADR 0004](decisions/0004-dotnet-10.md)) | — |
+| API | ASP.NET Core com controllers; OpenAPI nativo + Scalar | — |
+| Persistência (Gateway) | EF Core 10 + Npgsql via `AddDbContext`, Migrations | — |
+| Mapeamento | Mapster, só no Gateway ([ADR 0005](decisions/0005-mapster.md)) | — |
 | JSON externo | Newtonsoft + `JsonDictionary` | `System.Text.Json` + DTOs tipados (Fase 03) |
 | Validação | — | FluentValidation (Fase 02) |
 | Auth | — | JWT Bearer (Fase 02) |
@@ -22,18 +22,19 @@ Vale para `WeatherGatewayApp/` e `WeatherProviderApp/`. Seções marcadas **(a p
 Cada serviço segue camadas no estilo Clean Architecture:
 
 ```
-WeatherGatewayApp/
-├── WeatherGatewayApp/                 ← API: Program.cs, Controllers
-├── WeatherGatewayApp.Application/     ← Contracts (I*AppService), Services, Model (DTOs), Core (mapeamentos, extensões)
-├── WeatherGatewayApp.Domain/          ← Entidades e interfaces de repositório, por agregado (Cities/, Users/, Weathers/)
-└── WeatherGatewayApp.Infrastructure/  ← ConnectionContext (EF), Data/Repositories
-WeatherProviderApp/
-├── WeatherProviderApp/                ← API
-├── WeatherProviderApp.Application/    ← Clientes das APIs externas (Services)
-└── WeatherProviderApp.Domain/         ← Weather (contrato devolvido ao Gateway)
+Climato.slnx                         ← solução única; Directory.Build.props / Directory.Packages.props / global.json na raiz
+src/Gateway/
+├── Climato.Gateway.Api/             ← Program.cs, Controllers
+├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs), Mappings (Mapster), Options, DependencyInjection.cs
+├── Climato.Gateway.Domain/          ← Entidades e interfaces de repositório por agregado (Cities/, Users/, Weathers/)
+└── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients), DependencyInjection.cs
+src/Provider/
+├── Climato.Provider.Api/
+├── Climato.Provider.Application/    ← Clientes das APIs externas (Services), Options, DependencyInjection.cs
+└── Climato.Provider.Domain/         ← Weather (contrato devolvido ao Gateway)
 ```
 
-**Alvo (Fase 01):** solução única `Climato.sln` na raiz com pastas de solução `Gateway/` e `Provider/`; testes em `tests/` (Fase 04).
+Testes em `tests/` (Fase 04).
 
 ### Dependências entre camadas
 
@@ -46,6 +47,7 @@ API ──▶ Application ──▶ Domain
 - **Application** não referencia Infrastructure; usa as interfaces do Domain.
 - **API** só referencia Infrastructure para registrar o DI.
 - Pacotes ficam no projeto que os usa (EF Core/Npgsql só na Infrastructure).
+- Versões de pacote só em `Directory.Packages.props`; `.csproj` sem `Version`.
 
 ## Convenções de Código
 
@@ -55,7 +57,7 @@ API ──▶ Application ──▶ Domain
 - Namespace igual ao caminho da pasta, no formato file-scoped (`namespace X;`) em arquivos novos ou tocados.
 - Campos privados `camelCase` sem `_`, como no código existente.
 - Chaves em todo `if`/`else`/`foreach`.
-- Async de ponta a ponta: métodos retornam `Task`/`Task<T>`, nunca `async void`; sem `.Result`/`.Wait()`. `CancellationToken` propagado do controller ao repositório e ao `HttpClient` (a partir da Fase 01).
+- Async de ponta a ponta: métodos retornam `Task`/`Task<T>`, nunca `async void`; sem `.Result`/`.Wait()`. `CancellationToken` obrigatório (sem default) nas interfaces e propagado do controller ao repositório e ao `HttpClient`.
 
 ### Controllers
 - Finos: validam a entrada (via FluentValidation, Fase 02), chamam um AppService e traduzem o resultado em status HTTP.
@@ -68,13 +70,18 @@ API ──▶ Application ──▶ Domain
 - DTO de resposta **nunca** expõe senha, hash ou dado interno.
 - Entidades do Domain nunca saem pelo controller.
 
+### Mapeamento (Mapster)
+- Configuração em `Application/Mappings/` com uma classe `IRegister` por agregado (`CityMappings`, `UserMappings`).
+- AppServices recebem `MapsterMapper.IMapper` e chamam `mapper.Map<TDestino>(origem)`. Nada de `.Adapt()` ou `TypeAdapterConfig` fora de `Mappings/` e do `DependencyInjection.cs`.
+- Decisão: [ADR 0005](decisions/0005-mapster.md).
+
 ### Entidades (Domain)
 - Construtor com os campos obrigatórios gera `Id` e `CreatedAt`; construtor vazio só para o EF.
 - Regra que muda estado da entidade é método dela (ex.: `city.ToggleFavorite()`), não lógica solta no AppService.
 
 ### Repositórios (Infrastructure)
 - Interface no Domain, implementação na Infrastructure.
-- Recebem o `ConnectionContext` pelo construtor (**a partir da Fase 01**; hoje usam `new` — A10).
+- Recebem o `ClimatoDbContext` pelo construtor e são registrados como `Scoped`. Todo método recebe `CancellationToken`.
 - Consultas filtradas por usuário recebem `userId` explícito; nunca retornar dados de outro usuário.
 
 ### Comunicação HTTP
@@ -91,6 +98,11 @@ API ──▶ Application ──▶ Domain
 - `appsettings.json` versionado **sem segredos**; valores locais em `appsettings.Development.json` (ignorado) ou `dotnet user-secrets`; em container, variáveis de ambiente (`OpenWeather__ApiKey`).
 - Seções tipadas com `IOptions<T>` e `ValidateOnStart()` para chaves obrigatórias.
 
+### Injeção de dependência por camada
+- Cada projeto expõe `DependencyInjection.cs` com uma extensão `Add<Servico><Camada>()` (`AddGatewayApplication`, `AddGatewayInfrastructure(configuration)`, `AddProviderApplication`).
+- `Program.cs` só chama essas extensões, configura o pipeline e (no Gateway) aplica migrations fora de `Production`.
+- Options: classe `*Options` com `const string SectionName`, registrada com `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()`; mensagens de `[Required]` em português citando a chave.
+
 ## Decisões Técnicas
 
 ### Gateway como BFF
@@ -102,8 +114,8 @@ O formato da OpenWeather/Pexels não vaza para o Gateway: o Provider devolve con
 ### Palavra reservada `user`
 A tabela se chama `user`, reservada no PostgreSQL: em SQL manual, sempre `"user"`.
 
-### Migrations **(a partir da Fase 01)**
-EF Core Migrations no projeto Infrastructure do Gateway. Mudança de entidade ou mapping → nova migration no mesmo PR. O script `Scripts/170520251436.sql` é aposentado.
+### Migrations
+EF Core Migrations em `Gateway.Infrastructure/Data/Migrations/`. Mudança de entidade ou configuration → nova migration no mesmo PR. Aplicadas automaticamente no startup fora de `Production`; comandos no [`runbook.md`](../runbook.md#3-banco-de-dados).
 
 ## Verificação
 

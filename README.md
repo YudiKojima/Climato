@@ -8,9 +8,9 @@ App de clima em **microsserviços** com .NET e React: pesquise uma cidade, veja 
 
 ```mermaid
 flowchart LR
-    web["web<br/>React + Ant Design"] --> gw["WeatherGatewayApp<br/>usuários · cidades · favoritos"]
+    web["web<br/>React + Ant Design"] --> gw["Climato.Gateway<br/>usuários · cidades · favoritos"]
     gw --> db[(PostgreSQL)]
-    gw --> pv["WeatherProviderApp<br/>integração externa"]
+    gw --> pv["Climato.Provider<br/>integração externa"]
     pv --> ow["OpenWeather"]
     pv --> px["Pexels"]
 ```
@@ -19,7 +19,7 @@ Detalhes em [`docs/architecture/system-design.md`](docs/architecture/system-desi
 
 ## Stack
 
-.NET · ASP.NET Core · EF Core · PostgreSQL · React · Vite · Ant Design
+.NET 10 · ASP.NET Core · EF Core · PostgreSQL · React · Vite · Ant Design
 
 ## Como rodar
 
