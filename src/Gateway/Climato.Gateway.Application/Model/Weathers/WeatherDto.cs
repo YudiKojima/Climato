@@ -1,6 +1,6 @@
-﻿namespace Climato.Gateway.Domain.Weathers;
+namespace Climato.Gateway.Application.Model.Weathers;
 
-public class Weather
+public class WeatherDto
 {
     public string City { get; set; }
     public string Country { get; set; }

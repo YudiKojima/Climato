@@ -1,5 +1,5 @@
 using Climato.Gateway.Application.Contracts;
-using Climato.Gateway.Domain.Weathers;
+using Climato.Gateway.Application.Model.Weathers;
 
 namespace Climato.Gateway.Infrastructure.Http;
 
@@ -12,7 +12,7 @@ public class WeatherProviderClient : IWeatherProviderClient
         client = httpClient;
     }
 
-    public async Task<Weather> GetWeatherAsync(string cityName, CancellationToken cancellationToken)
+    public async Task<WeatherDto> GetWeatherAsync(string cityName, CancellationToken cancellationToken)
     {
         var response = await client.GetAsync($"weathers?cityName={Uri.EscapeDataString(cityName)}", cancellationToken);
 
@@ -20,7 +20,7 @@ public class WeatherProviderClient : IWeatherProviderClient
 
         var result = await response.ReadContentAsDictionaryAsync(cancellationToken);
 
-        return new Weather
+        return new WeatherDto
         {
             City = result["city"]?.ToString(),
             Country = result["country"]?.ToString(),

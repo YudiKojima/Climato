@@ -50,7 +50,7 @@ public class CityAppService : ICityAppService
             return null;
         }
 
-        city.IsFavorite = !city.IsFavorite;
+        city.ToggleFavorite();
         await cityRepository.UpdateAsync(city, cancellationToken);
 
         return mapper.Map<CityDto>(city);

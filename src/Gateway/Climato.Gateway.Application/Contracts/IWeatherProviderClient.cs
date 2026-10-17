@@ -1,8 +1,8 @@
-using Climato.Gateway.Domain.Weathers;
+using Climato.Gateway.Application.Model.Weathers;
 
 namespace Climato.Gateway.Application.Contracts;
 
 public interface IWeatherProviderClient
 {
-    Task<Weather> GetWeatherAsync(string cityName, CancellationToken cancellationToken);
+    Task<WeatherDto> GetWeatherAsync(string cityName, CancellationToken cancellationToken);
 }

@@ -1,6 +1,6 @@
 using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Domain.Cities;
-using Climato.Gateway.Domain.Weathers;
+using Climato.Gateway.Application.Model.Weathers;
 
 namespace Climato.Gateway.Application.Services;
 
@@ -15,7 +15,7 @@ public class WeatherAppService : IWeatherAppService
         weatherProviderClient = providerClient ?? throw new ArgumentNullException(nameof(providerClient));
     }
 
-    public async Task<Weather> GetByCityAsync(string cityName, Guid userId, CancellationToken cancellationToken)
+    public async Task<WeatherDto> GetByCityAsync(string cityName, Guid userId, CancellationToken cancellationToken)
     {
         var weather = await weatherProviderClient.GetWeatherAsync(cityName, cancellationToken);
         var city = await cityRepository.GetByNameAsync(weather.City, userId, cancellationToken);

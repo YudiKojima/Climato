@@ -20,4 +20,9 @@ public class City
         IsFavorite = false;
         CreatedAt = DateTime.UtcNow;
     }
+
+    public void ToggleFavorite()
+    {
+        IsFavorite = !IsFavorite;
+    }
 }
