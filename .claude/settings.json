@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dotnet test *)",
+      "Bash(dotnet --list-sdks)",
+      "Bash(npm --prefix web run build)",
+      "Bash(npm --prefix web run lint)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git merge-base *)",
+      "Bash(git ls-files *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr checks *)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(dotnet test *)",
+      "PowerShell(dotnet --list-sdks)",
+      "PowerShell(npm --prefix web run build)",
+      "PowerShell(npm --prefix web run lint)",
+      "PowerShell(git status)",
+      "PowerShell(git status *)",
+      "PowerShell(git diff)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)",
+      "PowerShell(git merge-base *)",
+      "PowerShell(git ls-files *)",
+      "PowerShell(gh pr view *)",
+      "PowerShell(gh pr checks *)"
+    ]
+  }
+}
