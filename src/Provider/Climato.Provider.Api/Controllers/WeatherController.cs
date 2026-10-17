@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Climato.Provider.Application.Contracts;
+﻿using Climato.Provider.Application.Contracts;
 using Climato.Provider.Domain.Weathers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Climato.Provider.Api.Controllers;
 
@@ -15,17 +15,20 @@ public class WeatherController : ControllerBase
         this.appService = appService;
     }
 
+    /// <summary>Retorna o clima atual e a imagem da cidade informada.</summary>
+    /// <param name="cityName">Nome da cidade, exemplo: Cuiabá</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     [HttpGet]
-    public async Task<ActionResult<Weather>> Get([FromQuery] string cityName)
+    public async Task<ActionResult<Weather>> Get([FromQuery] string cityName, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(cityName))
         {
-            return BadRequest("Parâmetro 'city' é obrigatório.");
+            return BadRequest("Parâmetro 'cityName' é obrigatório.");
         }
 
         try
         {
-            var result = await appService.GetByCityAsync(cityName);
+            var result = await appService.GetByCityAsync(cityName, cancellationToken);
             return Ok(result);
         }
         catch (HttpRequestException)

@@ -2,5 +2,5 @@
 
 public interface ICityImageAppService
 {
-    Task<string?> GetImageUrlAsync(string cityName);
+    Task<string?> GetImageUrlAsync(string? cityName, CancellationToken cancellationToken);
 }

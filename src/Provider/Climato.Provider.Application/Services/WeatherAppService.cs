@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using Climato.Provider.Application.Contracts;
+﻿using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Core.Collections;
+using Climato.Provider.Application.Options;
 using Climato.Provider.Domain.Weathers;
+using Microsoft.Extensions.Options;
 
 namespace Climato.Provider.Application.Services;
 
@@ -10,21 +12,21 @@ public class WeatherAppService : IWeatherAppService
     private readonly string apiKey;
     private readonly ICityImageAppService cityImageAppService;
 
-    public WeatherAppService(HttpClient httpClient, IConfiguration config, ICityImageAppService cityImageAppService)
+    public WeatherAppService(HttpClient httpClient, IOptions<OpenWeatherOptions> options, ICityImageAppService cityImageAppService)
     {
         client = httpClient;
-        apiKey = config["OpenWeather:ApiKey"]!;
+        apiKey = options.Value.ApiKey;
         this.cityImageAppService = cityImageAppService;
     }
 
-    public async Task<Weather> GetByCityAsync(string cityName)
+    public async Task<Weather> GetByCityAsync(string cityName, CancellationToken cancellationToken)
     {
-        var url = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={apiKey}&units=metric&lang=pt_br";
-        var response = await client.GetAsync(url);
+        var url = $"data/2.5/weather?q={Uri.EscapeDataString(cityName)}&appid={apiKey}&units=metric&lang=pt_br";
+        var response = await client.GetAsync(url, cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var result = await response.ReadContentAsDictionaryAsync();
+        var result = await response.ReadContentAsDictionaryAsync(cancellationToken);
         var weather = new Weather
         {
             City = result["name"]?.ToString(),
@@ -43,8 +45,7 @@ public class WeatherAppService : IWeatherAppService
             Sunset = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(((Dictionary<string, object>)result["sys"])["sunset"])).DateTime,
         };
 
-        var cityImageUrl = await cityImageAppService.GetImageUrlAsync(weather.City);
-        weather.ImageUrl = cityImageUrl;
+        weather.ImageUrl = await cityImageAppService.GetImageUrlAsync(weather.City, cancellationToken);
 
         return weather;
     }

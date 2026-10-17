@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using Climato.Provider.Application.Contracts;
+﻿using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Core.Collections;
+using Climato.Provider.Application.Options;
+using Microsoft.Extensions.Options;
 
 namespace Climato.Provider.Application.Services;
 
@@ -8,27 +10,27 @@ public class CityImageAppService : ICityImageAppService
     private readonly HttpClient client;
     private readonly string apiKey;
 
-    public CityImageAppService(HttpClient httpClient, IConfiguration config)
+    public CityImageAppService(HttpClient httpClient, IOptions<PexelsOptions> options)
     {
         client = httpClient;
-        apiKey = config["Pexels:ApiKey"]!;
+        apiKey = options.Value.ApiKey;
     }
 
-    public async Task<string?> GetImageUrlAsync(string? cityName)
+    public async Task<string?> GetImageUrlAsync(string? cityName, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(cityName))
         {
             return null;
         }
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.pexels.com/v1/search?query={cityName}&orientation=landscape&per_page=1");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"v1/search?query={Uri.EscapeDataString(cityName)}&orientation=landscape&per_page=1");
         request.Headers.Add("Authorization", apiKey);
 
-        var response = await client.SendAsync(request);
+        var response = await client.SendAsync(request, cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var result = await response.ReadContentAsDictionaryAsync();
+        var result = await response.ReadContentAsDictionaryAsync(cancellationToken);
         string? cityImage = null;
 
         if (result.TryGetValue("photos", out var photosObj) && photosObj is List<object> photos && photos.Count > 0)

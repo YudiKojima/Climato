@@ -4,5 +4,5 @@ namespace Climato.Provider.Application.Contracts;
 
 public interface IWeatherAppService
 {
-    Task<Weather> GetByCityAsync(string cityName);
+    Task<Weather> GetByCityAsync(string cityName, CancellationToken cancellationToken);
 }
