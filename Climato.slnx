@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Gateway/">
+    <Project Path="src/Gateway/Climato.Gateway.Api/Climato.Gateway.Api.csproj" />
+    <Project Path="src/Gateway/Climato.Gateway.Application/Climato.Gateway.Application.csproj" />
+    <Project Path="src/Gateway/Climato.Gateway.Domain/Climato.Gateway.Domain.csproj" />
+    <Project Path="src/Gateway/Climato.Gateway.Infrastructure/Climato.Gateway.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Provider/">
+    <Project Path="src/Provider/Climato.Provider.Api/Climato.Provider.Api.csproj" />
+    <Project Path="src/Provider/Climato.Provider.Application/Climato.Provider.Application.csproj" />
+    <Project Path="src/Provider/Climato.Provider.Domain/Climato.Provider.Domain.csproj" />
+  </Folder>
+</Solution>
