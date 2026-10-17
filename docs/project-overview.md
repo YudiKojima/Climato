@@ -90,5 +90,6 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 - [Fase 02] `getWeatherByCity` em `api.js` sem `encodeURIComponent`
 - [Fase 02] `User` com construtor próprio (hoje montado campo a campo no `UserAppService`)
 - [Fase 03] Checagens impossíveis: `if (weather == null)` no `WeatherController` e `?? throw ArgumentNullException` nos construtores dos AppServices; `HttpResponseMessage`/`HttpRequestMessage` sem `using`; `CityRepository.UpdateAsync` chama `Update()` em entidade já rastreada
+- [Fase 03] Nulabilidade: remover as supressões CS8601/CS8604/CS8613 do `.editorconfig` e zerar os avisos de `WeatherDto`/`Weather`/`JsonDictionary` junto com os DTOs tipados (o `backend.md` pede "nenhum aviso de nulabilidade novo")
 - [Fase 04] Mapster: trocar `TypeAdapterConfig.GlobalSettings` por instância própria e validar com `Compile()`/teste
 - [Fase 05] Estratégia de migration em produção (bundle, job dedicado ou flag `Database:MigrateOnStartup`); hoje qualquer ambiente ≠ Production migra no startup
