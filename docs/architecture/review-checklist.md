@@ -22,7 +22,7 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | BE-05 | 🔴 | 00 | Entidade do Domain retornada pelo controller | Action retornando tipo de `*.Domain` | [DTOs](backend.md#dtos-application) |
 | BE-06 | 🔴 | 00 | Camada violada | Domain referenciando outro projeto/pacote de infra; Application referenciando Infrastructure; EF Core fora da Infrastructure | [Dependências entre camadas](backend.md#dependências-entre-camadas) |
 | BE-07 | 🔴 | 00 | URL ou chave literal | `"https://..."` de serviço/API externa ou chave no código em vez de configuração | [Comunicação HTTP](backend.md#comunicação-http) |
-| BE-08 | 🔴 | 01 | Mudança de entidade sem migration | Entidade ou `OnModelCreating` alterado sem nova migration no mesmo diff | [Migrations](backend.md#migrations-a-partir-da-fase-01) |
+| BE-08 | 🔴 | 01 | Mudança de entidade sem migration | Entidade ou `OnModelCreating` alterado sem nova migration no mesmo diff | [Migrations](backend.md#migrations) |
 | BE-09 | 🔴 | 02 | `userId` vindo do cliente | Parâmetro `userId` em rota, query ou corpo de endpoint autenticado | [CLAUDE.md — O que evitar](../../CLAUDE.md#o-que-evitar) |
 | BE-10 | 🔴 | 02 | Recurso sem verificação de dono | Operação sobre `City` por `id` sem filtrar pelo usuário das claims | [Repositórios](backend.md#repositórios-infrastructure) |
 | BE-11 | 🔴 | 02 | Endpoint sem `[Authorize]` | Controller/action nova sem `[Authorize]` e sem `[AllowAnonymous]` explícito | [Controllers](backend.md#controllers) |
@@ -33,6 +33,9 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | BE-16 | 🟡 | 02 | Erro fora de `ProblemDetails` | `return BadRequest("texto")`/`NotFound("texto")` com string solta | [Erros](backend.md#erros) |
 | BE-17 | 🟡 | 03 | JSON externo sem tipo | `Dictionary<string, object>`, `JObject`, `dynamic` para ler resposta de API | [Comunicação HTTP](backend.md#comunicação-http) |
 | BE-18 | 🔴 | 04 | Regra nova sem teste | AppService/entidade/endpoint novo ou alterado sem teste correspondente em `tests/` | [CLAUDE.md — Skills](../../CLAUDE.md#skills-disponíveis) |
+| BE-19 | 🟡 | 01 | Mapeamento fora de `Mappings/` | `.Adapt(`, `TypeAdapterConfig` ou mapeamento manual campo a campo de entidade → DTO fora de `Application/Mappings/` e `DependencyInjection.cs` | [Mapeamento](backend.md#mapeamento-mapster) |
+| BE-20 | 🔴 | 01 | Options sem validação | Classe `*Options` registrada sem `ValidateOnStart()` ou chave obrigatória sem `[Required]` | [Injeção de dependência por camada](backend.md#injeção-de-dependência-por-camada) |
+| BE-21 | 🟡 | 01 | Versão de pacote no `.csproj` | `PackageReference` com atributo `Version` (versões só em `Directory.Packages.props`) | [Dependências entre camadas](backend.md#dependências-entre-camadas) |
 
 ## Frontend
 

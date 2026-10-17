@@ -49,7 +49,7 @@ Proteção de rota **só** em `ProtectedRoute`/router — páginas não redireci
 ## Chamadas à API
 
 - Toda chamada passa por `services/`; páginas e componentes nunca usam `axios` direto.
-- URL base de `import.meta.env.VITE_API_URL` (**a partir da Fase 02**; hoje fixa — A27). `web/.env.example` versionado, `.env` local ignorado.
+- URL base de `import.meta.env.VITE_API_URL`. `web/.env.example` versionado, `web/.env` local ignorado e obrigatório (ver [`runbook.md`](../runbook.md#2-segredos-user-secrets)).
 - **(a partir da Fase 02)** Instância única do axios com interceptor de request (`Authorization: Bearer <token>`) e de response (401 → limpa sessão e vai para `/signin`). `userId` nunca é enviado pelo front.
 - Parâmetros de rota/query com `encodeURIComponent`.
 - Erros da API chegam como `ProblemDetails`: exibir `title`/`detail`, não a mensagem do axios.

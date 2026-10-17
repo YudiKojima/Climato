@@ -9,10 +9,10 @@ Dois serviços .NET e um SPA React. O frontend fala **só** com o Gateway; o Gat
 ```mermaid
 flowchart LR
     web["web<br/>React + Vite + AntD"] -- "HTTPS + userId na query" --> gw
-    subgraph Gateway["WeatherGatewayApp"]
+    subgraph Gateway["Climato.Gateway"]
         gw["API"] --> db[(PostgreSQL)]
     end
-    gw -- "HTTP (URL fixa)" --> pv["WeatherProviderApp"]
+    gw -- "HTTP (Provider:BaseUrl)" --> pv["Climato.Provider"]
     pv --> ow["OpenWeather<br/>/data/2.5/weather"]
     pv --> px["Pexels<br/>/v1/search"]
 ```
@@ -22,11 +22,11 @@ flowchart LR
 ```mermaid
 flowchart LR
     web["web (nginx)<br/>React + AntD"] -- "HTTPS + JWT" --> gw
-    subgraph Gateway["WeatherGatewayApp (BFF)"]
+    subgraph Gateway["Climato.Gateway (BFF)"]
         gw["API<br/>auth · cidades · favoritos"] --> db[(PostgreSQL)]
     end
     gw -- "HTTP + resiliência<br/>X-Correlation-ID" --> pv
-    subgraph Provider["WeatherProviderApp"]
+    subgraph Provider["Climato.Provider"]
         pv["API<br/>clima · previsão · geocoding"] --> cache[(Redis)]
     end
     pv -- "resiliência" --> ow["OpenWeather"]
@@ -37,8 +37,8 @@ flowchart LR
 
 | Serviço | Responsável por | Não faz |
 |---|---|---|
-| **WeatherGatewayApp** | Usuários e autenticação (JWT), histórico de cidades e favoritos por usuário, composição das respostas para o front | Chamar APIs externas diretamente |
-| **WeatherProviderApp** | Traduzir OpenWeather/Pexels para um contrato próprio (camada anticorrupção), cache, resiliência contra as APIs externas | Persistir dados de usuário; conhecer usuários |
+| **Climato.Gateway** | Usuários e autenticação (JWT), histórico de cidades e favoritos por usuário, composição das respostas para o front | Chamar APIs externas diretamente |
+| **Climato.Provider** | Traduzir OpenWeather/Pexels para um contrato próprio (camada anticorrupção), cache, resiliência contra as APIs externas | Persistir dados de usuário; conhecer usuários |
 | **web** | Interface; guarda o token e chama o Gateway | Regra de negócio (ex.: "não excluir favorita" fica no backend) |
 
 **Por que dois serviços:** o Provider isola a dependência externa (troca de provedor de clima, cotas, cache) e escala de forma independente; o Gateway concentra estado e identidade. Ver [ADR 0001](decisions/0001-evolucao-incremental-dois-servicos.md).
@@ -72,7 +72,7 @@ PostgreSQL, propriedade exclusiva do Gateway.
 | `user` | id, email (único), name, password (hash a partir da Fase 02), createdat | Nome reservado no Postgres — sempre entre aspas no SQL |
 | `city` | id, userid → user (cascade), name, country, isfavorite, createdat | Uma linha por cidade **por usuário** |
 
-Schema versionado por EF Core Migrations a partir da Fase 01.
+Schema versionado por EF Core Migrations (`Gateway.Infrastructure/Data/Migrations/`).
 
 ## Integrações externas
 

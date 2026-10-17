@@ -20,6 +20,7 @@ Ao tomar uma decisão que afeta mais de um arquivo ou que alguém poderia questi
 | [0002](0002-frontend-ant-design-modernizado.md) | Manter Ant Design e JavaScript no frontend, com tema próprio | Aceito |
 | [0003](0003-deploy-gratuito.md) | Docker Compose local + deploy público em camadas gratuitas | Aceito |
 | [0004](0004-dotnet-10.md) | Migrar de .NET 8 para .NET 10 | Aceito |
+| [0005](0005-mapster.md) | Mapster no lugar do AutoMapper | Aceito |
 
 ## Template
 
