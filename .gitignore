@@ -71,3 +71,6 @@
 **/TestResults/
 **/coverage/
 **/build/
+# Claude Code (configuração pessoal)
+.claude/settings.local.json
+.claude/worktrees/
