@@ -2429,7 +2429,7 @@ git commit -m "Atualiza documentação da Fase 01" -m "Co-Authored-By: Claude Op
 
 ### Tarefa 7: Verificação final (sem commit)
 
-- [ ] **Passo 1: Build e front**
+- [x] **Passo 1: Build e front**
 
 ```bash
 cd "/c/Program Files/source/WeaterApp"
@@ -2440,7 +2440,7 @@ npm --prefix web run build
 
 Esperado: tudo sem erro.
 
-- [ ] **Passo 2: Clone limpo (A23)**
+- [x] **Passo 2: Clone limpo (A23)**
 
 ```bash
 TMP=$(mktemp -d)
@@ -2451,7 +2451,7 @@ rm -rf "$TMP"
 
 Esperado: `Build succeeded`.
 
-- [ ] **Passo 3: Startup sem segredo**
+- [x] **Passo 3: Startup sem segredo**
 
 ```bash
 dotnet run --project src/Provider/Climato.Provider.Api --launch-profile https -- --OpenWeather:ApiKey=
@@ -2459,7 +2459,7 @@ dotnet run --project src/Provider/Climato.Provider.Api --launch-profile https --
 
 Esperado: falha ao subir com `OpenWeather:ApiKey não configurada. Ver docs/runbook.md.` (o argumento de linha de comando sobrescreve o user-secret com vazio).
 
-- [ ] **Passo 4: Roteiro manual com banco novo**
+- [x] **Passo 4: Roteiro manual com banco novo**
 
 Se existir um banco `climato` de testes anteriores, apagá-lo (`DROP DATABASE climato;`). Subir Provider, Gateway e web (runbook, seção 4) e conferir:
 
@@ -2469,6 +2469,24 @@ Se existir um banco `climato` de testes anteriores, apagá-lo (`DROP DATABASE cl
 4. No Scalar do Gateway: `DELETE /cities/{guid aleatório}` → `404`.
 5. Excluir um usuário com cidades (`DELETE /users/{id}` no Scalar) → `204`; `GET /cities?userId={id}` → lista vazia (cascade).
 
-- [ ] **Passo 5: Relatório**
+- [x] **Passo 5: Relatório**
 
 Registrar no fim deste plano uma seção `## Notas de execução (AAAA-MM-DD)` com desvios e achados, e seguir para `/requesting-code-review` → `/finishing-a-development-branch`.
+
+## Notas de execução (2026-10-17)
+
+Executado com um subagente por tarefa e revisão (spec + qualidade) após cada uma. Commits: `5f6ab81` (T1), `b13ef35` (T2), `15e906a` (T3), `171118d` (T4), `d281af7` (T5), `1b74bd6` + `6e5b113` (T6, com uma correção pós-revisão em `frontend.md`/`backend.md`).
+
+**Verificação (Tarefa 7)**
+- `dotnet build Climato.slnx`: 0 erros (avisos de nulabilidade pré-existentes em `Weather.cs`/`JsonDictionary.cs`); lint e build do web ok.
+- Clone limpo da branch compila (A23).
+- Provider sem chave não sobe: `OpenWeather:ApiKey não configurada. Ver docs/runbook.md.`
+- Gateway criou o banco `climato` e aplicou `Inicial` no startup. O EF registra um `fail` de conexão antes do `CREATE DATABASE` quando o banco ainda não existe — ruído esperado.
+- Fluxo pela API e pelo navegador: cadastro → login → clima de Cuiabá com imagem → histórico → favoritar/desfavoritar → `DELETE` `204` → id inexistente `404` → exclusão de usuário com cascade.
+- A chave da OpenWeather não aparece nos logs: o .NET 10 mascara a query (`weather?*`).
+
+**Desvios e achados**
+- O certificado HTTPS de desenvolvimento não estava confiável na máquina; a chamada Gateway → Provider via `https://localhost:7002` falhou no TLS. A verificação foi feita com os serviços só em HTTP (`--urls http://localhost:500x`, `--Provider:BaseUrl=http://localhost:5002/`, `VITE_API_URL=http://localhost:5001`), sem mudança de código. O runbook já exige `dotnet dev-certs https --trust`.
+- Visíveis e já mapeados para a Fase 03: vento em m/s exibido como km/h (A16), nascer/pôr do sol em UTC (A17).
+- `dotnet new tool-manifest` criou o manifesto na raiz; movido para `.config/`.
+- Pendências registradas no `project-overview.md`: lockfile do web (Fase 05), erro do `DELETE` não tratado no `CityCard.jsx` (Fase 07).
