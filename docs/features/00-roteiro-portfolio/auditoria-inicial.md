@@ -55,4 +55,4 @@ Levantamento feito antes do roteiro de portfólio ([`design.md`](design.md)), so
 
 | Código | Sev. | Achado | Onde | Fase | Status |
 |---|---|---|---|---|---|
-| A27 | 🟡 | URL da API fixa em `api.js`; layout com largura fixa (`width: 1000`), estilos inline, `alert()` para erros, logout duplicado em várias páginas | [api.js](../../../web/src/services/api.js), `pages/*` | 02 (URL) · 07 (resto) | 🟡 URL na Fase 01 · resto na 07 |
+| A27 | 🟡 | URL da API fixa em `api.js`; layout com largura fixa (`width: 1000`), estilos inline, `alert()` para erros, logout duplicado em várias páginas | [api.js](../../../web/src/services/api.js), `pages/*` | 01 (URL) · 07 (resto) | 🟡 URL na Fase 01 · resto na 07 |

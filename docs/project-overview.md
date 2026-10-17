@@ -51,7 +51,7 @@ Auditoria: A5, A8–A13, A20–A23, A27 (URL), A28.
 
 #### Fase 02 — Segurança
 Hash de senha, JWT, autorização por dono, CORS, validação, ProblemDetails; front adaptado ao token.
-Auditoria: A1–A4, A6, A7, A18.
+Auditoria: A1–A4, A6, A7, A18. Ver também os itens `[Fase 02]` em [Pendências futuras](#pendências-futuras).
 
 #### Fase 03 — Comunicação entre serviços
 Typed HttpClient + DTOs, resiliência, cache Redis, health checks, previsão de 5 dias, geocoding.
