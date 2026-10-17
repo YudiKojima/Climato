@@ -16,10 +16,17 @@ public class CityAppService : ICityAppService
         this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
-    public async void DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        var city = await cityRepository.GetAsync(id, CancellationToken.None) ?? throw new ArgumentException("Cidade não encontrada");
-        await cityRepository.DeleteAsync(city, CancellationToken.None);
+        var city = await cityRepository.GetAsync(id, cancellationToken);
+
+        if (city == null)
+        {
+            return false;
+        }
+
+        await cityRepository.DeleteAsync(city, cancellationToken);
+        return true;
     }
 
     public async Task<List<CityDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken)

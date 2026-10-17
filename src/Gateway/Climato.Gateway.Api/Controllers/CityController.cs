@@ -47,12 +47,23 @@ public class CityController : ControllerBase
         return Ok(city);
     }
 
-    /// <summary>Remover cidade informada.</summary>
+    /// <summary>Remove a cidade informada.</summary>
     /// <param name="id">Id da cidade</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição</param>
+    /// <response code="204">Cidade removida.</response>
+    /// <response code="404">Cidade não encontrada.</response>
     [HttpDelete("{id}")]
-    public IActionResult Delete(Guid id)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        appService.DeleteAsync(id);
-        return Ok();
+        var deleted = await appService.DeleteAsync(id, cancellationToken);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
 }

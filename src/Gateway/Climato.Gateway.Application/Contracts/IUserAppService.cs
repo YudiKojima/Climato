@@ -6,5 +6,5 @@ public interface IUserAppService
 {
     Task<UserDto?> PostAsync(UserPostDto dto, CancellationToken cancellationToken);
     Task<UserDto?> GetAsync(string email, string password, CancellationToken cancellationToken);
-    void DeleteAsync(Guid id);
+    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken);
 }

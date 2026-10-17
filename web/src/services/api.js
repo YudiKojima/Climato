@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "https://localhost:44394";
+const API = import.meta.env.VITE_API_URL;
 
 export const getAllCities = async () => {
   const userId = localStorage.getItem("userId");

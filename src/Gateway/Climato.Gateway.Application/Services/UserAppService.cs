@@ -16,10 +16,17 @@ public class UserAppService : IUserAppService
         this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
-    public async void DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetAsync(id, CancellationToken.None) ?? throw new ArgumentException("Usuário não encontrado");
-        await userRepository.DeleteAsync(user, CancellationToken.None);
+        var user = await userRepository.GetAsync(id, cancellationToken);
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        await userRepository.DeleteAsync(user, cancellationToken);
+        return true;
     }
 
     public async Task<UserDto?> GetAsync(string email, string password, CancellationToken cancellationToken)

@@ -45,10 +45,21 @@ public class UserController : ControllerBase
 
     /// <summary>Remove o usuário informado.</summary>
     /// <param name="id">Id do usuário</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição</param>
+    /// <response code="204">Usuário removido.</response>
+    /// <response code="404">Usuário não encontrado.</response>
     [HttpDelete("{id}")]
-    public IActionResult Delete(Guid id)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        appService.DeleteAsync(id);
-        return Ok();
+        var deleted = await appService.DeleteAsync(id, cancellationToken);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
 }
