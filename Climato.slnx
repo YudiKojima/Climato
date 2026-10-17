@@ -1,4 +1,11 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
   <Folder Name="/Gateway/">
     <Project Path="src/Gateway/Climato.Gateway.Api/Climato.Gateway.Api.csproj" />
     <Project Path="src/Gateway/Climato.Gateway.Application/Climato.Gateway.Application.csproj" />

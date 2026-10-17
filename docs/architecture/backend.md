@@ -25,12 +25,12 @@ Cada serviço segue camadas no estilo Clean Architecture:
 Climato.slnx                         ← solução única; Directory.Build.props / Directory.Packages.props / global.json na raiz
 src/Gateway/
 ├── Climato.Gateway.Api/             ← Program.cs, Controllers
-├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs), Mappings (Mapster), Options, DependencyInjection.cs
-├── Climato.Gateway.Domain/          ← Entidades e interfaces de repositório por agregado (Cities/, Users/, Weathers/)
+├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs: Cities, Users, Weathers), Mappings (Mapster), Options, DependencyInjection.cs
+├── Climato.Gateway.Domain/          ← Entidades e interfaces de repositório por agregado (Cities/, Users/)
 └── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients), DependencyInjection.cs
 src/Provider/
 ├── Climato.Provider.Api/
-├── Climato.Provider.Application/    ← Clientes das APIs externas (Services), Options, DependencyInjection.cs
+├── Climato.Provider.Application/    ← Clientes das APIs externas (Services), Options, DependencyInjection.cs, Core/Collections (JsonDictionary, até a Fase 03)
 └── Climato.Provider.Domain/         ← Weather (contrato devolvido ao Gateway)
 ```
 
@@ -67,7 +67,7 @@ API ──▶ Application ──▶ Domain
 
 ### DTOs (Application)
 - Ficam em `Application/Model/<Agregado>/`; sufixos `Dto` (resposta), `PostDto`/`PutDto` (entrada).
-- DTO de resposta **nunca** expõe senha, hash ou dado interno.
+- DTO de resposta **nunca** expõe senha, hash ou dado interno (exceção conhecida: `UserDto.Password`, removido na Fase 02 — A3).
 - Entidades do Domain nunca saem pelo controller.
 
 ### Mapeamento (Mapster)
@@ -76,7 +76,7 @@ API ──▶ Application ──▶ Domain
 - Decisão: [ADR 0005](decisions/0005-mapster.md).
 
 ### Entidades (Domain)
-- Construtor com os campos obrigatórios gera `Id` e `CreatedAt`; construtor vazio só para o EF.
+- Construtor com os campos obrigatórios gera `Id` e `CreatedAt`; construtor vazio só para o EF — `User` ainda é montado campo a campo pelo `UserAppService` (ajuste na Fase 02).
 - Regra que muda estado da entidade é método dela (ex.: `city.ToggleFavorite()`), não lógica solta no AppService.
 
 ### Repositórios (Infrastructure)
@@ -109,7 +109,7 @@ API ──▶ Application ──▶ Domain
 O frontend só conhece o Gateway. Novos dados para o front (previsão, autocomplete) são expostos pelo Gateway e buscados no Provider, mesmo quando o Gateway só repassa. Ver [`system-design.md`](system-design.md).
 
 ### Provider como camada anticorrupção
-O formato da OpenWeather/Pexels não vaza para o Gateway: o Provider devolve contratos próprios (`Weather`, previsão, cidades). Trocar o provedor de clima afeta só o Provider.
+O formato da OpenWeather/Pexels não vaza para o Gateway: o Provider devolve contratos próprios (`Weather`, previsão, cidades). Trocar o provedor de clima afeta só o Provider. No Gateway, o contrato recebido do Provider é o `WeatherDto` da Application; o Domain do Gateway não conhece o formato do Provider.
 
 ### Palavra reservada `user`
 A tabela se chama `user`, reservada no PostgreSQL: em SQL manual, sempre `"user"`.

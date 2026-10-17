@@ -76,6 +76,9 @@ Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
 | `ConnectionStrings:Climato não configurada` | Faltou o user-secret do Gateway |
 | Toda busca mostra "cidade não encontrada" | Provider fora do ar ou chave inválida — erros ainda viram 404/500 indistintos (A14, A15, Fase 03) |
 | `ERR_CERT_AUTHORITY_INVALID` no navegador | `dotnet dev-certs https --trust` e abrir `https://localhost:7001/scalar` uma vez |
+| `fail: Microsoft.EntityFrameworkCore.Database.Connection` no primeiro startup | Esperado: o banco `climato` ainda não existe; o Gateway o cria e aplica as migrations logo em seguida |
+| Busca retorna 500 depois de recriar o banco | O `userId` antigo continua no `localStorage` do navegador — clicar em "Sair" e cadastrar-se de novo (a Fase 02 resolve com JWT) |
+| `The SSL connection could not be established` no log do Gateway | Certificado de desenvolvimento não confiável — `dotnet dev-certs https --trust` (seção Pré-requisitos) |
 
 ## 6. Verificação antes de PR
 

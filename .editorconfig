@@ -27,3 +27,6 @@ indent_size = 2
 
 [*.{js,jsx,css,md}]
 indent_size = 2
+
+[**/Migrations/*.cs]
+generated_code = true

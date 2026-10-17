@@ -28,7 +28,7 @@ Definido no [`CLAUDE.md`](../CLAUDE.md): brainstorming → `design.md` → `plan
 
 ---
 
-## Estado Atual (2026-10-16, após a Fase 01)
+## Estado Atual (2026-10-17, após a Fase 01)
 
 **Funciona:** cadastro e login (inseguros — ver A1–A4), busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade.
 
@@ -85,3 +85,10 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 
 - [Fase 05] Versionar um lockfile do web e padronizar o gerenciador (hoje há um `yarn.lock` local não versionado e o runbook usa npm)
 - [Fase 07] `CityCard.jsx` não trata erro do `DELETE` (404 vira rejeição não tratada)
+- [Fase 02] Ordem do pipeline: `UseCors` antes de `UseAuthentication`/`UseAuthorization` (com `[Authorize]`, o preflight receberia 401)
+- [Fase 02] E-mail único sem diferenciar maiúsculas (normalizar ou `citext`)
+- [Fase 02] `getWeatherByCity` em `api.js` sem `encodeURIComponent`
+- [Fase 02] `User` com construtor próprio (hoje montado campo a campo no `UserAppService`)
+- [Fase 03] Checagens impossíveis: `if (weather == null)` no `WeatherController` e `?? throw ArgumentNullException` nos construtores dos AppServices; `HttpResponseMessage`/`HttpRequestMessage` sem `using`; `CityRepository.UpdateAsync` chama `Update()` em entidade já rastreada
+- [Fase 04] Mapster: trocar `TypeAdapterConfig.GlobalSettings` por instância própria e validar com `Compile()`/teste
+- [Fase 05] Estratégia de migration em produção (bundle, job dedicado ou flag `Database:MigrateOnStartup`); hoje qualquer ambiente ≠ Production migra no startup

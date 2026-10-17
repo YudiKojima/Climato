@@ -2490,3 +2490,8 @@ Executado com um subagente por tarefa e revisão (spec + qualidade) após cada u
 - Visíveis e já mapeados para a Fase 03: vento em m/s exibido como km/h (A16), nascer/pôr do sol em UTC (A17).
 - `dotnet new tool-manifest` criou o manifesto na raiz; movido para `.config/`.
 - Pendências registradas no `project-overview.md`: lockfile do web (Fase 05), erro do `DELETE` não tratado no `CityCard.jsx` (Fase 07).
+
+**Revisão final da branch**
+- Veredito: com correções.
+- Corrigido: BE-05 (o Gateway não devolve mais tipo do Domain; `WeatherDto` na Application), BE-12 (`City.ToggleFavorite()`), `.gitignore` com `logs/` e `*.bak`, newline do manifesto de ferramentas, `generated_code` das migrations no `.editorconfig`, pasta "Solution Items" no `.slnx` e ajustes nos docs.
+- Os demais achados viraram pendências no `project-overview.md`.

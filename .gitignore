@@ -3,6 +3,7 @@
 **/obj/
 **/TestResults/
 **/publish/
+**/logs/
 **/*.user
 **/*.suo
 .vs/
@@ -29,6 +30,7 @@
 **/*.pfx
 **/*.db
 **/*.sqlite
+**/*.bak
 
 # ---------- IDEs e SO ----------
 **/.idea/
