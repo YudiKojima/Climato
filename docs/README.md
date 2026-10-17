@@ -15,7 +15,7 @@
 | Fase | Pasta |
 |---|---|
 | 00 — Roteiro do portfólio + auditoria inicial | [`features/00-roteiro-portfolio/`](features/00-roteiro-portfolio/) |
-| 01 — Higiene e fundação | `features/01-higiene-fundacao/` (criada no início da fase) |
+| 01 — Higiene e fundação | [`features/01-higiene-fundacao/`](features/01-higiene-fundacao/) |
 | 02 — Segurança | `features/02-seguranca/` |
 | 03 — Comunicação entre serviços | `features/03-comunicacao-servicos/` |
 | 04 — Testes | `features/04-testes/` |
