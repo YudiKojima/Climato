@@ -12,10 +12,10 @@ public class CityRepository : ICityRepository
         this.context = context;
     }
 
-    public async Task<City?> GetAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<City?> GetAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
         return await context.Cities
-            .Where(c => c.Id == id)
+            .Where(c => c.Id == id && c.UserId == userId)
             .FirstOrDefaultAsync(cancellationToken);
     }
 

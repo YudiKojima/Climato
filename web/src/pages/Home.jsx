@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAllCities } from "../services/api";
+import { clearSession } from "../services/session";
 import CityCard from "../components/CityCard";
 import { Link, useNavigate } from "react-router-dom";
 import { Input, Button, Row, Col, Typography, Divider } from "antd";
@@ -50,7 +51,7 @@ const Home = () => {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem("userId");
+    clearSession();
     navigate("/signin");
   };
 

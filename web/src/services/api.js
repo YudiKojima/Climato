@@ -1,45 +1,74 @@
 import axios from "axios";
+import { clearSession, getToken } from "./session";
 
-const API = import.meta.env.VITE_API_URL;
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+
+api.interceptors.request.use((config) => {
+  const token = getToken();
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isAuthRoute = error.config?.url?.startsWith("/auth/");
+
+    if (error.response?.status === 401 && !isAuthRoute) {
+      clearSession();
+      window.location.assign("/signin");
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export const login = async (data) => {
+  const response = await api.post("/auth/login", data);
+  return response.data;
+};
+
+export const register = async (data) => {
+  const response = await api.post("/auth/register", data);
+  return response.data;
+};
 
 export const getAllCities = async () => {
-  const userId = localStorage.getItem("userId");
-  const response = await axios.get(`${API}/cities?userId=${userId}`);
-  return response.data;
-};
-
-export const getWeatherByCity = async (cityName) => {
-  const userId = localStorage.getItem("userId");
-  const response = await axios.get(
-    `${API}/weathers/${cityName}?userId=${userId}`
-  );
-  return response.data;
-};
-
-export const toggleFavorite = async (id) => {
-  const response = await axios.patch(`${API}/cities/${id}/favorite`);
+  const response = await api.get("/cities");
   return response.data;
 };
 
 export const getAllFavorites = async () => {
-  const userId = localStorage.getItem("userId");
-  const response = await axios.get(`${API}/cities/favorites?userId=${userId}`);
+  const response = await api.get("/cities/favorites");
   return response.data;
 };
 
-export const DeleteCity = async (id) => {
-  const response = await axios.delete(`${API}/cities/${id}`);
+export const getWeatherByCity = async (cityName) => {
+  const response = await api.get(`/weathers/${encodeURIComponent(cityName)}`);
   return response.data;
 };
 
-export const GetUser = async (data) => {
-  const response = await axios.get(
-    `${API}/users?email=${data.email}&password=${data.password}`
-  );
+export const toggleFavorite = async (id) => {
+  const response = await api.patch(`/cities/${id}/favorite`);
   return response.data;
 };
 
-export const CreateUser = async (data) => {
-  const response = await axios.post(`${API}/users`, data);
-  return response.data;
+export const deleteCity = async (id) => {
+  await api.delete(`/cities/${id}`);
+};
+
+export const getApiErrorMessage = (
+  error,
+  fallback = "Não foi possível concluir a operação."
+) => {
+  const data = error.response?.data;
+  const firstValidationError = data?.errors
+    ? Object.values(data.errors).flat()[0]
+    : undefined;
+
+  return firstValidationError || data?.detail || data?.title || fallback;
 };

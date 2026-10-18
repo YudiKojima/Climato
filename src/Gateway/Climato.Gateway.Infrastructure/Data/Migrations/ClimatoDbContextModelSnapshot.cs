@@ -88,11 +88,10 @@ namespace Climato.Gateway.Infrastructure.Data.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("password");
+                        .HasColumnType("text")
+                        .HasColumnName("passwordhash");
 
                     b.HasKey("Id");
 

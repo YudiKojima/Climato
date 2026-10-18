@@ -1,3 +1,5 @@
+using Climato.Gateway.Domain.Exceptions;
+
 namespace Climato.Gateway.Domain.Cities;
 
 public class City
@@ -24,5 +26,13 @@ public class City
     public void ToggleFavorite()
     {
         IsFavorite = !IsFavorite;
+    }
+
+    public void EnsureCanBeDeleted()
+    {
+        if (IsFavorite)
+        {
+            throw new DomainException("Não é possível remover uma cidade favorita.");
+        }
     }
 }

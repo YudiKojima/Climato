@@ -1,11 +1,13 @@
+using Climato.Gateway.Api.Extensions;
 using Climato.Gateway.Application.Contracts;
-using Climato.Gateway.Application.Model.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Climato.Gateway.Api.Controllers;
 
 [ApiController]
 [Route("users")]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserAppService appService;
@@ -15,45 +17,16 @@ public class UserController : ControllerBase
         this.appService = appService;
     }
 
-    /// <summary>Cria um usuário.</summary>
-    [HttpPost]
-    public async Task<ActionResult<UserDto>> Post(UserPostDto dto, CancellationToken cancellationToken)
-    {
-        var user = await appService.PostAsync(dto, cancellationToken);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(user);
-    }
-
-    /// <summary>Busca o usuário por e-mail e senha.</summary>
-    [HttpGet]
-    public async Task<ActionResult<UserDto>> Get([FromQuery] UserGetDto dto, CancellationToken cancellationToken)
-    {
-        var user = await appService.GetAsync(dto.Email, dto.Password, cancellationToken);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(user);
-    }
-
-    /// <summary>Remove o usuário informado.</summary>
-    /// <param name="id">Id do usuário</param>
+    /// <summary>Remove a conta do usuário autenticado e o histórico de cidades dele.</summary>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
-    /// <response code="204">Usuário removido.</response>
+    /// <response code="204">Conta removida.</response>
     /// <response code="404">Usuário não encontrado.</response>
-    [HttpDelete("{id}")]
+    [HttpDelete("me")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteMe(CancellationToken cancellationToken)
     {
-        var deleted = await appService.DeleteAsync(id, cancellationToken);
+        var deleted = await appService.DeleteAsync(User.GetUserId(), cancellationToken);
 
         if (!deleted)
         {
