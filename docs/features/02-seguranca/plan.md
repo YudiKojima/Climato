@@ -1295,7 +1295,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 **Interfaces produzidas:** `session.js` → `saveSession(auth)`, `getToken()`, `clearSession()`, `hasValidSession()`; `api.js` → `login`, `register`, `getAllCities`, `getAllFavorites`, `getWeatherByCity`, `toggleFavorite`, `deleteCity`, `getApiErrorMessage(error, fallback?)`.
 
-- [ ] **Passo 1: `web/src/services/session.js`**
+- [x] **Passo 1: `web/src/services/session.js`**
 
 ```js
 const TOKEN_KEY = "token";
@@ -1321,7 +1321,7 @@ export const hasValidSession = () => {
 };
 ```
 
-- [ ] **Passo 2: `web/src/services/api.js` (reescrever)**
+- [x] **Passo 2: `web/src/services/api.js` (reescrever)**
 
 ```js
 import axios from "axios";
@@ -1400,7 +1400,7 @@ export const getApiErrorMessage = (
 };
 ```
 
-- [ ] **Passo 3: `web/src/pages/SignIn.jsx`**
+- [x] **Passo 3: `web/src/pages/SignIn.jsx`**
   - import: `import { login, getApiErrorMessage } from "../services/api";` e `import { hasValidSession, saveSession } from "../services/session";`
   - `handleSubmit`:
 
@@ -1427,7 +1427,7 @@ export const getApiErrorMessage = (
   }, [navigate]);
 ```
 
-- [ ] **Passo 4: `web/src/pages/SignUp.jsx`**
+- [x] **Passo 4: `web/src/pages/SignUp.jsx`**
   - import: `import { register, getApiErrorMessage } from "../services/api";` e `import { hasValidSession, saveSession } from "../services/session";`
   - `handleSubmit`:
 
@@ -1456,9 +1456,9 @@ export const getApiErrorMessage = (
             ]}
 ```
 
-- [ ] **Passo 5: `SignOut.jsx`, `Home.jsx`, `Favorites.jsx`** — importar `import { clearSession } from "../services/session";` e trocar `localStorage.removeItem("userId");` por `clearSession();`.
+- [x] **Passo 5: `SignOut.jsx`, `Home.jsx`, `Favorites.jsx`** — importar `import { clearSession } from "../services/session";` e trocar `localStorage.removeItem("userId");` por `clearSession();`.
 
-- [ ] **Passo 6: `web/src/router/ProtectedRoute.jsx` (reescrever)**
+- [x] **Passo 6: `web/src/router/ProtectedRoute.jsx` (reescrever)**
 
 ```jsx
 import { Navigate } from "react-router-dom";
@@ -1475,7 +1475,7 @@ const ProtectedRoute = ({ children }) => {
 export default ProtectedRoute;
 ```
 
-- [ ] **Passo 7: `web/src/components/CityCard.jsx`**
+- [x] **Passo 7: `web/src/components/CityCard.jsx`**
   - import: `import { toggleFavorite, deleteCity, getApiErrorMessage } from "../services/api";`
   - `handleDeleteClick`:
 
@@ -1498,7 +1498,7 @@ export default ProtectedRoute;
   };
 ```
 
-- [ ] **Passo 8: Conferências**
+- [x] **Passo 8: Conferências**
 
 ```bash
 grep -rn "userId\|GetUser\|CreateUser\|DeleteCity" web/src
@@ -1509,7 +1509,7 @@ npm --prefix web run build
 
 Esperado: primeiro grep vazio; `localStorage` só em `services/session.js`; lint e build sem erro.
 
-- [ ] **Passo 9: Commit** (após `/revisar-padrao`)
+- [x] **Passo 9: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add web/src

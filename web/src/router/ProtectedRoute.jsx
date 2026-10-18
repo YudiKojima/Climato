@@ -1,9 +1,8 @@
 import { Navigate } from "react-router-dom";
+import { hasValidSession } from "../services/session";
 
 const ProtectedRoute = ({ children }) => {
-  const userId = localStorage.getItem("userId");
-
-  if (!userId) {
+  if (!hasValidSession()) {
     return <Navigate to="/signin" replace />;
   }
 

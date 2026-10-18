@@ -1,6 +1,10 @@
 import { Card, Button, Typography, message } from "antd";
 import { StarFilled, StarOutlined, CloseOutlined } from "@ant-design/icons";
-import { toggleFavorite, DeleteCity } from "../services/api";
+import {
+  toggleFavorite,
+  deleteCity,
+  getApiErrorMessage,
+} from "../services/api";
 
 const { Title, Text } = Typography;
 
@@ -15,12 +19,14 @@ const CityCard = ({ city, onToggleFavorite, onClick, onDelete }) => {
     e.stopPropagation();
 
     if (city.isFavorite) {
-      alert("Não é possível remover uma cidade favorita.");
+      message.warning("Não é possível remover uma cidade favorita.");
       return;
     }
 
     try {
-      await DeleteCity(city.id);
+      await deleteCity(city.id);
+    } catch (err) {
+      message.error(getApiErrorMessage(err));
     } finally {
       onDelete();
     }
