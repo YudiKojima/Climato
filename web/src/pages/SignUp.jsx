@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateUser } from "../services/api";
+import { register, getApiErrorMessage } from "../services/api";
+import { hasValidSession, saveSession } from "../services/session";
 import img from "../assets/Climato sem fundo preto.png";
 import "../styles/Containers.css";
 import { Button, Form, Input, Typography, message } from "antd";
@@ -15,21 +16,18 @@ const SignUp = () => {
   const handleSubmit = async (values) => {
     try {
       setIsLoading(true);
-      const user = await CreateUser(values);
-      localStorage.setItem("userId", user.id);
+      const auth = await register(values);
+      saveSession(auth);
       navigate("/p");
     } catch (err) {
-      message.error(
-        "Erro ao criar conta: " + (err.response?.data?.message || err.message)
-      );
+      message.error(getApiErrorMessage(err, "Erro ao criar conta."));
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId) navigate("/p");
+    if (hasValidSession()) navigate("/p");
   }, [navigate]);
 
   return (
@@ -77,7 +75,10 @@ const SignUp = () => {
           <Form.Item
             label="Senha"
             name="password"
-            rules={[{ required: true, message: "Digite sua senha" }]}
+            rules={[
+              { required: true, message: "Digite sua senha" },
+              { min: 8, message: "A senha deve ter pelo menos 8 caracteres" },
+            ]}
           >
             <Input.Password
               style={{ padding: "8px" }}

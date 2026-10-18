@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GetUser } from "../services/api";
+import { login, getApiErrorMessage } from "../services/api";
+import { hasValidSession, saveSession } from "../services/session";
 import img from "../assets/Climato sem fundo preto.png";
 import "../styles/Containers.css";
 import { Button, Input, Form, Typography, message } from "antd";
@@ -15,19 +16,18 @@ const SignIn = () => {
   const handleSubmit = async (values) => {
     try {
       setIsLoading(true);
-      const user = await GetUser(values);
-      localStorage.setItem("userId", user.id);
+      const auth = await login(values);
+      saveSession(auth);
       navigate("/p");
     } catch (err) {
-      alert("E-mail ou Senha incorreta.");
+      message.error(getApiErrorMessage(err, "E-mail ou senha incorretos."));
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId) navigate("/p");
+    if (hasValidSession()) navigate("/p");
   }, [navigate]);
 
   return (

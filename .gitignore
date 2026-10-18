@@ -1,73 +1,44 @@
-# node_modules em qualquer parte do projeto
-**/node_modules/
+# ---------- .NET ----------
+**/bin/
+**/obj/
+**/TestResults/
+**/publish/
+**/logs/
+**/*.user
+**/*.suo
+.vs/
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/secrets.json
 
-# Vite e React
+# ---------- Node / Vite ----------
+**/node_modules/
 **/dist/
 **/.vite/
 **/.cache/
-**/.env
-**/.env.*.local
-**/.DS_Store
 **/coverage/
-**/yarn.lock
-**/pnpm-lock.yaml
-**/vite.config.ts
-
-# logs
+**/.env
+**/.env.local
+**/.env.*.local
 **/npm-debug.log*
 **/yarn-debug.log*
 **/yarn-error.log*
 
-# sistema
+# ---------- Arquivos sensíveis ----------
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.db
+**/*.sqlite
+**/*.bak
+
+# ---------- IDEs e SO ----------
+**/.idea/
+**/.vscode/
 **/.DS_Store
 **/Thumbs.db
 
-# IDEs e editores
-**/.idea/
-**/.vscode/
-**/*.suo
-**/*.ntvs_analysis.dat
-**/*.njsproj
-**/*.sln
-**/*.sw?
-
-# backend .NET Core (C#)
-**/bin/
-**/obj/
-**/Properties/launchSettings.json
-**/appsettings.Development.json
-**/appsettings.Local.json
-**/appsettings.*.json
-**/appsettings.json
-**/secrets.json
-
-# ASP.NET publish outputs
-**/wwwroot/
-**/publish/
-**/logs/
-
-# arquivos sensíveis e configuráveis
-**/*.db
-**/*.sqlite
-**/*.mdf
-**/*.bak
-**/*.pem
-**/*.key
-**/*.crt
-
-# docker
-**/.dockerignore
-**/Dockerfile
-
-# test output
-**/TestResults/
-**/coverage/
-**/build/
-
-# Visual Studio .vs folder
-.vs/
-
-# test output
-**/TestResults/
-**/coverage/
-**/build/
+# ---------- Claude Code (configuração pessoal) ----------
+.claude/settings.local.json
+.claude/worktrees/
+.superpowers/

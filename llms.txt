@@ -1,0 +1,23 @@
+# Climato
+
+App de clima em microsserviços: busca o clima atual (OpenWeather) e uma imagem da cidade (Pexels), guarda o histórico de cidades pesquisadas e os favoritos de cada usuário. Projeto de portfólio com foco em backend .NET.
+
+Serviços:
+- `src/Provider/` — .NET 10; integra OpenWeather + Pexels; sem estado (cache a partir da Fase 03).
+- `src/Gateway/` — .NET 10 + EF Core + PostgreSQL; usuários, cidades, favoritos; único ponto de entrada do frontend.
+- `web/` — React 19 + Vite + Ant Design.
+
+## Leia primeiro
+
+- `CLAUDE.md` — instruções operacionais para agentes de IA (workflow, skills, comportamento)
+- `docs/README.md` — índice da documentação
+- `docs/project-overview.md` — estado atual e roteiro das fases
+- `docs/architecture/system-design.md` — serviços e comunicação
+- `docs/architecture/backend.md` — padrões do backend
+- `docs/architecture/frontend.md` — padrões do frontend
+
+## Specs e planos
+
+- `docs/features/00-roteiro-portfolio/` — roteiro aprovado e auditoria inicial
+- `docs/features/NN-nome/design.md` e `plan.md` — um par por fase
+- `docs/architecture/decisions/` — ADRs

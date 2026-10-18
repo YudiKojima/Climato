@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAllFavorites } from "../services/api";
+import { clearSession } from "../services/session";
 import CityCard from "../components/CityCard";
 import { Link, useNavigate } from "react-router-dom";
 import { Typography, Button, Row, Col, Space, Empty } from "antd";
@@ -33,7 +34,7 @@ const Favorites = () => {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem("userId");
+    clearSession();
     navigate("/signin");
   };
 
