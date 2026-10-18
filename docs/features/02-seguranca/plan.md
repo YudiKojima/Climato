@@ -1085,7 +1085,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - `ICityAppService.ToggleFavoriteAsync(Guid id, Guid userId, CancellationToken)` e `DeleteAsync(Guid id, Guid userId, CancellationToken)`.
 - `City.EnsureCanBeDeleted()`.
 
-- [ ] **Passo 1: `City.cs`** — adicionar `using Climato.Gateway.Domain.Exceptions;` no topo e o método após `ToggleFavorite()`:
+- [x] **Passo 1: `City.cs`** — adicionar `using Climato.Gateway.Domain.Exceptions;` no topo e o método após `ToggleFavorite()`:
 
 ```csharp
     public void EnsureCanBeDeleted()
@@ -1097,13 +1097,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
     }
 ```
 
-- [ ] **Passo 2: `ICityRepository.cs`** — trocar `Task<City?> GetAsync(Guid id, CancellationToken cancellationToken);` por:
+- [x] **Passo 2: `ICityRepository.cs`** — trocar `Task<City?> GetAsync(Guid id, CancellationToken cancellationToken);` por:
 
 ```csharp
     Task<City?> GetAsync(Guid id, Guid userId, CancellationToken cancellationToken);
 ```
 
-- [ ] **Passo 3: `CityRepository.cs`** — trocar o método `GetAsync(Guid id, ...)` por:
+- [x] **Passo 3: `CityRepository.cs`** — trocar o método `GetAsync(Guid id, ...)` por:
 
 ```csharp
     public async Task<City?> GetAsync(Guid id, Guid userId, CancellationToken cancellationToken)
@@ -1114,7 +1114,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
     }
 ```
 
-- [ ] **Passo 4: `ICityAppService.cs` (reescrever)**
+- [x] **Passo 4: `ICityAppService.cs` (reescrever)**
 
 ```csharp
 using Climato.Gateway.Application.Model.Cities;
@@ -1130,7 +1130,7 @@ public interface ICityAppService
 }
 ```
 
-- [ ] **Passo 5: `CityAppService.cs`** — substituir `DeleteAsync` e `ToggleFavoriteAsync`:
+- [x] **Passo 5: `CityAppService.cs`** — substituir `DeleteAsync` e `ToggleFavoriteAsync`:
 
 ```csharp
     public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
@@ -1165,7 +1165,7 @@ public interface ICityAppService
     }
 ```
 
-- [ ] **Passo 6: `CityController.cs` (reescrever)**
+- [x] **Passo 6: `CityController.cs` (reescrever)**
 
 ```csharp
 using Climato.Gateway.Api.Extensions;
@@ -1248,7 +1248,7 @@ public class CityController : ControllerBase
 }
 ```
 
-- [ ] **Passo 7: `WeatherController.cs`** — adicionar `using Climato.Gateway.Api.Extensions;` e `using Microsoft.AspNetCore.Authorization;`, `[Authorize]` na classe, e trocar a action por:
+- [x] **Passo 7: `WeatherController.cs`** — adicionar `using Climato.Gateway.Api.Extensions;` e `using Microsoft.AspNetCore.Authorization;`, `[Authorize]` na classe, e trocar a action por:
 
 ```csharp
     /// <summary>Retorna os dados climáticos da cidade informada e a registra no histórico do usuário autenticado.</summary>
@@ -1270,7 +1270,7 @@ public class CityController : ControllerBase
 
 (O `if (weather == null)` é pendência da Fase 03; não mexer.)
 
-- [ ] **Passo 8: Build**
+- [x] **Passo 8: Build**
 
 ```bash
 dotnet build Climato.slnx
@@ -1278,7 +1278,7 @@ dotnet build Climato.slnx
 
 Esperado: 0 erros. `grep -rn "userId" src/Gateway/Climato.Gateway.Api/Controllers` não deve encontrar parâmetro de action.
 
-- [ ] **Passo 9: Commit** (após `/revisar-padrao`)
+- [x] **Passo 9: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add src/Gateway

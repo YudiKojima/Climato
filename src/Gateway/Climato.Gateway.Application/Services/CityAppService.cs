@@ -16,15 +16,16 @@ public class CityAppService : ICityAppService
         this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
-        var city = await cityRepository.GetAsync(id, cancellationToken);
+        var city = await cityRepository.GetAsync(id, userId, cancellationToken);
 
         if (city == null)
         {
             return false;
         }
 
+        city.EnsureCanBeDeleted();
         await cityRepository.DeleteAsync(city, cancellationToken);
         return true;
     }
@@ -41,9 +42,9 @@ public class CityAppService : ICityAppService
         return mapper.Map<List<CityDto>>(cities);
     }
 
-    public async Task<CityDto?> ToggleFavoriteAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<CityDto?> ToggleFavoriteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
-        var city = await cityRepository.GetAsync(id, cancellationToken);
+        var city = await cityRepository.GetAsync(id, userId, cancellationToken);
 
         if (city == null)
         {
