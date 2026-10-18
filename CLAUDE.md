@@ -27,14 +27,14 @@ Plugin: **`superpowers`** (`superpowers@claude-plugins-official`).
 | `writing-plans` | Após o design aprovado — converte o design em plano passo a passo |
 | `executing-plans` / `subagent-driven-development` | Executar um plano existente com checkpoints |
 | `test-driven-development` | A partir da Fase 04 (projetos de teste existem): toda regra nova nasce com teste |
-| `using-git-worktrees` | Ao iniciar uma fase — branch isolado a partir do `main` |
+| `using-git-worktrees` | Ao iniciar uma fase — branch isolado a partir do `master` |
 | `systematic-debugging` | Qualquer bug ou comportamento inesperado — antes de propor fix |
 | `verification-before-completion` | Antes de declarar fase concluída — rodar os comandos de verificação e confirmar o output |
 | `revisar-padrao` (projeto) | **Obrigatória** antes de qualquer commit e de abrir PR |
 | `requesting-code-review` | Antes de abrir PR |
 | `finishing-a-development-branch` | Implementação completa → commit final e PR |
 
-**Convenção de branch:** `dev/{descricao-com-hifens}` a partir do `main`. Ex.: `dev/higiene-fundacao`, `dev/autenticacao-jwt`.
+**Convenção de branch:** `dev/{descricao-com-hifens}` a partir do `master` (branch padrão do repositório); o PR volta direto para o `master`. Ex.: `dev/higiene-fundacao`, `dev/autenticacao-jwt`. O `main` não é mais usado (até a Fase 02 o fluxo era `dev/*` → `main` → `master`).
 
 **Fluxo padrão de uma fase:**
 1. `/brainstorming` → design aprovado → `docs/features/NN-nome/design.md`
