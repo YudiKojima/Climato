@@ -105,5 +105,5 @@ Deixar o projeto compilável a partir de um clone e corrigir os bugs estruturais
 ## Critério de conclusão do roteiro
 
 - Todos os códigos da auditoria com ✅ (ou justificados como não aplicáveis).
-- `docker compose up` sobe tudo num clone limpo; CI verde no `main`.
+- `docker compose up` sobe tudo num clone limpo; CI verde no `master`.
 - Demo pública funcionando e linkada no README.

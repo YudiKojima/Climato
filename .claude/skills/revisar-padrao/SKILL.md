@@ -10,7 +10,7 @@ Gera um relatório; **não altera arquivos**.
 ## 1. Escopo
 
 ```bash
-BASE=$(git merge-base HEAD origin/main)
+BASE=$(git merge-base HEAD origin/master)
 git diff --stat "$BASE"
 git diff "$BASE"
 git ls-files --others --exclude-standard
