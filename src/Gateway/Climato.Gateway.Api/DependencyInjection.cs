@@ -41,6 +41,7 @@ public static class DependencyInjection
                 {
                     ValidIssuer = jwt.Issuer,
                     ValidAudience = jwt.Audience,
+                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey)),
                     ClockSkew = TimeSpan.FromSeconds(30),
                     NameClaimType = JwtRegisteredClaimNames.Name
