@@ -1524,7 +1524,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 **Arquivos:** `docs/architecture/{backend,frontend,system-design,review-checklist}.md`, `docs/architecture/decisions/{README,0006-jwt-localstorage-sem-refresh}.md`, `docs/runbook.md`.
 
-- [ ] **Passo 1: `docs/architecture/backend.md`**
+- [x] **Passo 1: `docs/architecture/backend.md`**
   - Tabela **Stack**: linha Validação → `| Validação | FluentValidation + \`ValidationFilter\` | — |`; linha Auth → `| Auth | JWT Bearer (\`Microsoft.AspNetCore.Authentication.JwtBearer\`) + \`PasswordHasher<User>\` | — |`.
   - Estrutura da solução: `Climato.Gateway.Api/` → `← Program.cs, DependencyInjection.cs, Controllers, Filters, Errors, Extensions, OpenApi`; Application acrescenta `Validators`; Infrastructure acrescenta `Auth (JwtTokenService)`; Domain acrescenta `Exceptions/`.
   - **Controllers**: remover "(a partir da Fase 02)"; trocar "(via FluentValidation, Fase 02)" por "(via `ValidationFilter`, que roda o `IValidator<T>` do argumento)"; acrescentar: "Usuário atual: `User.GetUserId()` (`Api/Extensions/ClaimsPrincipalExtensions`), que lê a claim `sub`."
@@ -1538,11 +1538,11 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 JWT HS256 emitido pelo Gateway em `POST /auth/register` e `POST /auth/login` (claims `sub`, `email`, `name`, `jti`; validade `Jwt:ExpirationMinutes`). Sem refresh token ([ADR 0006](decisions/0006-jwt-localstorage-sem-refresh.md)). Senha com `PasswordHasher<User>` (PBKDF2), rehash no login quando o formato envelhece. E-mail normalizado (`User.NormalizeEmail`). Recurso de outro usuário responde 404, nunca 403. Pipeline: `UseExceptionHandler` → `UseStatusCodePages` → `UseHttpsRedirection` → `UseCors` → `UseAuthentication` → `UseAuthorization`.
 ```
 
-- [ ] **Passo 2: `docs/architecture/frontend.md`**
+- [x] **Passo 2: `docs/architecture/frontend.md`**
   - Estrutura de pastas: `services/api.js  ← todas as chamadas HTTP` e nova linha `services/session.js ← token no localStorage (único ponto)`.
   - Chamadas à API: remover "(a partir da Fase 02)"; acrescentar: "Sessão só via `services/session.js` (`saveSession`, `getToken`, `clearSession`, `hasValidSession`); nenhum outro arquivo usa `localStorage` para auth. Mensagem de erro com `getApiErrorMessage(err)`."
 
-- [ ] **Passo 3: `docs/architecture/review-checklist.md`** — acrescentar:
+- [x] **Passo 3: `docs/architecture/review-checklist.md`** — acrescentar:
 
 ```markdown
 | BE-22 | 🟡 | 02 | DTO de entrada sem validator | `*PostDto`/`*PutDto` novo sem `AbstractValidator<T>` em `Application/Validators/` | [DTOs](backend.md#dtos-application) |
@@ -1555,7 +1555,7 @@ na tabela Backend e, na tabela Frontend:
 | FE-11 | 🔴 | 02 | Sessão fora de `session.js` | `localStorage` com token/expiração fora de `services/session.js` | [Chamadas à API](frontend.md#chamadas-à-api) |
 ```
 
-- [ ] **Passo 4: `docs/architecture/system-design.md`**
+- [x] **Passo 4: `docs/architecture/system-design.md`**
   - Diagrama "Estado atual": `"HTTPS + userId na query"` → `"HTTPS + JWT (Bearer)"`.
   - Tabela **Dados**, linha `user`: `id, email (único, minúsculo), name, passwordhash (PBKDF2), createdat`.
   - Nova seção em **Fluxos**, antes de "Consulta de clima":
@@ -1569,7 +1569,7 @@ na tabela Backend e, na tabela Frontend:
 4. Token ausente ou expirado → 401 → o web limpa a sessão e volta para `/signin`.
 ```
 
-- [ ] **Passo 5: ADR `docs/architecture/decisions/0006-jwt-localstorage-sem-refresh.md`**
+- [x] **Passo 5: ADR `docs/architecture/decisions/0006-jwt-localstorage-sem-refresh.md`**
 
 ```markdown
 # 0006 — JWT no localStorage, sem refresh token
@@ -1604,7 +1604,7 @@ O Gateway emite um **access token JWT** (HS256, 60 min configuráveis) em `/auth
 | [0006](0006-jwt-localstorage-sem-refresh.md) | JWT no localStorage, sem refresh token | Aceito |
 ```
 
-- [ ] **Passo 6: `docs/runbook.md`**
+- [x] **Passo 6: `docs/runbook.md`**
   - Seção 2, no bloco de comandos, após a connection string:
 
 ```bash
@@ -1626,7 +1626,7 @@ dotnet user-secrets set "Jwt:SecretKey" "$(openssl rand -base64 48)" --project s
 | Erro de CORS no console do navegador | Origem do web fora de `Cors:AllowedOrigins` no `appsettings.json` do Gateway |
 ```
 
-- [ ] **Passo 7: Commit** (após `/revisar-padrao`)
+- [x] **Passo 7: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add docs

@@ -17,6 +17,7 @@ web/src/
 ├── pages/           ← uma página por rota (Home, WeatherDetails, Favorites, SignIn, SignUp, SignOut)
 ├── components/      ← componentes reutilizáveis (CityCard, Loading, Footer…)
 ├── services/api.js  ← todas as chamadas HTTP
+├── services/session.js ← token no localStorage (único ponto)
 ├── styles/          ← CSS por tela
 └── assets/          ← imagens e logo
 ```
@@ -50,7 +51,8 @@ Proteção de rota **só** em `ProtectedRoute`/router — páginas não redireci
 
 - Toda chamada passa por `services/`; páginas e componentes nunca usam `axios` direto.
 - URL base de `import.meta.env.VITE_API_URL`. `web/.env.example` versionado, `web/.env` local ignorado e obrigatório (ver [`runbook.md`](../runbook.md#2-segredos-user-secrets)).
-- **(a partir da Fase 02)** Instância única do axios com interceptor de request (`Authorization: Bearer <token>`) e de response (401 → limpa sessão e vai para `/signin`). `userId` nunca é enviado pelo front.
+- Instância única do axios com interceptor de request (`Authorization: Bearer <token>`) e de response (401 → limpa sessão e vai para `/signin`). `userId` nunca é enviado pelo front.
+- Sessão só via `services/session.js` (`saveSession`, `getToken`, `clearSession`, `hasValidSession`); nenhum outro arquivo usa `localStorage` para auth. Mensagem de erro com `getApiErrorMessage(err)`.
 - Parâmetros de rota/query com `encodeURIComponent`.
 - Erros da API chegam como `ProblemDetails`: exibir `title`/`detail`, não a mensagem do axios.
 

@@ -36,6 +36,8 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | BE-19 | 🟡 | 01 | Mapeamento fora de `Mappings/` | `.Adapt(`, `TypeAdapterConfig` ou mapeamento manual campo a campo de entidade → DTO fora de `Application/Mappings/` e `DependencyInjection.cs` | [Mapeamento](backend.md#mapeamento-mapster) |
 | BE-20 | 🔴 | 01 | Options sem validação | Classe `*Options` registrada sem `ValidateOnStart()` ou chave obrigatória sem `[Required]` | [Injeção de dependência por camada](backend.md#injeção-de-dependência-por-camada) |
 | BE-21 | 🟡 | 01 | Versão de pacote no `.csproj` | `PackageReference` com atributo `Version` (versões só em `Directory.Packages.props`) | [Dependências entre camadas](backend.md#dependências-entre-camadas) |
+| BE-22 | 🟡 | 02 | DTO de entrada sem validator | `*PostDto`/`*PutDto` novo sem `AbstractValidator<T>` em `Application/Validators/` | [DTOs](backend.md#dtos-application) |
+| BE-23 | 🟡 | 02 | Regra de negócio com status HTTP solto | AppService/controller devolvendo 409 por regra que pertence à entidade, em vez de `DomainException` | [Erros](backend.md#erros) |
 
 ## Frontend
 
@@ -51,6 +53,7 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | FE-08 | 🟡 | 07 | Largura fixa de container | `width: <n>px` em container de página | [Tema e estilo](frontend.md#tema-e-estilo-a-partir-da-fase-07) |
 | FE-09 | 🟡 | 00 | Reutilizável inline | JSX repetido em duas páginas (header, card, estado vazio) | [Componentização](frontend.md#componentização) |
 | FE-10 | 🟡 | 00 | Erro de carga engolido | Fetch de tela sem tratamento de erro (vira loading infinito ou lista vazia silenciosa) | [Chamadas à API](frontend.md#chamadas-à-api) |
+| FE-11 | 🔴 | 02 | Sessão fora de `session.js` | `localStorage` com token/expiração fora de `services/session.js` | [Chamadas à API](frontend.md#chamadas-à-api) |
 
 ## Geral
 

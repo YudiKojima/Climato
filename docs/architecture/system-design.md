@@ -8,7 +8,7 @@ Dois serviços .NET e um SPA React. O frontend fala **só** com o Gateway; o Gat
 
 ```mermaid
 flowchart LR
-    web["web<br/>React + Vite + AntD"] -- "HTTPS + userId na query" --> gw
+    web["web<br/>React + Vite + AntD"] -- "HTTPS + JWT (Bearer)" --> gw
     subgraph Gateway["Climato.Gateway"]
         gw["API"] --> db[(PostgreSQL)]
     end
@@ -45,6 +45,13 @@ flowchart LR
 
 ## Fluxos
 
+### Autenticação
+
+1. `POST /auth/register` ou `POST /auth/login` → Gateway valida (FluentValidation), confere o hash e devolve `{ token, expiresAt, user }`.
+2. O web guarda token e expiração (`services/session.js`) e envia `Authorization: Bearer` em toda chamada.
+3. O Gateway valida assinatura, emissor, audiência e validade; o usuário vem da claim `sub`.
+4. Token ausente ou expirado → 401 → o web limpa a sessão e volta para `/signin`.
+
 ### Consulta de clima (alvo)
 
 1. `GET /weathers/{cidade}` no Gateway com `Authorization: Bearer`.
@@ -69,7 +76,7 @@ PostgreSQL, propriedade exclusiva do Gateway.
 
 | Tabela | Colunas | Observações |
 |---|---|---|
-| `user` | id, email (único), name, password (hash a partir da Fase 02), createdat | Nome reservado no Postgres — sempre entre aspas no SQL |
+| `user` | id, email (único, minúsculo), name, passwordhash (PBKDF2), createdat | Nome reservado no Postgres — sempre entre aspas no SQL |
 | `city` | id, userid → user (cascade), name, country, isfavorite, createdat | Uma linha por cidade **por usuário** |
 
 Schema versionado por EF Core Migrations (`Gateway.Infrastructure/Data/Migrations/`).

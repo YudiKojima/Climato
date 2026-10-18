@@ -11,8 +11,8 @@ Vale para `src/Gateway/` e `src/Provider/`. Seções marcadas **(a partir da Fas
 | Persistência (Gateway) | EF Core 10 + Npgsql via `AddDbContext`, Migrations | — |
 | Mapeamento | Mapster, só no Gateway ([ADR 0005](decisions/0005-mapster.md)) | — |
 | JSON externo | Newtonsoft + `JsonDictionary` | `System.Text.Json` + DTOs tipados (Fase 03) |
-| Validação | — | FluentValidation (Fase 02) |
-| Auth | — | JWT Bearer (Fase 02) |
+| Validação | FluentValidation + `ValidationFilter` | — |
+| Auth | JWT Bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`) + `PasswordHasher<User>` | — |
 | Resiliência / cache | — | `Microsoft.Extensions.Http.Resilience` / `IDistributedCache` + Redis (Fase 03) |
 | Testes | — | xUnit, NSubstitute, Testcontainers, WireMock.Net (Fase 04) |
 | Logs | padrão do ASP.NET | Serilog (Fase 06) |
@@ -24,10 +24,10 @@ Cada serviço segue camadas no estilo Clean Architecture:
 ```
 Climato.slnx                         ← solução única; Directory.Build.props / Directory.Packages.props / global.json na raiz
 src/Gateway/
-├── Climato.Gateway.Api/             ← Program.cs, Controllers
-├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs: Cities, Users, Weathers), Mappings (Mapster), Options, DependencyInjection.cs
-├── Climato.Gateway.Domain/          ← Entidades e interfaces de repositório por agregado (Cities/, Users/)
-└── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients), DependencyInjection.cs
+├── Climato.Gateway.Api/             ← Program.cs, DependencyInjection.cs, Controllers, Filters, Errors, Extensions, OpenApi
+├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs: Auth, Cities, Users, Weathers), Mappings (Mapster), Validators, Options, DependencyInjection.cs
+├── Climato.Gateway.Domain/          ← Entidades e interfaces de repositório por agregado (Cities/, Users/), Exceptions/
+└── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients), Auth (JwtTokenService), DependencyInjection.cs
 src/Provider/
 ├── Climato.Provider.Api/
 ├── Climato.Provider.Application/    ← Clientes das APIs externas (Services), Options, DependencyInjection.cs, Core/Collections (JsonDictionary, até a Fase 03)
@@ -60,15 +60,17 @@ API ──▶ Application ──▶ Domain
 - Async de ponta a ponta: métodos retornam `Task`/`Task<T>`, nunca `async void`; sem `.Result`/`.Wait()`. `CancellationToken` obrigatório (sem default) nas interfaces e propagado do controller ao repositório e ao `HttpClient`.
 
 ### Controllers
-- Finos: validam a entrada (via FluentValidation, Fase 02), chamam um AppService e traduzem o resultado em status HTTP.
+- Finos: validam a entrada (via `ValidationFilter`, que roda o `IValidator<T>` do argumento), chamam um AppService e traduzem o resultado em status HTTP.
 - `ActionResult<T>` com o DTO de resposta; XML doc (`/// <summary>`) em português em cada action — aparece na documentação OpenAPI/Scalar.
 - Rotas no plural e minúsculas (`/cities`, `/weathers`, `/auth`).
-- **(a partir da Fase 02)** `[Authorize]` em todo controller; `[AllowAnonymous]` explícito só em registro, login e health checks. O usuário atual vem das claims, nunca de parâmetro.
+- `[Authorize]` em todo controller; `[AllowAnonymous]` explícito só em registro, login e health checks. O usuário atual vem das claims, nunca de parâmetro.
+- Usuário atual: `User.GetUserId()` (`Api/Extensions/ClaimsPrincipalExtensions`), que lê a claim `sub`.
 
 ### DTOs (Application)
 - Ficam em `Application/Model/<Agregado>/`; sufixos `Dto` (resposta), `PostDto`/`PutDto` (entrada).
-- DTO de resposta **nunca** expõe senha, hash ou dado interno (exceção conhecida: `UserDto.Password`, removido na Fase 02 — A3).
+- DTO de resposta **nunca** expõe senha, hash ou dado interno.
 - Entidades do Domain nunca saem pelo controller.
+- Todo DTO de entrada tem um `AbstractValidator<T>` em `Application/Validators/`, com mensagens em português.
 
 ### Mapeamento (Mapster)
 - Configuração em `Application/Mappings/` com uma classe `IRegister` por agregado (`CityMappings`, `UserMappings`).
@@ -76,8 +78,9 @@ API ──▶ Application ──▶ Domain
 - Decisão: [ADR 0005](decisions/0005-mapster.md).
 
 ### Entidades (Domain)
-- Construtor com os campos obrigatórios gera `Id` e `CreatedAt`; construtor vazio só para o EF — `User` ainda é montado campo a campo pelo `UserAppService` (ajuste na Fase 02).
+- Construtor com os campos obrigatórios gera `Id` e `CreatedAt`; construtor vazio só para o EF; setters privados quando a entidade tem método de mudança (ex.: `User.SetPasswordHash`).
 - Regra que muda estado da entidade é método dela (ex.: `city.ToggleFavorite()`), não lógica solta no AppService.
+- Violação de regra de negócio lança `DomainException` (vira 409).
 
 ### Repositórios (Infrastructure)
 - Interface no Domain, implementação na Infrastructure.
@@ -91,7 +94,7 @@ API ──▶ Application ──▶ Domain
 - **(a partir da Fase 03)** DTOs tipados por API externa (`OpenWeatherCurrentResponse` etc.) desserializados com `ReadFromJsonAsync`; resiliência com `AddStandardResilienceHandler()`.
 
 ### Erros
-- **(a partir da Fase 02)** Respostas de erro em `ProblemDetails` (`AddProblemDetails` + handler global de exceções). Exceções de domínio mapeadas para 400/404/409; o resto vira 500 sem detalhes internos.
+- Respostas de erro em `ProblemDetails` (`AddProblemDetails` + `UseStatusCodePages` + `GlobalExceptionHandler`). `DomainException` → 409 com a mensagem; validação → 400 `ValidationProblemDetails`; resto → 500 "Erro interno." sem detalhes. Erros esperados no controller com `Problem(statusCode, title)` ou `NotFound()`.
 - Não usar exceção para fluxo esperado (cidade não encontrada → retorno `null`/resultado, controller devolve 404).
 
 ### Configuração e segredos
@@ -110,6 +113,9 @@ O frontend só conhece o Gateway. Novos dados para o front (previsão, autocompl
 
 ### Provider como camada anticorrupção
 O formato da OpenWeather/Pexels não vaza para o Gateway: o Provider devolve contratos próprios (`Weather`, previsão, cidades). Trocar o provedor de clima afeta só o Provider. No Gateway, o contrato recebido do Provider é o `WeatherDto` da Application; o Domain do Gateway não conhece o formato do Provider.
+
+### Autenticação
+JWT HS256 emitido pelo Gateway em `POST /auth/register` e `POST /auth/login` (claims `sub`, `email`, `name`, `jti`; validade `Jwt:ExpirationMinutes`). Sem refresh token ([ADR 0006](decisions/0006-jwt-localstorage-sem-refresh.md)). Senha com `PasswordHasher<User>` (PBKDF2), rehash no login quando o formato envelhece. E-mail normalizado (`User.NormalizeEmail`). Recurso de outro usuário responde 404, nunca 403. Pipeline: `UseExceptionHandler` → `UseStatusCodePages` → `UseHttpsRedirection` → `UseCors` → `UseAuthentication` → `UseAuthorization`.
 
 ### Palavra reservada `user`
 A tabela se chama `user`, reservada no PostgreSQL: em SQL manual, sempre `"user"`.
