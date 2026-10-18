@@ -8,13 +8,13 @@ Levantamento feito antes do roteiro de portfólio ([`design.md`](design.md)), so
 
 | Código | Sev. | Achado | Onde | Fase | Status |
 |---|---|---|---|---|---|
-| A1 | 🔴 | Senha gravada em texto puro e comparada com `!=` | `UserAppService.cs:30` | 02 | |
-| A2 | 🔴 | Login via `GET /users?email=&password=` — senha na URL, em logs e no histórico do navegador | `UserController.cs`, [api.js](../../../web/src/services/api.js) | 02 | |
-| A3 | 🔴 | `UserDto` devolve o campo `Password` em cadastro e login | `UserDto.cs` | 02 | |
-| A4 | 🔴 | Sem autenticação: `userId` vem na query; qualquer um lê as cidades de outro usuário. `PATCH /cities/{id}/favorite` e `DELETE /cities/{id}`/`/users/{id}` não verificam dono (IDOR) | `CityController.cs` | 02 | |
+| A1 | 🔴 | Senha gravada em texto puro e comparada com `!=` | `UserAppService.cs:30` | 02 | ✅ Fase 02 |
+| A2 | 🔴 | Login via `GET /users?email=&password=` — senha na URL, em logs e no histórico do navegador | `UserController.cs`, [api.js](../../../web/src/services/api.js) | 02 | ✅ Fase 02 |
+| A3 | 🔴 | `UserDto` devolve o campo `Password` em cadastro e login | `UserDto.cs` | 02 | ✅ Fase 02 |
+| A4 | 🔴 | Sem autenticação: `userId` vem na query; qualquer um lê as cidades de outro usuário. `PATCH /cities/{id}/favorite` e `DELETE /cities/{id}`/`/users/{id}` não verificam dono (IDOR) | `CityController.cs` | 02 | ✅ Fase 02 |
 | A5 | 🟡 | Connection string fixa no código; senha antiga do banco local já está no histórico do git | `ConnectionContext.cs:13` | 01 | ✅ Fase 01 |
-| A6 | 🟡 | CORS `AllowAnyOrigin` e `UseCors` registrado depois de `UseAuthorization` | `Program.cs` | 02 | |
-| A7 | 🟡 | "Sessão" do front é só `userId` no `localStorage`; nada é validado no servidor | [ProtectedRoute.jsx](../../../web/src/router/ProtectedRoute.jsx) | 02 | |
+| A6 | 🟡 | CORS `AllowAnyOrigin` e `UseCors` registrado depois de `UseAuthorization` | `Program.cs` | 02 | ✅ Fase 02 |
+| A7 | 🟡 | "Sessão" do front é só `userId` no `localStorage`; nada é validado no servidor | [ProtectedRoute.jsx](../../../web/src/router/ProtectedRoute.jsx) | 02 | ✅ Fase 02 |
 
 ## Bugs
 
@@ -30,7 +30,7 @@ Levantamento feito antes do roteiro de portfólio ([`design.md`](design.md)), so
 | A15 | 🟡 | Gateway: erro do Provider vira 500 (`EnsureSuccessStatusCode`); front mostra "cidade não encontrada" para qualquer falha | `WeatherAppService.cs` | 03 | |
 | A16 | 🟡 | Velocidade do vento chega em m/s (OpenWeather `units=metric`) e é exibida como km/h | [WeatherDetails.jsx](../../../web/src/pages/WeatherDetails.jsx) | 03 | |
 | A17 | 🟡 | Nascer/pôr do sol: `DateTime` sem `Kind`/fuso no Provider e `DateTime.Parse` dependente de cultura no Gateway; o horário exibido não é o local da cidade | `WeatherAppService.cs (Provider)` | 03 | |
-| A18 | 🔵 | Front bloqueia excluir cidade favorita; backend permite | [CityCard.jsx](../../../web/src/components/CityCard.jsx) | 02 | |
+| A18 | 🔵 | Front bloqueia excluir cidade favorita; backend permite | [CityCard.jsx](../../../web/src/components/CityCard.jsx) | 02 | ✅ Fase 02 |
 
 ## Código e estrutura
 

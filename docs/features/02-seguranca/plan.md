@@ -1639,7 +1639,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ### Tarefa 6: Verificação final (sem commit)
 
-- [ ] **Passo 1: Build e front**
+- [x] **Passo 1: Build e front**
 
 ```bash
 dotnet build Climato.slnx
@@ -1649,7 +1649,7 @@ npm --prefix web run build
 
 Esperado: tudo sem erro.
 
-- [ ] **Passo 2: Startup sem segredo**
+- [x] **Passo 2: Startup sem segredo**
 
 ```bash
 dotnet run --project src/Gateway/Climato.Gateway.Api --launch-profile https -- --Jwt:SecretKey=
@@ -1657,7 +1657,7 @@ dotnet run --project src/Gateway/Climato.Gateway.Api --launch-profile https -- -
 
 Esperado: não sobe; mensagem cita `Jwt:SecretKey`.
 
-- [ ] **Passo 3: Roteiro manual** — subir Provider, Gateway e web (runbook, seção 4). Usuários A e B criados pelo Scalar ou pelo web.
+- [x] **Passo 3: Roteiro manual** — subir Provider, Gateway e web (runbook, seção 4). Usuários A e B criados pelo Scalar ou pelo web.
 
 1. Log mostra `Applying migration '..._HashSenhaUsuario'`.
 2. `POST /auth/register` de A → 201 com `token`; repetir com o e-mail em maiúsculas → 409.
@@ -1677,4 +1677,25 @@ Esperado: não sobe; mensagem cita `Jwt:SecretKey`.
 11. No DevTools, editar `expiresAt` no `localStorage` para uma data passada e recarregar → vai para `/signin`. Restaurar a data e trocar o `token` por um valor inválido → próxima chamada dá 401 e volta para `/signin`.
 12. `DELETE /users/me` com o token de B → 204; `SELECT count(*) FROM city WHERE userid = '<id de B>';` → 0.
 
-- [ ] **Passo 4: Relatório** — registrar no fim deste plano `## Notas de execução (AAAA-MM-DD)` com desvios e achados; seguir para `/requesting-code-review` → `/finishing-a-development-branch`. No commit final: Fase 02 `✅ Concluída` no `project-overview.md`, A1–A4, A6, A7, A18 marcados na auditoria, e removidas das "Pendências futuras" as quatro `[Fase 02]` e a `[Fase 07]` do `CityCard`.
+- [x] **Passo 4: Relatório** — registrar no fim deste plano `## Notas de execução (AAAA-MM-DD)` com desvios e achados; seguir para `/requesting-code-review` → `/finishing-a-development-branch`. No commit final: Fase 02 `✅ Concluída` no `project-overview.md`, A1–A4, A6, A7, A18 marcados na auditoria, e removidas das "Pendências futuras" as quatro `[Fase 02]` e a `[Fase 07]` do `CityCard`.
+
+## Notas de execução (2026-10-18)
+
+Executado com um subagente por tarefa e revisão (spec + qualidade) após cada uma, todas aprovadas sem correções. Commits: `da9fec3` (T0), `9bf20dc` (T1), `22cab6d` (T2), `e0e6da3` (T3), `eb69197` (T4), `25f4e90` (T5).
+
+**Verificação (Tarefa 6)**
+- `dotnet build Climato.slnx`: 0 erros (12 avisos de nulabilidade pré-existentes, Fase 03); lint e build do web ok.
+- Sem `Jwt:SecretKey` o Gateway não sobe: `Jwt:SecretKey não configurada. Ver docs/runbook.md.`
+- API (curl): cadastro 201 com `token`/`expiresAt` (com offset `+00:00`)/`user`; e-mail repetido em maiúsculas com espaços → 409; senha de 7 caracteres → 400 `ValidationProblemDetails` em português; senha errada e e-mail inexistente → o mesmo 401; `GET /cities` sem token → 401 `application/problem+json`; B em cidade de A → 404 no `PATCH` e no `DELETE`; `DELETE` de favorita → 409 com `detail` em português **e** `Access-Control-Allow-Origin` presente; preflight de `http://localhost:5173` → 204 com CORS, de outra origem → sem cabeçalho; 401 também leva o cabeçalho CORS; `DELETE /users/me` → 204.
+- Web (painel do navegador): validação de senha < 8 no cadastro; cadastro → `/p` com só `token` e `expiresAt` no `localStorage`; busca de Cuiabá → histórico → favoritar → tentar remover favorita não dispara `DELETE` → desfavoritar → remover (`204`); nenhuma URL com `userId`; token inválido → 401 → sessão limpa → `/signin`; `expiresAt` no passado → `/signin`; login com senha errada → 401 sem loop de redirect; `/signout` limpa a sessão.
+
+**Desvios e achados**
+- Serviços rodados só em HTTP (`--urls`, `--Provider:BaseUrl=http://localhost:5002/`, `VITE_API_URL=http://localhost:5001`), como na Fase 01, por causa do certificado de desenvolvimento.
+- Itens 5 e 12 do roteiro (conferência direta no banco) não foram executados: exigiriam a senha do Postgres guardada nos user-secrets. Cobertura indireta: o login só passa via `PasswordHasher` (texto puro falharia) e a FK `fk_city_user` com cascade não mudou desde a Fase 01.
+- Os toasts do AntD (`message.*`) não renderizam com a janela do app oculta; textos conferidos pelo código e pelas respostas da API.
+
+**Revisão final da branch**
+- Veredito: com correções, sem itens críticos.
+- Corrigido em `fe8f0cf`: ordem alfabética do `Directory.Packages.props`, `ValidAlgorithms = [HS256]` na validação do JWT e tamanho máximo de e-mail/senha no `LoginPostDtoValidator` (smoke test: token válido → 200; senha de 200 caracteres no login → 400).
+- Viraram pendências no `project-overview.md`: rate limiting em `/auth/*` (Fase 08, antes do deploy público), mapeamentos de erro que hoje viram 500 e o 400 automático em inglês (Fase 03), `handleFavoriteClick` sem `try/catch` (Fase 07).
+- Descartados: tempo de resposta do login revelando e-mail (o 409 do cadastro já revela), recarga de página no redirect do 401 (exigida pelo plano), trailers de commit com o modelo do subagente.

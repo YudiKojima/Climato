@@ -28,11 +28,11 @@ Definido no [`CLAUDE.md`](../CLAUDE.md): brainstorming → `design.md` → `plan
 
 ---
 
-## Estado Atual (2026-10-17, após a Fase 01)
+## Estado Atual (2026-10-18, após a Fase 02)
 
-**Funciona:** cadastro e login (inseguros — ver A1–A4), busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade.
+**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade.
 
-**Não há:** autenticação real, testes, Docker, CI, logs estruturados, deploy.
+**Não há:** testes, Docker, CI, logs estruturados, deploy.
 
 **Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Newtonsoft.Json (até a Fase 03) · React 19 · Vite 6 · Ant Design 5 · axios.
 
@@ -49,9 +49,10 @@ Design: [`features/00-roteiro-portfolio/design.md`](features/00-roteiro-portfoli
 Design: [`design.md`](features/01-higiene-fundacao/design.md) · Plano: [`plan.md`](features/01-higiene-fundacao/plan.md)
 Auditoria: A5, A8–A13, A20–A23, A27 (URL), A28.
 
-#### Fase 02 — Segurança
+#### Fase 02 — Segurança ✅ Concluída (2026-10-18)
 Hash de senha, JWT, autorização por dono, CORS, validação, ProblemDetails; front adaptado ao token.
-Auditoria: A1–A4, A6, A7, A18. Ver também os itens `[Fase 02]` em [Pendências futuras](#pendências-futuras).
+Design: [`design.md`](features/02-seguranca/design.md) · Plano: [`plan.md`](features/02-seguranca/plan.md)
+Auditoria: A1–A4, A6, A7, A18.
 
 #### Fase 03 — Comunicação entre serviços
 Typed HttpClient + DTOs, resiliência, cache Redis, health checks, previsão de 5 dias, geocoding.
@@ -84,12 +85,11 @@ Auditoria: A26.
 Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: `- [Fase NN] descrição`.
 
 - [Fase 05] Versionar um lockfile do web e padronizar o gerenciador (hoje há um `yarn.lock` local não versionado e o runbook usa npm)
-- [Fase 07] `CityCard.jsx` não trata erro do `DELETE` (404 vira rejeição não tratada)
-- [Fase 02] Ordem do pipeline: `UseCors` antes de `UseAuthentication`/`UseAuthorization` (com `[Authorize]`, o preflight receberia 401)
-- [Fase 02] E-mail único sem diferenciar maiúsculas (normalizar ou `citext`)
-- [Fase 02] `getWeatherByCity` em `api.js` sem `encodeURIComponent`
-- [Fase 02] `User` com construtor próprio (hoje montado campo a campo no `UserAppService`)
 - [Fase 03] Checagens impossíveis: `if (weather == null)` no `WeatherController` e `?? throw ArgumentNullException` nos construtores dos AppServices; `HttpResponseMessage`/`HttpRequestMessage` sem `using`; `CityRepository.UpdateAsync` chama `Update()` em entidade já rastreada
 - [Fase 03] Nulabilidade: remover as supressões CS8601/CS8604/CS8613 do `.editorconfig` e zerar os avisos de `WeatherDto`/`Weather`/`JsonDictionary` junto com os DTOs tipados (o `backend.md` pede "nenhum aviso de nulabilidade novo")
 - [Fase 04] Mapster: trocar `TypeAdapterConfig.GlobalSettings` por instância própria e validar com `Compile()`/teste
 - [Fase 05] Estratégia de migration em produção (bundle, job dedicado ou flag `Database:MigrateOnStartup`); hoje qualquer ambiente ≠ Production migra no startup
+- [Fase 03] Erros: `OperationCanceledException` (cliente abortou) vira 500 logado como Error; cadastro concorrente com o mesmo e-mail vira 500 (`DbUpdateException` do índice `ix_user_email`) em vez de 409; busca com token de conta já apagada viola `fk_city_user` e vira 500 (responder 401)
+- [Fase 03] 400 automático do `[ApiController]` (JSON malformado/corpo vazio) sai com título em inglês — configurar `InvalidModelStateResponseFactory` para o mesmo formato do `ValidationFilter`
+- [Fase 07] `CityCard.jsx`: `handleFavoriteClick` sem `try/catch` (falha no `PATCH` vira rejeição não tratada)
+- [Fase 08] Rate limiting em `/auth/*` (`AddRateLimiter`, janela fixa por IP) — obrigatório antes do deploy público
