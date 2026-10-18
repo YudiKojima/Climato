@@ -1,3 +1,4 @@
+using Climato.Gateway.Api;
 using Climato.Gateway.Application;
 using Climato.Gateway.Infrastructure;
 using Climato.Gateway.Infrastructure.Data;
@@ -6,21 +7,10 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
-
 builder.Services
+    .AddGatewayApi(builder.Configuration)
     .AddGatewayApplication()
     .AddGatewayInfrastructure(builder.Configuration);
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        policy => policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
 
 var app = builder.Build();
 
@@ -37,11 +27,11 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.UseHttpsRedirection();
-
+app.UseCors("Web");
 app.UseAuthorization();
-
-app.UseCors("AllowAll");
 
 app.MapControllers();
 

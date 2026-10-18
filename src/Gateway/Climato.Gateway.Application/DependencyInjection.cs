@@ -1,5 +1,6 @@
 using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Application.Services;
+using FluentValidation;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,8 @@ public static class DependencyInjection
         services.AddScoped<ICityAppService, CityAppService>();
         services.AddScoped<IUserAppService, UserAppService>();
         services.AddScoped<IWeatherAppService, WeatherAppService>();
+
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
         return services;
     }

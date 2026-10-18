@@ -75,9 +75,9 @@ Caminhos relativos a `src/Gateway/` quando começam com `Climato.Gateway.*`.
 
 ### Tarefa 0: Preparar a branch
 
-- [ ] **Passo 1:** confirmar que o PR de `dev/ajustes-docs-fase-01` foi mergeado no `main` (`git log --oneline -3 origin/main` mostra `Ajusta índice de fases e auditoria após a Fase 01`). Se não foi, parar e avisar o usuário.
-- [ ] **Passo 2:** `/using-git-worktrees` → branch `dev/seguranca` a partir do `origin/main`.
-- [ ] **Passo 3:** copiar `docs/features/02-seguranca/design.md` e `plan.md` para a branch e commitar:
+- [x] **Passo 1:** confirmar que o PR de `dev/ajustes-docs-fase-01` foi mergeado no `main` (`git log --oneline -3 origin/main` mostra `Ajusta índice de fases e auditoria após a Fase 01`). Se não foi, parar e avisar o usuário.
+- [x] **Passo 2:** `/using-git-worktrees` → branch `dev/seguranca` a partir do `origin/main`.
+- [x] **Passo 3:** copiar `docs/features/02-seguranca/design.md` e `plan.md` para a branch e commitar:
 
 ```bash
 git add docs/features/02-seguranca
@@ -86,7 +86,7 @@ git commit -m "Adiciona design e plano da Fase 02 (segurança)
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
-- [ ] **Passo 4:** gerar a chave local do JWT (não aparece no terminal):
+- [x] **Passo 4:** gerar a chave local do JWT (não aparece no terminal):
 
 ```bash
 dotnet user-secrets set "Jwt:SecretKey" "$(openssl rand -base64 48)" --project src/Gateway/Climato.Gateway.Api
@@ -102,7 +102,7 @@ dotnet user-secrets set "Jwt:SecretKey" "$(openssl rand -base64 48)" --project s
 - Política CORS `"Web"`.
 - Todo argumento de action com `IValidator<T>` registrado é validado antes da action (400 `ValidationProblemDetails`).
 
-- [ ] **Passo 1: Pacotes** — em `Directory.Packages.props`, dentro do `<ItemGroup>`, em ordem alfabética:
+- [x] **Passo 1: Pacotes** — em `Directory.Packages.props`, dentro do `<ItemGroup>`, em ordem alfabética:
 
 ```xml
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
@@ -116,7 +116,7 @@ Em `Climato.Gateway.Application.csproj`, no `ItemGroup` de pacotes:
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
 ```
 
-- [ ] **Passo 2: `Climato.Gateway.Domain/Exceptions/DomainException.cs`**
+- [x] **Passo 2: `Climato.Gateway.Domain/Exceptions/DomainException.cs`**
 
 ```csharp
 namespace Climato.Gateway.Domain.Exceptions;
@@ -129,13 +129,13 @@ public class DomainException : Exception
 }
 ```
 
-- [ ] **Passo 3: registrar validators** — em `Climato.Gateway.Application/DependencyInjection.cs`, adicionar `using FluentValidation;` e, após os `AddScoped` dos AppServices:
+- [x] **Passo 3: registrar validators** — em `Climato.Gateway.Application/DependencyInjection.cs`, adicionar `using FluentValidation;` e, após os `AddScoped` dos AppServices:
 
 ```csharp
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 ```
 
-- [ ] **Passo 4: `Climato.Gateway.Api/Filters/ValidationFilter.cs`**
+- [x] **Passo 4: `Climato.Gateway.Api/Filters/ValidationFilter.cs`**
 
 ```csharp
 using FluentValidation;
@@ -189,7 +189,7 @@ public sealed class ValidationFilter : IAsyncActionFilter
 }
 ```
 
-- [ ] **Passo 5: `Climato.Gateway.Api/Errors/GlobalExceptionHandler.cs`**
+- [x] **Passo 5: `Climato.Gateway.Api/Errors/GlobalExceptionHandler.cs`**
 
 ```csharp
 using Climato.Gateway.Domain.Exceptions;
@@ -246,7 +246,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
 
 > No .NET 10 o middleware não loga exceções tratadas por `IExceptionHandler`; por isso o `LogError` explícito no ramo 500.
 
-- [ ] **Passo 6: `Climato.Gateway.Api/DependencyInjection.cs`**
+- [x] **Passo 6: `Climato.Gateway.Api/DependencyInjection.cs`**
 
 ```csharp
 using Climato.Gateway.Api.Errors;
@@ -278,7 +278,7 @@ public static class DependencyInjection
 }
 ```
 
-- [ ] **Passo 7: `Climato.Gateway.Api/Program.cs` (reescrever)**
+- [x] **Passo 7: `Climato.Gateway.Api/Program.cs` (reescrever)**
 
 ```csharp
 using Climato.Gateway.Api;
@@ -321,7 +321,7 @@ app.MapControllers();
 app.Run();
 ```
 
-- [ ] **Passo 8: `Climato.Gateway.Api/appsettings.json`** — adicionar após a seção `Provider`:
+- [x] **Passo 8: `Climato.Gateway.Api/appsettings.json`** — adicionar após a seção `Provider`:
 
 ```json
   "Cors": {
@@ -331,7 +331,7 @@ app.Run();
 
 (lembrar da vírgula depois do `}` de `Provider`).
 
-- [ ] **Passo 9: Build**
+- [x] **Passo 9: Build**
 
 ```bash
 dotnet build Climato.slnx
@@ -339,7 +339,7 @@ dotnet build Climato.slnx
 
 Esperado: `Build succeeded`, 0 erros.
 
-- [ ] **Passo 10: Commit** (após `/revisar-padrao`)
+- [x] **Passo 10: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add Directory.Packages.props src/Gateway
