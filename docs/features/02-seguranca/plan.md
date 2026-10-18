@@ -363,7 +363,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - `ClaimsPrincipal.GetUserId() : Guid` (lê `sub`).
 - Rotas `POST /auth/register`, `POST /auth/login`, `DELETE /users/me`.
 
-- [ ] **Passo 1: Pacotes** — em `Directory.Packages.props`, em ordem alfabética:
+- [x] **Passo 1: Pacotes** — em `Directory.Packages.props`, em ordem alfabética:
 
 ```xml
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
@@ -375,7 +375,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - `Climato.Gateway.Application.csproj`: `<PackageReference Include="Microsoft.Extensions.Identity.Core" />`
 - `Climato.Gateway.Infrastructure.csproj`: `<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />`
 
-- [ ] **Passo 2: `Climato.Gateway.Domain/Users/User.cs` (reescrever)**
+- [x] **Passo 2: `Climato.Gateway.Domain/Users/User.cs` (reescrever)**
 
 ```csharp
 namespace Climato.Gateway.Domain.Users;
@@ -410,7 +410,7 @@ public class User
 }
 ```
 
-- [ ] **Passo 3: `IUserRepository` e `UserRepository`** — adicionar à interface:
+- [x] **Passo 3: `IUserRepository` e `UserRepository`** — adicionar à interface:
 
 ```csharp
     Task UpdateAsync(User user, CancellationToken cancellationToken);
@@ -425,13 +425,13 @@ e à implementação (a entidade já está rastreada pelo contexto):
     }
 ```
 
-- [ ] **Passo 4: `UserConfiguration.cs`** — trocar a linha de `Password` por:
+- [x] **Passo 4: `UserConfiguration.cs`** — trocar a linha de `Password` por:
 
 ```csharp
         builder.Property(e => e.PasswordHash).HasColumnName("passwordhash").IsRequired();
 ```
 
-- [ ] **Passo 5: `Climato.Gateway.Application/Options/JwtOptions.cs`**
+- [x] **Passo 5: `Climato.Gateway.Application/Options/JwtOptions.cs`**
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
@@ -457,7 +457,7 @@ public sealed class JwtOptions
 }
 ```
 
-- [ ] **Passo 6: DTOs** — remover `Model/Users/UserPostDto.cs` e `Model/Users/UserGetDto.cs`; em `UserDto.cs` remover a propriedade `Password`. Criar em `Climato.Gateway.Application/Model/Auth/`:
+- [x] **Passo 6: DTOs** — remover `Model/Users/UserPostDto.cs` e `Model/Users/UserGetDto.cs`; em `UserDto.cs` remover a propriedade `Password`. Criar em `Climato.Gateway.Application/Model/Auth/`:
 
 `RegisterPostDto.cs`
 ```csharp
@@ -503,7 +503,7 @@ namespace Climato.Gateway.Application.Model.Auth;
 public sealed record AuthToken(string Token, DateTimeOffset ExpiresAt);
 ```
 
-- [ ] **Passo 7: Validators** — `Climato.Gateway.Application/Validators/RegisterPostDtoValidator.cs`
+- [x] **Passo 7: Validators** — `Climato.Gateway.Application/Validators/RegisterPostDtoValidator.cs`
 
 ```csharp
 using Climato.Gateway.Application.Model.Auth;
@@ -551,7 +551,7 @@ public class LoginPostDtoValidator : AbstractValidator<LoginPostDto>
 }
 ```
 
-- [ ] **Passo 8: Contratos** — `Contracts/ITokenService.cs`
+- [x] **Passo 8: Contratos** — `Contracts/ITokenService.cs`
 
 ```csharp
 using Climato.Gateway.Application.Model.Auth;
@@ -588,7 +588,7 @@ public interface IUserAppService
 }
 ```
 
-- [ ] **Passo 9: `Services/AuthAppService.cs`**
+- [x] **Passo 9: `Services/AuthAppService.cs`**
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -671,7 +671,7 @@ public class AuthAppService : IAuthAppService
 }
 ```
 
-- [ ] **Passo 10: `Services/UserAppService.cs` (reescrever)**
+- [x] **Passo 10: `Services/UserAppService.cs` (reescrever)**
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -703,14 +703,14 @@ public class UserAppService : IUserAppService
 }
 ```
 
-- [ ] **Passo 11: DI da Application** — em `DependencyInjection.cs`, adicionar `using Climato.Gateway.Domain.Users;` e `using Microsoft.AspNetCore.Identity;`, e junto dos outros registros:
+- [x] **Passo 11: DI da Application** — em `DependencyInjection.cs`, adicionar `using Climato.Gateway.Domain.Users;` e `using Microsoft.AspNetCore.Identity;`, e junto dos outros registros:
 
 ```csharp
         services.AddScoped<IAuthAppService, AuthAppService>();
         services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 ```
 
-- [ ] **Passo 12: `Climato.Gateway.Infrastructure/Auth/JwtTokenService.cs`**
+- [x] **Passo 12: `Climato.Gateway.Infrastructure/Auth/JwtTokenService.cs`**
 
 ```csharp
 using System.Text;
@@ -759,7 +759,7 @@ public sealed class JwtTokenService : ITokenService
 }
 ```
 
-- [ ] **Passo 13: DI da Infrastructure** — em `DependencyInjection.cs`, adicionar `using Climato.Gateway.Infrastructure.Auth;` e, após o registro de `ProviderOptions`:
+- [x] **Passo 13: DI da Infrastructure** — em `DependencyInjection.cs`, adicionar `using Climato.Gateway.Infrastructure.Auth;` e, após o registro de `ProviderOptions`:
 
 ```csharp
         services.AddOptions<JwtOptions>()
@@ -770,7 +770,7 @@ public sealed class JwtTokenService : ITokenService
         services.AddSingleton<ITokenService, JwtTokenService>();
 ```
 
-- [ ] **Passo 14: `Climato.Gateway.Api/Extensions/ClaimsPrincipalExtensions.cs`**
+- [x] **Passo 14: `Climato.Gateway.Api/Extensions/ClaimsPrincipalExtensions.cs`**
 
 ```csharp
 using System.Security.Claims;
@@ -787,7 +787,7 @@ public static class ClaimsPrincipalExtensions
 }
 ```
 
-- [ ] **Passo 15: `Climato.Gateway.Api/OpenApi/BearerSecuritySchemeTransformer.cs`**
+- [x] **Passo 15: `Climato.Gateway.Api/OpenApi/BearerSecuritySchemeTransformer.cs`**
 
 ```csharp
 using Microsoft.AspNetCore.OpenApi;
@@ -824,7 +824,7 @@ public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransforme
 
 > Usa a API do `Microsoft.OpenApi` 2.x (que vem com o `Microsoft.AspNetCore.OpenApi` 10). Se o compilador acusar diferença de tipo em `SecuritySchemes`/`Security`, ajustar ao tipo exato indicado no erro, mantendo o comportamento: um esquema `Bearer` HTTP e um requisito global.
 
-- [ ] **Passo 16: `Climato.Gateway.Api/DependencyInjection.cs` (reescrever com autenticação)**
+- [x] **Passo 16: `Climato.Gateway.Api/DependencyInjection.cs` (reescrever com autenticação)**
 
 ```csharp
 using System.Text;
@@ -883,9 +883,9 @@ public static class DependencyInjection
 }
 ```
 
-- [ ] **Passo 17: `Program.cs`** — inserir `app.UseAuthentication();` entre `app.UseCors("Web");` e `app.UseAuthorization();`.
+- [x] **Passo 17: `Program.cs`** — inserir `app.UseAuthentication();` entre `app.UseCors("Web");` e `app.UseAuthorization();`.
 
-- [ ] **Passo 18: `appsettings.json`** — adicionar após `Cors` (sem `SecretKey`):
+- [x] **Passo 18: `appsettings.json`** — adicionar após `Cors` (sem `SecretKey`):
 
 ```json
   "Jwt": {
@@ -895,7 +895,7 @@ public static class DependencyInjection
   }
 ```
 
-- [ ] **Passo 19: `Climato.Gateway.Api/Controllers/AuthController.cs`**
+- [x] **Passo 19: `Climato.Gateway.Api/Controllers/AuthController.cs`**
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -959,7 +959,7 @@ public class AuthController : ControllerBase
 }
 ```
 
-- [ ] **Passo 20: `Climato.Gateway.Api/Controllers/UserController.cs` (reescrever)**
+- [x] **Passo 20: `Climato.Gateway.Api/Controllers/UserController.cs` (reescrever)**
 
 ```csharp
 using Climato.Gateway.Api.Extensions;
@@ -1002,7 +1002,7 @@ public class UserController : ControllerBase
 }
 ```
 
-- [ ] **Passo 21: Build**
+- [x] **Passo 21: Build**
 
 ```bash
 dotnet build Climato.slnx
@@ -1010,7 +1010,7 @@ dotnet build Climato.slnx
 
 Esperado: 0 erros. Se o Passo 15 falhar por tipo do `Microsoft.OpenApi`, corrigir conforme a nota do passo.
 
-- [ ] **Passo 22: Migration**
+- [x] **Passo 22: Migration**
 
 ```bash
 dotnet ef migrations add HashSenhaUsuario --project src/Gateway/Climato.Gateway.Infrastructure --startup-project src/Gateway/Climato.Gateway.Api --output-dir Data/Migrations
@@ -1056,7 +1056,7 @@ Substituir os corpos de `Up` e `Down` do arquivo `*_HashSenhaUsuario.cs` gerado 
         }
 ```
 
-- [ ] **Passo 23: Build e smoke test**
+- [x] **Passo 23: Build e smoke test**
 
 ```bash
 dotnet build Climato.slnx
@@ -1065,7 +1065,7 @@ dotnet run --project src/Gateway/Climato.Gateway.Api --launch-profile https
 
 Esperado: log `Applying migration '..._HashSenhaUsuario'`. No Scalar (`https://localhost:7001/scalar`): `POST /auth/register` → 201 com `token`; `POST /auth/login` com senha errada → 401 ProblemDetails; `DELETE /users/me` sem token → 401 ProblemDetails. Parar o serviço.
 
-- [ ] **Passo 24: Commit** (após `/revisar-padrao`)
+- [x] **Passo 24: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add Directory.Packages.props src/Gateway

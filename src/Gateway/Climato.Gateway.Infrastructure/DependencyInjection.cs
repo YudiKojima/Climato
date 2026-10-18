@@ -2,6 +2,7 @@ using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Application.Options;
 using Climato.Gateway.Domain.Cities;
 using Climato.Gateway.Domain.Users;
+using Climato.Gateway.Infrastructure.Auth;
 using Climato.Gateway.Infrastructure.Data;
 using Climato.Gateway.Infrastructure.Data.Repositories;
 using Climato.Gateway.Infrastructure.Http;
@@ -31,6 +32,13 @@ public static class DependencyInjection
             .BindConfiguration(ProviderOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<ITokenService, JwtTokenService>();
 
         services.AddHttpClient<IWeatherProviderClient, WeatherProviderClient>((serviceProvider, client) =>
         {

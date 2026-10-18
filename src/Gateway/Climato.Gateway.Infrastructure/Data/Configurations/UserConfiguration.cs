@@ -14,7 +14,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(e => e.Id).HasColumnName("id");
         builder.Property(e => e.Email).HasColumnName("email").HasMaxLength(255).IsRequired();
         builder.Property(e => e.Name).HasColumnName("name").HasMaxLength(255).IsRequired();
-        builder.Property(e => e.Password).HasColumnName("password").HasMaxLength(255).IsRequired();
+        builder.Property(e => e.PasswordHash).HasColumnName("passwordhash").IsRequired();
         builder.Property(e => e.CreatedAt)
             .HasColumnName("createdat")
             .HasColumnType("timestamp with time zone")

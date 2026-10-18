@@ -1,6 +1,6 @@
-namespace Climato.Gateway.Application.Model.Users;
+namespace Climato.Gateway.Application.Model.Auth;
 
-public class UserPostDto
+public class RegisterPostDto
 {
     public string Email { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

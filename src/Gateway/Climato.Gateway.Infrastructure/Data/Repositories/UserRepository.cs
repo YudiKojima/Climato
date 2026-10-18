@@ -32,6 +32,11 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task UpdateAsync(User user, CancellationToken cancellationToken)
+    {
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task DeleteAsync(User user, CancellationToken cancellationToken)
     {
         context.Users.Remove(user);

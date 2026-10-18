@@ -31,6 +31,7 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();
 app.UseCors("Web");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
