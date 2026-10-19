@@ -36,6 +36,16 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message
             };
         }
+        else if (exception is UserNotFoundException)
+        {
+            logger.LogInformation("Token de usuário inexistente em {Method} {Path}.", httpContext.Request.Method, httpContext.Request.Path);
+
+            problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Sessão inválida."
+            };
+        }
         else if (exception is ProviderUnavailableException)
         {
             logger.LogWarning(exception, "Provider indisponível em {Method} {Path}.", httpContext.Request.Method, httpContext.Request.Path);

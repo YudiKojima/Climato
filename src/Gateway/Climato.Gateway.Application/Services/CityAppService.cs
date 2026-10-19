@@ -12,8 +12,8 @@ public class CityAppService : ICityAppService
 
     public CityAppService(ICityRepository repository, IMapper mapper)
     {
-        cityRepository = repository ?? throw new ArgumentNullException(nameof(repository));
-        this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        cityRepository = repository;
+        this.mapper = mapper;
     }
 
     public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
