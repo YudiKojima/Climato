@@ -52,23 +52,31 @@ flowchart LR
 3. O Gateway valida assinatura, emissor, audiência e validade; o usuário vem da claim `sub`.
 4. Token ausente ou expirado → 401 → o web limpa a sessão e volta para `/signin`.
 
-### Consulta de clima (alvo)
+### Consulta de clima
 
 1. `GET /weathers/{cidade}` no Gateway com `Authorization: Bearer`.
 2. Gateway chama `GET /weathers?cityName=` no Provider (retry/timeout/circuit breaker).
-3. Provider consulta o cache (`clima:{cidade-normalizada}`); em miss, chama OpenWeather e, de forma opcional, Pexels; grava no cache.
+3. Provider consulta o cache (`clima:{cidade-normalizada}`, TTL 10 min; Redis ou memória); em miss, chama OpenWeather e, de forma opcional, Pexels; grava no cache.
 4. Gateway registra a cidade no histórico do usuário (se ainda não existir) e devolve o clima.
 
-### Mapeamento de erros (alvo, Fase 03)
+### Mapeamento de erros
 
 | Situação | Provider responde | Gateway responde |
 |---|---|---|
-| Cidade não existe na OpenWeather | 404 | 404 |
-| OpenWeather fora / timeout / 401 de chave | 502 / 503 | 503 |
+| Cidade não existe na OpenWeather | 404 | 404 (não entra no histórico) |
+| OpenWeather fora / timeout / circuito aberto / 401 de chave / 429 | 503 | 503 |
 | Pexels falha | 200 sem `imageUrl` | 200 |
 | Provider fora ou circuito aberto | — | 503 |
+| Cliente abortou a requisição | 499 | 499 |
 
 Todas as respostas de erro em `application/problem+json`.
+
+### Health checks
+
+| Serviço | `/health/live` | `/health/ready` |
+|---|---|---|
+| Provider | processo vivo | Redis (se configurado) |
+| Gateway | processo vivo | Postgres + `/health/ready` do Provider |
 
 ## Dados
 

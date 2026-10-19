@@ -7,6 +7,7 @@ Alvo futuro: `docker compose up` (Fase 05). Até lá, os serviços sobem com `do
 - .NET SDK 10 (versão fixada em `global.json`)
 - Node.js LTS (≥ 20)
 - PostgreSQL rodando em `localhost:5432`
+- (Opcional) Redis em `localhost:6379` — sem ele o Provider usa cache em memória
 - Certificado HTTPS de desenvolvimento confiável: `dotnet dev-certs https --trust`
 - Chaves gratuitas da [OpenWeather](https://openweathermap.org/api) e da [Pexels](https://www.pexels.com/api/)
 
@@ -55,6 +56,17 @@ dotnet ef migrations add <NomeEmPascalCase> --project src/Gateway/Climato.Gatewa
 
 > Bancos `weather-app` criados antes da Fase 01 (script SQL) não são usados mais — podem ser apagados.
 
+## 3a. Redis (opcional)
+
+Sem `ConnectionStrings:Redis`, o Provider usa cache em memória (por processo). Para usar Redis:
+
+```bash
+docker run -d --name climato-redis -p 6379:6379 redis:7-alpine
+dotnet user-secrets set "ConnectionStrings:Redis" "localhost:6379,abortConnect=false,connectTimeout=1000" --project src/Provider/Climato.Provider.Api
+```
+
+`abortConnect=false,connectTimeout=1000` evita que cada requisição espere 5 s quando o Redis cai: o Provider loga um warning e segue sem cache.
+
 ## 4. Subir a aplicação
 
 Em três terminais:
@@ -65,11 +77,11 @@ dotnet run --project src/Gateway/Climato.Gateway.Api --launch-profile https
 npm --prefix web install && npm --prefix web run dev
 ```
 
-| Serviço | URL | Documentação |
-|---|---|---|
-| Provider | `https://localhost:7002` | `https://localhost:7002/scalar` |
-| Gateway | `https://localhost:7001` | `https://localhost:7001/scalar` |
-| Web | `http://localhost:5173` | — |
+| Serviço | URL | Documentação | Health |
+|---|---|---|---|
+| Provider | `https://localhost:7002` | `https://localhost:7002/scalar` | `/health/live` · `/health/ready` |
+| Gateway | `https://localhost:7001` | `https://localhost:7001/scalar` | `/health/live` · `/health/ready` |
+| Web | `http://localhost:5173` | — | — |
 
 Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
 
@@ -82,7 +94,8 @@ Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
 | `OptionsValidationException: Jwt:SecretKey não configurada` | Faltou o user-secret do JWT (seção 2) |
 | Front volta para o login logo após entrar | Token expirado ou chave do JWT trocada — entrar de novo |
 | Erro de CORS no console do navegador | Origem do web fora de `Cors:AllowedOrigins` no `appsettings.json` do Gateway |
-| Toda busca mostra "cidade não encontrada" | Provider fora do ar ou chave inválida — erros ainda viram 404/500 indistintos (A14, A15, Fase 03) |
+| Busca mostra "Serviço de clima indisponível" | Provider fora do ar, chave da OpenWeather inválida ou cota estourada — ver o log do Provider e `https://localhost:7001/health/ready` |
+| Warning `Falha ao ler o cache de clima` no log do Provider | Redis configurado mas fora do ar — subir o container ou remover `ConnectionStrings:Redis` |
 | `ERR_CERT_AUTHORITY_INVALID` no navegador | `dotnet dev-certs https --trust` e abrir `https://localhost:7001/scalar` uma vez |
 | `fail: Microsoft.EntityFrameworkCore.Database.Connection` no primeiro startup | Esperado: o banco `climato` ainda não existe; o Gateway o cria e aplica as migrations logo em seguida |
 | `The SSL connection could not be established` no log do Gateway | Certificado de desenvolvimento não confiável — `dotnet dev-certs https --trust` (seção Pré-requisitos) |
