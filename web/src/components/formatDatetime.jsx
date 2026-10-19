@@ -1,8 +1,3 @@
-const formatDatetime = (dateStr) => {
-  return new Date(dateStr).toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
+const formatDatetime = (isoWithOffset) => isoWithOffset.slice(11, 16);
 
 export default formatDatetime;

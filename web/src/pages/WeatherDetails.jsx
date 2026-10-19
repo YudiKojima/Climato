@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getWeatherByCity } from "../services/api";
+import { getApiErrorMessage, getWeatherByCity } from "../services/api";
 import { Button, Empty, Typography } from "antd";
 import "../styles/WeatherDetails.css";
 import Loading from "../components/Loading";
@@ -11,6 +11,7 @@ const WeatherDetails = () => {
   const [weather, setWeather] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +26,13 @@ const WeatherDetails = () => {
           setNotFound(true);
         }
       } catch (error) {
-        setNotFound(true);
+        if (error.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          setErrorMessage(
+            getApiErrorMessage(error, "Não foi possível carregar o clima agora.")
+          );
+        }
       } finally {
         setIsLoading(false);
       }
@@ -50,14 +57,20 @@ const WeatherDetails = () => {
       }}
     >
       <div className="weather-details-card">
-        {notFound ? (
+        {notFound || errorMessage ? (
           <>
             <Empty
               image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
               styles={{ image: { height: 140 } }}
               description={
                 <Typography.Text>
-                  Cidade "<strong>{cityName}</strong>" não encontrada.
+                  {notFound ? (
+                    <>
+                      Cidade "<strong>{cityName}</strong>" não encontrada.
+                    </>
+                  ) : (
+                    errorMessage
+                  )}
                 </Typography.Text>
               }
             ></Empty>
@@ -92,7 +105,7 @@ const WeatherDetails = () => {
                 <strong>Pressão:</strong> {weather.pressure} hPa
               </div>
               <div>
-                <strong>Vento:</strong> {weather.windSpeed} km/h
+                <strong>Vento:</strong> {weather.windSpeedKmh} km/h
               </div>
               <div>
                 <strong>Direção:</strong> {weather.windDirection}°
