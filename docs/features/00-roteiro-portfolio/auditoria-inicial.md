@@ -26,17 +26,17 @@ Levantamento feito antes do roteiro de portfólio ([`design.md`](design.md)), so
 | A11 | 🟡 | URL do Provider fixa (`https://localhost:44313`) | `WeatherAppService.cs:20` | 01 | ✅ Fase 01 |
 | A12 | 🟡 | `WeatherProviderApp.Infrastructure` órfão: usa `ConnectionContext`/`ICityRepository` que não existem no Provider e não é referenciado | `CityRepository.cs` (Provider.Infrastructure) | 01 | ✅ Fase 01 |
 | A13 | 🔵 | Controllers do Gateway com namespace `WeatherProviderApp.Controllers` | `Controllers/` (Gateway) | 01 | ✅ Fase 01 |
-| A14 | 🟡 | Provider: qualquer `HttpRequestException` vira 404 — inclusive chave inválida ou Pexels fora; falha da imagem derruba o clima inteiro | `WeatherController.cs` | 03 | |
-| A15 | 🟡 | Gateway: erro do Provider vira 500 (`EnsureSuccessStatusCode`); front mostra "cidade não encontrada" para qualquer falha | `WeatherAppService.cs` | 03 | |
-| A16 | 🟡 | Velocidade do vento chega em m/s (OpenWeather `units=metric`) e é exibida como km/h | [WeatherDetails.jsx](../../../web/src/pages/WeatherDetails.jsx) | 03 | |
-| A17 | 🟡 | Nascer/pôr do sol: `DateTime` sem `Kind`/fuso no Provider e `DateTime.Parse` dependente de cultura no Gateway; o horário exibido não é o local da cidade | `WeatherAppService.cs (Provider)` | 03 | |
+| A14 | 🟡 | Provider: qualquer `HttpRequestException` vira 404 — inclusive chave inválida ou Pexels fora; falha da imagem derruba o clima inteiro | `WeatherController.cs` | 03 | ✅ Fase 03 |
+| A15 | 🟡 | Gateway: erro do Provider vira 500 (`EnsureSuccessStatusCode`); front mostra "cidade não encontrada" para qualquer falha | `WeatherAppService.cs` | 03 | ✅ Fase 03 |
+| A16 | 🟡 | Velocidade do vento chega em m/s (OpenWeather `units=metric`) e é exibida como km/h | [WeatherDetails.jsx](../../../web/src/pages/WeatherDetails.jsx) | 03 | ✅ Fase 03 |
+| A17 | 🟡 | Nascer/pôr do sol: `DateTime` sem `Kind`/fuso no Provider e `DateTime.Parse` dependente de cultura no Gateway; o horário exibido não é o local da cidade | `WeatherAppService.cs (Provider)` | 03 | ✅ Fase 03 |
 | A18 | 🔵 | Front bloqueia excluir cidade favorita; backend permite | [CityCard.jsx](../../../web/src/components/CityCard.jsx) | 02 | ✅ Fase 02 |
 
 ## Código e estrutura
 
 | Código | Sev. | Achado | Onde | Fase | Status |
 |---|---|---|---|---|---|
-| A19 | 🟡 | Parsing de JSON externo com `Dictionary<string, object>` + casts (Newtonsoft); Gateway reparseia o JSON do Provider do mesmo jeito em vez de DTO tipado | `Core/Collections/JsonDictionary.cs` (ambos) | 03 | |
+| A19 | 🟡 | Parsing de JSON externo com `Dictionary<string, object>` + casts (Newtonsoft); Gateway reparseia o JSON do Provider do mesmo jeito em vez de DTO tipado | `Core/Collections/JsonDictionary.cs` (ambos) | 03 | ✅ Fase 03 |
 | A20 | 🔵 | Registro duplicado `AddTransient` + `AddHttpClient` para a mesma interface | `Program.cs` (ambos) | 01 | ✅ Fase 01 |
 | A21 | 🔵 | Pacotes no projeto errado: EF Core/Npgsql na API do Gateway e no Provider; AutoMapper no Provider sem uso | `*.csproj` | 01 | ✅ Fase 01 |
 | A22 | 🟡 | .NET 8 sai de suporte em 2026-11-10; máquina de desenvolvimento só tem SDK 10 | `*.csproj` | 01 | ✅ Fase 01 |
