@@ -21,6 +21,19 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        var redisConnectionString = configuration.GetConnectionString("Redis");
+
+        if (string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            services.AddDistributedMemoryCache();
+        }
+        else
+        {
+            services.AddStackExchangeRedisCache(options => options.Configuration = redisConnectionString);
+        }
+
+        services.AddSingleton<IWeatherCache, WeatherCache>();
+
         services.AddHttpClient<IWeatherAppService, WeatherAppService>((serviceProvider, client) =>
             {
                 var options = serviceProvider.GetRequiredService<IOptions<OpenWeatherOptions>>().Value;

@@ -23,16 +23,25 @@ public sealed class WeatherAppService : IWeatherAppService
     private readonly HttpClient client;
     private readonly string apiKey;
     private readonly ICityImageAppService cityImageAppService;
+    private readonly IWeatherCache weatherCache;
 
-    public WeatherAppService(HttpClient httpClient, IOptions<OpenWeatherOptions> options, ICityImageAppService cityImageAppService)
+    public WeatherAppService(HttpClient httpClient, IOptions<OpenWeatherOptions> options, ICityImageAppService cityImageAppService, IWeatherCache weatherCache)
     {
         client = httpClient;
         apiKey = options.Value.ApiKey;
         this.cityImageAppService = cityImageAppService;
+        this.weatherCache = weatherCache;
     }
 
     public async Task<Weather?> GetByCityAsync(string cityName, CancellationToken cancellationToken)
     {
+        var cached = await weatherCache.GetAsync(cityName, cancellationToken);
+
+        if (cached != null)
+        {
+            return cached;
+        }
+
         var current = await GetCurrentAsync(cityName, cancellationToken);
 
         if (current == null)
@@ -41,7 +50,10 @@ public sealed class WeatherAppService : IWeatherAppService
         }
 
         var imageUrl = await cityImageAppService.GetImageUrlAsync(current.Name, cancellationToken);
-        return ToWeather(current, imageUrl);
+        var weather = ToWeather(current, imageUrl);
+
+        await weatherCache.SetAsync(cityName, weather, cancellationToken);
+        return weather;
     }
 
     private async Task<OpenWeatherCurrentResponse?> GetCurrentAsync(string cityName, CancellationToken cancellationToken)

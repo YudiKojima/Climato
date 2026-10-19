@@ -10,7 +10,13 @@ public static class DependencyInjection
         services.AddOpenApi();
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
-        services.AddHealthChecks();
+        var healthChecks = services.AddHealthChecks();
+        var redisConnectionString = configuration.GetConnectionString("Redis");
+
+        if (!string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            healthChecks.AddRedis(redisConnectionString, name: "redis", tags: ["ready"]);
+        }
 
         return services;
     }
