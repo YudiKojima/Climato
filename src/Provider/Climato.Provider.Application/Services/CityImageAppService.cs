@@ -33,7 +33,7 @@ public sealed class CityImageAppService : ICityImageAppService
             }
 
             var result = await response.Content.ReadFromJsonAsync<PexelsSearchResponse>(cancellationToken);
-            return result?.Photos.FirstOrDefault()?.Src.Large2x;
+            return result?.Photos?.FirstOrDefault()?.Src?.Large2x;
         }
         catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException or JsonException)
         {

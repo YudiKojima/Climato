@@ -92,3 +92,11 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 - [Fase 05] Estratégia de migration em produção (bundle, job dedicado ou flag `Database:MigrateOnStartup`); hoje qualquer ambiente ≠ Production migra no startup
 - [Fase 07] `CityCard.jsx`: `handleFavoriteClick` sem `try/catch` (falha no `PATCH` vira rejeição não tratada)
 - [Fase 08] Rate limiting em `/auth/*` (`AddRateLimiter`, janela fixa por IP) — obrigatório antes do deploy público
+- [Fase 04] Provider: resposta 200 incompleta da OpenWeather (lista `weather` vazia, `sys` nulo) vira 500 — lançar `ExternalServiceUnavailableException("resposta incompleta")` e cobrir com WireMock; `sys.country` ausente sai como `null`
+- [Fase 04] Gateway: 400 do Provider (`cityName` só com espaços) vira 503 — tratar como 404 ou validar no Gateway
+- [Fase 04] Extrair a criação do `ValidationProblemDetails` duplicada entre `ValidationFilter` e `InvalidModelStateResponseFactory`
+- [Fase 04] Confirmar se o ramo 499 dos `GlobalExceptionHandler` é alcançado (o `ExceptionHandlerMiddleware` do .NET 8+ já trata `OperationCanceledException` com `RequestAborted`); remover ou ajustar o `backend.md`
+- [Fase 04] Índice único (`userid`, `name`) em `city`: duas buscas simultâneas da mesma cidade nova gravam duplicata
+- [Fase 05] Timeout por check nos health checks (`AddDbContextCheck`/`ProviderHealthCheck`, ~3 s) para os probes do compose
+- [Fase 06] Log forging: `cityName` interpolado nos logs do Provider (`CityImageAppService`, `WeatherCache`) — resolver com Serilog/sink JSON; não desligar a redação de URI do `HttpClient` (chave da OpenWeather em `appid=`)
+- [Fase 08] 400 automático expõe mensagens do System.Text.Json em inglês e nomes de tipo .NET em `errors` — desligar `AllowInputFormatterExceptionMessages` ou mapear para "JSON inválido."

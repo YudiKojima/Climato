@@ -22,7 +22,7 @@ public class WeatherController : ControllerBase
     /// <param name="cityName">Nome da cidade, exemplo: Cuiabá</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     /// <response code="200">Clima atual, com vento em km/h e horários no fuso da cidade.</response>
-    /// <response code="404">Cidade não encontrada.</response>
+    /// <response code="404">Cidade não encontrada (não entra no histórico).</response>
     /// <response code="503">Serviço de clima indisponível.</response>
     [HttpGet("{cityName}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

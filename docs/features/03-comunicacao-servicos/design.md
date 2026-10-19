@@ -154,10 +154,10 @@ Todas as respostas de erro em `application/problem+json`.
 | Client | Timeout por tentativa | Timeout total | Retries |
 |---|---|---|---|
 | Provider → OpenWeather | 5 s | 15 s | 2 |
-| Provider → Pexels | 3 s | 5 s | 1 |
-| Gateway → Provider | 20 s | 25 s | 1 |
+| Provider → Pexels | 2 s | 5 s | 1 |
+| Gateway → Provider | 25 s | 30 s | 1 (só falha de transporte) |
 
-A tentativa do Gateway (20 s) é maior que o total do Provider (15 s): o Gateway não corta o Provider no meio de um retry, e o pior caso fica em ~6 chamadas à OpenWeather em vez de 16. A janela de amostragem do circuit breaker precisa ser ≥ 2× o timeout por tentativa (validação do pacote) — ajustar junto.
+Regra: a tentativa de quem chama é maior que a soma dos timeouts totais das dependências que o chamado consulta em sequência. A tentativa do Gateway (25 s) é maior que OpenWeather (15 s) + Pexels (5 s) + folga do cache: o Gateway não corta o Provider no meio de um retry, e o pior caso fica em ~6 chamadas à OpenWeather em vez de 16. O Gateway só re-tenta falha de transporte (`HttpRequestException`, ex.: Provider fora/conexão recusada); 5xx do Provider, que já fez seus próprios retries, não é re-tentado. A janela de amostragem do circuit breaker precisa ser ≥ 2× o timeout por tentativa (validação do pacote) — ajustar junto.
 
 ## 5. Cache
 
@@ -170,13 +170,13 @@ Ver `WeatherCache` na seção 2. Resumo:
 | Valor | `Weather` completo (com `imageUrl`), JSON |
 | TTL | 10 min, absoluto |
 | Não cacheia | Cidade inexistente (404), falhas |
-| Redis fora | Warning no log, segue sem cache; aparece no `/health/ready` |
+| Redis fora | Warning no log, segue sem cache; aparece como `Degraded` no `/health/ready` |
 
 ## 6. Health checks
 
 | Serviço | `/health/live` | `/health/ready` |
 |---|---|---|
-| Provider | nenhum check (processo vivo) | Redis, só se configurado (`AspNetCore.HealthChecks.Redis`) |
+| Provider | nenhum check (processo vivo) | Redis, só se configurado (`AspNetCore.HealthChecks.Redis`), com `failureStatus: Degraded` (responde 200; Redis fora não derruba o `ready` do Gateway) |
 | Gateway | nenhum check | Postgres (`AddDbContextCheck<ClimatoDbContext>`) + `ProviderHealthCheck` |
 
 - `live` usa `Predicate = _ => false`; `ready` filtra por tag `ready`.
@@ -239,7 +239,7 @@ Manual (Scalar + navegador):
 6. `OpenWeather:ApiKey` inválida → Provider 503, Gateway 503; front mostra a mensagem de indisponibilidade.
 7. Provider desligado → Gateway 503 (após o retry) e `/health/ready` do Gateway `Unhealthy`.
 8. `Pexels:ApiKey` inválida → 200 com `imageUrl: null` e warning no log.
-9. Com Redis configurado e depois parado → clima continua respondendo; `/health/ready` do Provider `Unhealthy`.
+9. Com Redis configurado e depois parado → clima continua respondendo; `/health/ready` do Provider `Degraded` (200) e o do Gateway segue `Healthy`.
 10. JSON malformado em `POST /auth/login` → 400 com título "Dados inválidos.".
 11. Token de usuário apagado em `GET /weathers/{cidade}` → 401 e o front volta para `/signin`.
 12. `/health/live` e `/health/ready` acessíveis sem token.
@@ -248,5 +248,5 @@ Manual (Scalar + navegador):
 
 - **Quebra de contrato (`windSpeedKmh`, `DateTimeOffset`)** — front ajustado no mesmo PR; não há outros consumidores.
 - **Cache em memória por instância** quando sem Redis — aceitável em dev; o compose da Fase 05 traz o Redis.
-- **Retry do Gateway pode dobrar a latência do 503** quando o Provider está fora (até ~25 s) — aceito; o circuit breaker corta as chamadas seguintes.
+- **Gateway só re-tenta falha de transporte; 5xx do Provider não é re-tentado** — o Provider já fez seus próprios retries; com o Provider fora há 1 retry rápido (conexão recusada) e o circuit breaker corta as chamadas seguintes.
 - **Sem testes automatizados** até a Fase 04 — os cenários acima viram os testes de integração (WireMock) da Fase 04.

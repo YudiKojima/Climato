@@ -75,7 +75,7 @@ Todas as respostas de erro em `application/problem+json`.
 
 | Serviço | `/health/live` | `/health/ready` |
 |---|---|---|
-| Provider | processo vivo | Redis (se configurado) |
+| Provider | processo vivo | Redis (se configurado; falha = `Degraded`, 200) |
 | Gateway | processo vivo | Postgres + `/health/ready` do Provider |
 
 ## Dados

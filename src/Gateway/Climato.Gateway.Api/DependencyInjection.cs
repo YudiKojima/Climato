@@ -28,7 +28,7 @@ public static class DependencyInjection
                         StatusCodes.Status400BadRequest,
                         "Dados inválidos.");
 
-                    return new BadRequestObjectResult(problem);
+                    return new BadRequestObjectResult(problem) { ContentTypes = { "application/problem+json" } };
                 };
             });
         services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());

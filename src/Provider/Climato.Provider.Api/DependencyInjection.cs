@@ -1,4 +1,5 @@
 using Climato.Provider.Api.Errors;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Climato.Provider.Api;
 
@@ -15,7 +16,7 @@ public static class DependencyInjection
 
         if (!string.IsNullOrWhiteSpace(redisConnectionString))
         {
-            healthChecks.AddRedis(redisConnectionString, name: "redis", tags: ["ready"]);
+            healthChecks.AddRedis(redisConnectionString, name: "redis", failureStatus: HealthStatus.Degraded, tags: ["ready"]);
         }
 
         return services;

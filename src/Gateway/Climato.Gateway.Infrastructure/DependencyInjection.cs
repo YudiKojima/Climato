@@ -43,9 +43,10 @@ public static class DependencyInjection
         services.AddHttpClient<IWeatherProviderClient, WeatherProviderClient>(ConfigureProviderClient)
             .AddStandardResilienceHandler(options =>
             {
-                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(20);
-                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(25);
+                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(25);
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
                 options.Retry.MaxRetryAttempts = 1;
+                options.Retry.ShouldHandle = args => ValueTask.FromResult(args.Outcome.Exception is HttpRequestException);
                 options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
             });
 

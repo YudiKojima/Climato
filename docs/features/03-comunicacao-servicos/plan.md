@@ -31,7 +31,8 @@
 | Health checks do Provider no `Program.cs` | Novo `Climato.Provider.Api/DependencyInjection.cs` com `AddProviderApi(configuration)` | Mesmo padrão do Gateway (`backend.md` — `Program.cs` só chama extensões) |
 | `WeatherDetails`: erro ≠ 404 → `message.error` | Erro ≠ 404 → estado de erro com a mensagem da API no mesmo `Empty` da tela | Hoje `weather` fica `null` e a tela quebra em `weather.city`; um estado explícito resolve as duas coisas (FE-10) |
 | Redis fora → warning e segue | Idem, e o runbook recomenda `abortConnect=false,connectTimeout=1000` na connection string | Sem isso, cada requisição espera o timeout padrão de 5 s do StackExchange.Redis |
-| Circuit breaker (janela ≥ 2× tentativa) | Gateway → Provider com `SamplingDuration` = 60 s; Provider usa o padrão (30 s) | 30 s < 2 × 20 s falharia a validação do pacote no startup |
+| Circuit breaker (janela ≥ 2× tentativa) | Gateway → Provider com `SamplingDuration` = 60 s; Provider usa o padrão (30 s) | 30 s < 2 × 25 s falharia a validação do pacote no startup |
+| Gateway → Provider 20 s/25 s, Pexels 3 s/5 s, retry padrão, Redis `Unhealthy` (I1–I3) | Gateway → Provider 25 s/30 s; Pexels 2 s/5 s; Gateway re-tenta só `HttpRequestException`; Redis com `failureStatus: Degraded` | Decidido na revisão final: a tentativa do Gateway precisa superar OpenWeather 15 s + Pexels 5 s + cache; 5xx do Provider já passou por retries; Redis fora não deve derrubar o `ready` do Gateway |
 
 ## Mapa de arquivos
 
