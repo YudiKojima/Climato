@@ -1,13 +1,25 @@
-﻿using Climato.Provider.Application.Contracts;
-using Climato.Provider.Application.Core.Collections;
+﻿using System.Net;
+using System.Net.Http.Json;
+using System.Text.Json;
+using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Exceptions;
+using Climato.Provider.Application.Model.OpenWeather;
 using Climato.Provider.Application.Options;
 using Climato.Provider.Domain.Weathers;
 using Microsoft.Extensions.Options;
+using Polly;
 
 namespace Climato.Provider.Application.Services;
 
-public class WeatherAppService : IWeatherAppService
+public sealed class WeatherAppService : IWeatherAppService
 {
+    private const string ServiceName = "OpenWeather";
+
+    private static readonly JsonSerializerOptions jsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
+
     private readonly HttpClient client;
     private readonly string apiKey;
     private readonly ICityImageAppService cityImageAppService;
@@ -19,34 +31,68 @@ public class WeatherAppService : IWeatherAppService
         this.cityImageAppService = cityImageAppService;
     }
 
-    public async Task<Weather> GetByCityAsync(string cityName, CancellationToken cancellationToken)
+    public async Task<Weather?> GetByCityAsync(string cityName, CancellationToken cancellationToken)
+    {
+        var current = await GetCurrentAsync(cityName, cancellationToken);
+
+        if (current == null)
+        {
+            return null;
+        }
+
+        var imageUrl = await cityImageAppService.GetImageUrlAsync(current.Name, cancellationToken);
+        return ToWeather(current, imageUrl);
+    }
+
+    private async Task<OpenWeatherCurrentResponse?> GetCurrentAsync(string cityName, CancellationToken cancellationToken)
     {
         var url = $"data/2.5/weather?q={Uri.EscapeDataString(cityName)}&appid={apiKey}&units=metric&lang=pt_br";
-        var response = await client.GetAsync(url, cancellationToken);
 
-        response.EnsureSuccessStatusCode();
-
-        var result = await response.ReadContentAsDictionaryAsync(cancellationToken);
-        var weather = new Weather
+        try
         {
-            City = result["name"]?.ToString(),
-            Country = ((Dictionary<string, object>)result["sys"])["country"]?.ToString(),
-            Description = ((List<object>)result["weather"])[0] is Dictionary<string, object> weatherDict ? weatherDict["description"]?.ToString() : null,
-            Icon = ((List<object>)result["weather"])[0] is Dictionary<string, object> weatherIconDict ? weatherIconDict["icon"]?.ToString() : null,
-            Temperature = Convert.ToDouble(((Dictionary<string, object>)result["main"])["temp"]),
-            FeelsLike = Convert.ToDouble(((Dictionary<string, object>)result["main"])["feels_like"]),
-            TempMin = Convert.ToDouble(((Dictionary<string, object>)result["main"])["temp_min"]),
-            TempMax = Convert.ToDouble(((Dictionary<string, object>)result["main"])["temp_max"]),
-            Humidity = Convert.ToInt32(((Dictionary<string, object>)result["main"])["humidity"]),
-            Pressure = Convert.ToInt32(((Dictionary<string, object>)result["main"])["pressure"]),
-            WindSpeed = Convert.ToDouble(((Dictionary<string, object>)result["wind"])["speed"]),
-            WindDirection = Convert.ToInt32(((Dictionary<string, object>)result["wind"])["deg"]),
-            Sunrise = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(((Dictionary<string, object>)result["sys"])["sunrise"])).DateTime,
-            Sunset = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(((Dictionary<string, object>)result["sys"])["sunset"])).DateTime,
+            using var response = await client.GetAsync(url, cancellationToken);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ExternalServiceUnavailableException(ServiceName, $"status {(int)response.StatusCode}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<OpenWeatherCurrentResponse>(jsonOptions, cancellationToken)
+                ?? throw new ExternalServiceUnavailableException(ServiceName, "resposta vazia");
+        }
+        catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException or JsonException)
+        {
+            throw new ExternalServiceUnavailableException(ServiceName, "falha na chamada", exception);
+        }
+    }
+
+    private static Weather ToWeather(OpenWeatherCurrentResponse current, string? imageUrl)
+    {
+        var offset = TimeSpan.FromSeconds(current.Timezone);
+        var condition = current.Weather[0];
+
+        return new Weather
+        {
+            City = current.Name,
+            Country = current.Sys.Country,
+            Description = condition.Description,
+            Icon = condition.Icon,
+            Temperature = current.Main.Temp,
+            FeelsLike = current.Main.FeelsLike,
+            TempMin = current.Main.TempMin,
+            TempMax = current.Main.TempMax,
+            Humidity = current.Main.Humidity,
+            Pressure = current.Main.Pressure,
+            WindSpeedKmh = Math.Round(current.Wind.Speed * 3.6, 1),
+            WindDirection = current.Wind.Deg,
+            Sunrise = DateTimeOffset.FromUnixTimeSeconds(current.Sys.Sunrise).ToOffset(offset),
+            Sunset = DateTimeOffset.FromUnixTimeSeconds(current.Sys.Sunset).ToOffset(offset),
+            ImageUrl = imageUrl
         };
-
-        weather.ImageUrl = await cityImageAppService.GetImageUrlAsync(weather.City, cancellationToken);
-
-        return weather;
     }
 }
