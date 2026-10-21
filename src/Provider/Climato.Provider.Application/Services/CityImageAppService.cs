@@ -1,49 +1,44 @@
-﻿using Climato.Provider.Application.Contracts;
-using Climato.Provider.Application.Core.Collections;
-using Climato.Provider.Application.Options;
-using Microsoft.Extensions.Options;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
+using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Model.Pexels;
+using Microsoft.Extensions.Logging;
+using Polly;
 
 namespace Climato.Provider.Application.Services;
 
-public class CityImageAppService : ICityImageAppService
+public sealed class CityImageAppService : ICityImageAppService
 {
     private readonly HttpClient client;
-    private readonly string apiKey;
+    private readonly ILogger<CityImageAppService> logger;
 
-    public CityImageAppService(HttpClient httpClient, IOptions<PexelsOptions> options)
+    public CityImageAppService(HttpClient httpClient, ILogger<CityImageAppService> logger)
     {
         client = httpClient;
-        apiKey = options.Value.ApiKey;
+        this.logger = logger;
     }
 
-    public async Task<string?> GetImageUrlAsync(string? cityName, CancellationToken cancellationToken)
+    public async Task<string?> GetImageUrlAsync(string cityName, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(cityName))
+        var url = $"v1/search?query={Uri.EscapeDataString(cityName)}&orientation=landscape&per_page=1";
+
+        try
         {
+            using var response = await client.GetAsync(url, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Pexels respondeu {StatusCode} para {CityName}; clima segue sem imagem.", (int)response.StatusCode, cityName);
+                return null;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<PexelsSearchResponse>(cancellationToken);
+            return result?.Photos?.FirstOrDefault()?.Src?.Large2x;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException or JsonException)
+        {
+            logger.LogWarning(exception, "Falha ao buscar a imagem de {CityName} no Pexels; clima segue sem imagem.", cityName);
             return null;
         }
-
-        var request = new HttpRequestMessage(HttpMethod.Get, $"v1/search?query={Uri.EscapeDataString(cityName)}&orientation=landscape&per_page=1");
-        request.Headers.Add("Authorization", apiKey);
-
-        var response = await client.SendAsync(request, cancellationToken);
-
-        response.EnsureSuccessStatusCode();
-
-        var result = await response.ReadContentAsDictionaryAsync(cancellationToken);
-        string? cityImage = null;
-
-        if (result.TryGetValue("photos", out var photosObj) && photosObj is List<object> photos && photos.Count > 0)
-        {
-            if (photos[0] is Dictionary<string, object> photo &&
-                photo.TryGetValue("src", out var srcObj) &&
-                srcObj is Dictionary<string, object> src &&
-                src.TryGetValue("large2x", out var imageUrlObj))
-            {
-                cityImage = imageUrlObj?.ToString();
-            }
-        }
-
-        return cityImage;
     }
 }

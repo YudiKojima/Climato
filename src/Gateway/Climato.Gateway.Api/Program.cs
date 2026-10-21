@@ -2,6 +2,7 @@ using Climato.Gateway.Api;
 using Climato.Gateway.Application;
 using Climato.Gateway.Infrastructure;
 using Climato.Gateway.Infrastructure.Data;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -35,5 +36,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }).AllowAnonymous();
 
 app.Run();

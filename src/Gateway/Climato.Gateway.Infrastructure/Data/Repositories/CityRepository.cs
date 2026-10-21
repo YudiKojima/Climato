@@ -1,5 +1,7 @@
 using Climato.Gateway.Domain.Cities;
+using Climato.Gateway.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Climato.Gateway.Infrastructure.Data.Repositories;
 
@@ -22,12 +24,19 @@ public class CityRepository : ICityRepository
     public async Task CreateAsync(City city, CancellationToken cancellationToken)
     {
         await context.Cities.AddAsync(city, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation, ConstraintName: "fk_city_user" })
+        {
+            throw new UserNotFoundException();
+        }
     }
 
     public async Task UpdateAsync(City city, CancellationToken cancellationToken)
     {
-        context.Cities.Update(city);
         await context.SaveChangesAsync(cancellationToken);
     }
 

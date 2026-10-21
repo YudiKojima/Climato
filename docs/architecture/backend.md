@@ -10,10 +10,11 @@ Vale para `src/Gateway/` e `src/Provider/`. Seções marcadas **(a partir da Fas
 | API | ASP.NET Core com controllers; OpenAPI nativo + Scalar | — |
 | Persistência (Gateway) | EF Core 10 + Npgsql via `AddDbContext`, Migrations | — |
 | Mapeamento | Mapster, só no Gateway ([ADR 0005](decisions/0005-mapster.md)) | — |
-| JSON externo | Newtonsoft + `JsonDictionary` | `System.Text.Json` + DTOs tipados (Fase 03) |
+| JSON externo | System.Text.Json + DTOs tipados por API externa (`ReadFromJsonAsync`) | — |
 | Validação | FluentValidation + `ValidationFilter` | — |
 | Auth | JWT Bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`) + `PasswordHasher<User>` | — |
-| Resiliência / cache | — | `Microsoft.Extensions.Http.Resilience` / `IDistributedCache` + Redis (Fase 03) |
+| Resiliência / cache | `Microsoft.Extensions.Http.Resilience` (`AddStandardResilienceHandler`) / `IDistributedCache` (Redis opcional, memória sem connection string) no Provider | — |
+| Health checks | `/health/live` e `/health/ready` (`Microsoft.Extensions.Diagnostics.HealthChecks`) | — |
 | Testes | — | xUnit, NSubstitute, Testcontainers, WireMock.Net (Fase 04) |
 | Logs | padrão do ASP.NET | Serilog (Fase 06) |
 
@@ -25,12 +26,12 @@ Cada serviço segue camadas no estilo Clean Architecture:
 Climato.slnx                         ← solução única; Directory.Build.props / Directory.Packages.props / global.json na raiz
 src/Gateway/
 ├── Climato.Gateway.Api/             ← Program.cs, DependencyInjection.cs, Controllers, Filters, Errors, Extensions, OpenApi
-├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs: Auth, Cities, Users, Weathers), Mappings (Mapster), Validators, Options, DependencyInjection.cs
+├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs: Auth, Cities, Users, Weathers), Mappings (Mapster), Validators, Options, Exceptions, DependencyInjection.cs
 ├── Climato.Gateway.Domain/          ← Entidades e interfaces de repositório por agregado (Cities/, Users/), Exceptions/
-└── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients), Auth (JwtTokenService), DependencyInjection.cs
+└── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients, ProviderHealthCheck), Auth (JwtTokenService), DependencyInjection.cs
 src/Provider/
-├── Climato.Provider.Api/
-├── Climato.Provider.Application/    ← Clientes das APIs externas (Services), Options, DependencyInjection.cs, Core/Collections (JsonDictionary, até a Fase 03)
+├── Climato.Provider.Api/            ← Program.cs, DependencyInjection.cs, Controllers, Errors
+├── Climato.Provider.Application/    ← Clientes das APIs externas e cache (Services), Contracts, Model (DTOs da OpenWeather/Pexels), Exceptions, Options, DependencyInjection.cs
 └── Climato.Provider.Domain/         ← Weather (contrato devolvido ao Gateway)
 ```
 
@@ -91,18 +92,37 @@ API ──▶ Application ──▶ Domain
 - **Typed HttpClient** registrado com `AddHttpClient<IContrato, Implementacao>()`, sem `AddTransient` duplicado (A20).
 - `BaseAddress` e chaves vêm de configuração (`Options`), nunca literais no código.
 - Parâmetros de query sempre com `Uri.EscapeDataString`.
-- **(a partir da Fase 03)** DTOs tipados por API externa (`OpenWeatherCurrentResponse` etc.) desserializados com `ReadFromJsonAsync`; resiliência com `AddStandardResilienceHandler()`.
+- DTOs tipados por API externa (`OpenWeatherCurrentResponse`, `PexelsSearchResponse`) em `Application/Model/<Api>/`, lidos com `ReadFromJsonAsync<T>`. Nada de `Dictionary<string, object>`, `JObject` ou Newtonsoft.
+- `using` em todo `HttpResponseMessage` (e `HttpRequestMessage`, quando criado à mão). Headers fixos (ex.: `Authorization` do Pexels) vão em `DefaultRequestHeaders` no registro do client.
+- Resiliência com `AddStandardResilienceHandler()` em todo typed client. Timeouts escalonados: a tentativa de quem chama é maior que a soma dos timeouts totais das dependências que o chamado consulta em sequência (Gateway → Provider 25 s/30 s > OpenWeather 15 s + Pexels 5 s + folga do cache; Provider → OpenWeather 5 s/15 s; Provider → Pexels 2 s/5 s). `CircuitBreaker.SamplingDuration` ≥ 2× o timeout por tentativa. O Gateway só re-tenta falha de transporte (`Retry.ShouldHandle` com `HttpRequestException`); 5xx do Provider não é re-tentado.
+- Client traduz a resposta: 404 → `null`; outro status de erro, `HttpRequestException`, `ExecutionRejectedException` (Polly) ou `JsonException` → exceção tipada de indisponibilidade (`ExternalServiceUnavailableException` no Provider, `ProviderUnavailableException` no Gateway).
 
 ### Erros
 - Respostas de erro em `ProblemDetails` (`AddProblemDetails` + `UseStatusCodePages` + `GlobalExceptionHandler`). `DomainException` → 409 com a mensagem; validação → 400 `ValidationProblemDetails`; resto → 500 "Erro interno." sem detalhes. Erros esperados no controller com `Problem(statusCode, title)` ou `NotFound()`.
 - Não usar exceção para fluxo esperado (cidade não encontrada → retorno `null`/resultado, controller devolve 404).
+- Dependência fora (API externa, Provider) → exceção tipada de indisponibilidade → **503** no `GlobalExceptionHandler`, log `Warning`. Cidade inexistente continua sendo fluxo esperado (`null` → 404).
+- Cliente abortou (`OperationCanceledException` com `RequestAborted` cancelado) → 499 sem corpo, log `Information`.
+- Violação de constraint que reflete regra (e-mail único) → o repositório traduz para `DomainException` (409); FK de usuário inexistente → `UserNotFoundException` → 401.
+- 400 automático do `[ApiController]` usa o mesmo `ValidationProblemDetails` do `ValidationFilter` (`InvalidModelStateResponseFactory`, título "Dados inválidos.").
+- Falha opcional (imagem do Pexels, cache) não derruba a resposta: log `Warning` e segue.
+
+### Cache (Provider)
+- `IDistributedCache` atrás de `IWeatherCache` (`Services/WeatherCache`). Redis se `ConnectionStrings:Redis` estiver preenchida; senão `AddDistributedMemoryCache`.
+- Chave `clima:{cidade-normalizada}` (trim, espaços colapsados, minúsculas, sem acentos); valor em JSON; TTL absoluto de 10 min.
+- Só resposta de sucesso entra no cache (404 e falhas não). Erro do cache → `Warning` e segue sem cache.
+
+### Health checks
+- `/health/live`: sem checks (processo vivo). `/health/ready`: checks com a tag `ready`.
+- Gateway: Postgres (`AddDbContextCheck`) e Provider (`ProviderHealthCheck` → `GET health/ready`, client nomeado sem resiliência, 5 s). Provider: Redis, só se configurado, com `failureStatus: HealthStatus.Degraded` (200; Redis fora não derruba o `ready` do Gateway).
+- APIs externas (OpenWeather, Pexels) **não** entram: gastariam cota.
+- No Gateway, `MapHealthChecks(...).AllowAnonymous()`.
 
 ### Configuração e segredos
 - `appsettings.json` versionado **sem segredos**; valores locais em `appsettings.Development.json` (ignorado) ou `dotnet user-secrets`; em container, variáveis de ambiente (`OpenWeather__ApiKey`).
 - Seções tipadas com `IOptions<T>` e `ValidateOnStart()` para chaves obrigatórias.
 
 ### Injeção de dependência por camada
-- Cada projeto expõe `DependencyInjection.cs` com uma extensão `Add<Servico><Camada>()` (`AddGatewayApplication`, `AddGatewayInfrastructure(configuration)`, `AddProviderApplication`).
+- Cada projeto expõe `DependencyInjection.cs` com uma extensão `Add<Servico><Camada>()` (`AddGatewayApi(configuration)`, `AddGatewayApplication`, `AddGatewayInfrastructure(configuration)`, `AddProviderApi(configuration)`, `AddProviderApplication(configuration)`).
 - `Program.cs` só chama essas extensões, configura o pipeline e (no Gateway) aplica migrations fora de `Production`.
 - Options: classe `*Options` com `const string SectionName`, registrada com `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()`; mensagens de `[Required]` em português citando a chave.
 

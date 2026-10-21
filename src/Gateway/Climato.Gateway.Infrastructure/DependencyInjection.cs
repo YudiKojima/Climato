@@ -40,12 +40,32 @@ public static class DependencyInjection
 
         services.AddSingleton<ITokenService, JwtTokenService>();
 
-        services.AddHttpClient<IWeatherProviderClient, WeatherProviderClient>((serviceProvider, client) =>
+        services.AddHttpClient<IWeatherProviderClient, WeatherProviderClient>(ConfigureProviderClient)
+            .AddStandardResilienceHandler(options =>
+            {
+                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(25);
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
+                options.Retry.MaxRetryAttempts = 1;
+                options.Retry.ShouldHandle = args => ValueTask.FromResult(args.Outcome.Exception is HttpRequestException);
+                options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
+            });
+
+        services.AddHttpClient(ProviderHealthCheck.HttpClientName, (serviceProvider, client) =>
         {
-            var options = serviceProvider.GetRequiredService<IOptions<ProviderOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
+            ConfigureProviderClient(serviceProvider, client);
+            client.Timeout = TimeSpan.FromSeconds(5);
         });
 
+        services.AddHealthChecks()
+            .AddDbContextCheck<ClimatoDbContext>("postgres", tags: ["ready"])
+            .AddCheck<ProviderHealthCheck>("provider", tags: ["ready"]);
+
         return services;
+    }
+
+    private static void ConfigureProviderClient(IServiceProvider serviceProvider, HttpClient client)
+    {
+        var options = serviceProvider.GetRequiredService<IOptions<ProviderOptions>>().Value;
+        client.BaseAddress = new Uri(options.BaseUrl);
     }
 }

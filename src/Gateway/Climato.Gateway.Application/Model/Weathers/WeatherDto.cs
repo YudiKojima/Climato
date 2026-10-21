@@ -1,20 +1,20 @@
 namespace Climato.Gateway.Application.Model.Weathers;
 
-public class WeatherDto
+public sealed class WeatherDto
 {
-    public string City { get; set; }
-    public string Country { get; set; }
-    public string Description { get; set; }
-    public string Icon { get; set; }
-    public double Temperature { get; set; }
-    public double FeelsLike { get; set; }
-    public double TempMin { get; set; }
-    public double TempMax { get; set; }
-    public int Humidity { get; set; }
-    public int Pressure { get; set; }
-    public double WindSpeed { get; set; }
-    public int WindDirection { get; set; }
-    public DateTime Sunrise { get; set; }
-    public DateTime Sunset { get; set; }
-    public string? ImageUrl { get; set; }
+    public required string City { get; init; }
+    public required string Country { get; init; }
+    public required string Description { get; init; }
+    public required string Icon { get; init; }
+    public required double Temperature { get; init; }
+    public required double FeelsLike { get; init; }
+    public required double TempMin { get; init; }
+    public required double TempMax { get; init; }
+    public required int Humidity { get; init; }
+    public required int Pressure { get; init; }
+    public required double WindSpeedKmh { get; init; }
+    public required int WindDirection { get; init; }
+    public required DateTimeOffset Sunrise { get; init; }
+    public required DateTimeOffset Sunset { get; init; }
+    public string? ImageUrl { get; init; }
 }

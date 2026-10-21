@@ -18,22 +18,29 @@ public class WeatherController : ControllerBase
     /// <summary>Retorna o clima atual e a imagem da cidade informada.</summary>
     /// <param name="cityName">Nome da cidade, exemplo: Cuiabá</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
+    /// <response code="200">Clima atual, com vento em km/h e horários no fuso da cidade.</response>
+    /// <response code="400">Parâmetro 'cityName' ausente.</response>
+    /// <response code="404">Cidade não encontrada.</response>
+    /// <response code="503">OpenWeather indisponível.</response>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     public async Task<ActionResult<Weather>> Get([FromQuery] string cityName, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(cityName))
         {
-            return BadRequest("Parâmetro 'cityName' é obrigatório.");
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Parâmetro 'cityName' é obrigatório.");
         }
 
-        try
+        var weather = await appService.GetByCityAsync(cityName, cancellationToken);
+
+        if (weather == null)
         {
-            var result = await appService.GetByCityAsync(cityName, cancellationToken);
-            return Ok(result);
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Cidade não encontrada.");
         }
-        catch (HttpRequestException)
-        {
-            return NotFound($"Não foi possível obter dados para a cidade '{cityName}'.");
-        }
+
+        return Ok(weather);
     }
 }

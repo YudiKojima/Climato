@@ -1,5 +1,7 @@
+using Climato.Gateway.Domain.Exceptions;
 using Climato.Gateway.Domain.Users;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Climato.Gateway.Infrastructure.Data.Repositories;
 
@@ -15,7 +17,15 @@ public class UserRepository : IUserRepository
     public async Task CreateAsync(User user, CancellationToken cancellationToken)
     {
         await context.Users.AddAsync(user, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "ix_user_email" })
+        {
+            throw new DomainException("E-mail já cadastrado.");
+        }
     }
 
     public async Task<User?> GetAsync(string email, CancellationToken cancellationToken)
