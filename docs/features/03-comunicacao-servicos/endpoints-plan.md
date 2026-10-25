@@ -1108,14 +1108,14 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `docs/architecture/backend.md`, `docs/architecture/system-design.md`, `docs/architecture/review-checklist.md`, `docs/architecture/frontend.md`
 
-- [ ] **Passo 1: `backend.md`**
+- [x] **Passo 1: `backend.md`**
   - **Estrutura da Solução:** linha do `Climato.Provider.Domain` → `← Weathers (Weather, Forecast — contratos devolvidos ao Gateway), Locations`; linha do `Climato.Provider.Application` → `← OpenWeatherClient, AppServices (clima, previsão, busca, imagem), cache (Services), Contracts, Model (DTOs da OpenWeather/Pexels), Exceptions, Options, DependencyInjection.cs`.
   - **Controllers:** exemplo de rotas → `(/cities, /weathers, /forecasts, /locations, /auth)`.
   - **Comunicação HTTP:** (feito na Tarefa 1) novo item — "Provider: toda chamada à OpenWeather passa pelo typed client `IOpenWeatherClient` (`OpenWeatherClient`), que concentra a tradução de erros num `GetAsync<T>` privado; AppServices não recebem `HttpClient` da OpenWeather. No Gateway, o `WeatherProviderClient` faz o mesmo para o Provider."
   - **Cache (Provider):** (feito na Tarefa 1) trocar o primeiro item por "`IDistributedCache` atrás de `IProviderCache` (`Services/ProviderCache`), genérico: `GetAsync<T>(prefixo, texto)` / `SetAsync<T>(prefixo, texto, valor, duração)`. Redis se `ConnectionStrings:Redis` estiver preenchida; senão `AddDistributedMemoryCache`." e o segundo por "Chave `{prefixo}:{texto-normalizado}` (trim, espaços colapsados, minúsculas, sem acentos); valor em JSON; TTL absoluto por uso: `clima` 10 min, `previsao` 30 min, `locais` 24 h (lista vazia também é cacheada)."
   - **Decisões Técnicas — Provider como camada anticorrupção:** acrescentar "A previsão é agregada por dia no Provider (data local da cidade, mín/máx, condição do ponto mais próximo de 12:00, maior `pop` × 100, maior vento em km/h); o Gateway e o front não veem os pontos de 3 h."
 
-- [ ] **Passo 2: `system-design.md`**
+- [x] **Passo 2: `system-design.md`**
   - Após **Consulta de clima**, novas subseções:
 
 ```markdown
@@ -1149,9 +1149,9 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 | BE-28 | 🟡 | 03 | Chamada à OpenWeather fora do client | `HttpClient` da OpenWeather injetado em AppService ou URL `data/2.5`/`geo/1.0` montada fora do `OpenWeatherClient` | [Comunicação HTTP](backend.md#comunicação-http) |
 ```
 
-- [ ] **Passo 4: `frontend.md`** — em **Chamadas à API**, novo item: "Previsão (`GET /forecasts/{cidade}`) e busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) já existem no Gateway; o consumo (autocomplete com *debounce*, tela de previsão) é da Fase 07."
+- [x] **Passo 4: `frontend.md`** — em **Chamadas à API**, novo item: "Previsão (`GET /forecasts/{cidade}`) e busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) já existem no Gateway; o consumo (autocomplete com *debounce*, tela de previsão) é da Fase 07."
 
-- [ ] **Passo 5: Commit** (após `/revisar-padrao`)
+- [x] **Passo 5: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add docs/architecture

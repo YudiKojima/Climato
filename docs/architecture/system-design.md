@@ -59,15 +59,30 @@ flowchart LR
 3. Provider consulta o cache (`clima:{cidade-normalizada}`, TTL 10 min; Redis ou memória); em miss, chama OpenWeather e, de forma opcional, Pexels; grava no cache.
 4. Gateway registra a cidade no histórico do usuário (se ainda não existir) e devolve o clima.
 
+### Previsão de 5 dias
+
+1. `GET /forecasts/{cidade}` no Gateway com `Authorization: Bearer`.
+2. Gateway chama `GET /forecasts?cityName=` no Provider.
+3. Provider consulta o cache (`previsao:{cidade-normalizada}`, TTL 30 min); em miss, chama OpenWeather `data/2.5/forecast` e agrega os pontos de 3 h por dia no fuso da cidade (até 5 dias).
+4. Gateway devolve a previsão **sem** registrar a cidade no histórico.
+
+### Busca de cidades (autocomplete)
+
+1. `GET /locations?query=` no Gateway (2 a 100 caracteres; senão 400).
+2. Gateway chama `GET /locations?query=` no Provider.
+3. Provider consulta o cache (`locais:{texto-normalizado}`, TTL 24 h); em miss, chama OpenWeather `geo/1.0/direct` (`limit=5`) e devolve `{ name, state, country }`, com o nome em português quando houver.
+
 ### Mapeamento de erros
 
 | Situação | Provider responde | Gateway responde |
 |---|---|---|
-| Cidade não existe na OpenWeather | 404 | 404 (não entra no histórico) |
+| Cidade não existe na OpenWeather (clima ou previsão) | 404 | 404 (não entra no histórico) |
 | OpenWeather fora / timeout / circuito aberto / 401 de chave / 429 | 503 | 503 |
 | Pexels falha | 200 sem `imageUrl` | 200 |
 | Provider fora ou circuito aberto | — | 503 |
 | Cliente abortou a requisição | 499 | 499 |
+| Busca com `query` < 2 ou > 100 caracteres | 400 | 400 |
+| Busca sem resultado | 200 `[]` | 200 `[]` |
 
 Todas as respostas de erro em `application/problem+json`.
 
@@ -94,8 +109,8 @@ Schema versionado por EF Core Migrations (`Gateway.Infrastructure/Data/Migration
 | API | Uso | Plano / limite | Configuração |
 |---|---|---|---|
 | OpenWeather Current Weather `2.5/weather` | Clima atual | Free: 60 req/min, 1M/mês | `OpenWeather:ApiKey` |
-| OpenWeather 5 day / 3 hour `2.5/forecast` | Previsão (Fase 03) | Free | idem |
-| OpenWeather Geocoding `geo/1.0/direct` | Autocomplete (Fase 03) | Free | idem |
+| OpenWeather 5 day / 3 hour `2.5/forecast` | Previsão | Free | idem |
+| OpenWeather Geocoding `geo/1.0/direct` | Autocomplete | Free | idem |
 | Pexels `v1/search` | Foto da cidade | 200 req/h | `Pexels:ApiKey` |
 
 Os limites gratuitos são o motivo do cache no Provider e do usuário de demonstração na Fase 08.
