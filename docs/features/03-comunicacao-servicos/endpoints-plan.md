@@ -608,7 +608,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `IOpenWeatherClient`, `IProviderCache` (Tarefa 1).
 - Produces: `IOpenWeatherClient.GetLocationsAsync(string query, CancellationToken) : Task<IReadOnlyList<OpenWeatherLocationResponse>>`; `ILocationAppService.SearchAsync(string query, CancellationToken) : Task<IReadOnlyList<Location>>`; `GET /locations?query=`.
 
-- [ ] **Passo 1: `Model/OpenWeather/OpenWeatherLocationResponse.cs` (criar)** — `local_names` é dicionário de código de idioma → nome (as chaves não passam pela política snake_case).
+- [x] **Passo 1: `Model/OpenWeather/OpenWeatherLocationResponse.cs` (criar)** — `local_names` é dicionário de código de idioma → nome (as chaves não passam pela política snake_case).
 
 ```csharp
 namespace Climato.Provider.Application.Model.OpenWeather;
@@ -620,7 +620,7 @@ public sealed record OpenWeatherLocationResponse(
     string? State);
 ```
 
-- [ ] **Passo 2: `Provider/Climato.Provider.Domain/Locations/Location.cs` (criar)**
+- [x] **Passo 2: `Provider/Climato.Provider.Domain/Locations/Location.cs` (criar)**
 
 ```csharp
 namespace Climato.Provider.Domain.Locations;
@@ -633,7 +633,7 @@ public sealed class Location
 }
 ```
 
-- [ ] **Passo 3: `IOpenWeatherClient` / `OpenWeatherClient`** — acrescentar:
+- [x] **Passo 3: `IOpenWeatherClient` / `OpenWeatherClient`** — acrescentar:
 
 ```csharp
     Task<IReadOnlyList<OpenWeatherLocationResponse>> GetLocationsAsync(string query, CancellationToken cancellationToken);
@@ -647,7 +647,7 @@ public sealed class Location
     }
 ```
 
-- [ ] **Passo 4: `Contracts/ILocationAppService.cs` (criar)**
+- [x] **Passo 4: `Contracts/ILocationAppService.cs` (criar)**
 
 ```csharp
 using Climato.Provider.Domain.Locations;
@@ -660,7 +660,7 @@ public interface ILocationAppService
 }
 ```
 
-- [ ] **Passo 5: `Services/LocationAppService.cs` (criar)** — lista vazia também vai para o cache.
+- [x] **Passo 5: `Services/LocationAppService.cs` (criar)** — lista vazia também vai para o cache.
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -715,13 +715,13 @@ public sealed class LocationAppService : ILocationAppService
 }
 ```
 
-- [ ] **Passo 6: `DependencyInjection.cs`** — após o registro do `IForecastAppService`:
+- [x] **Passo 6: `DependencyInjection.cs`** — após o registro do `IForecastAppService`:
 
 ```csharp
         services.AddScoped<ILocationAppService, LocationAppService>();
 ```
 
-- [ ] **Passo 7: `Provider/Climato.Provider.Api/Controllers/LocationController.cs` (criar)**
+- [x] **Passo 7: `Provider/Climato.Provider.Api/Controllers/LocationController.cs` (criar)**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -769,7 +769,7 @@ public class LocationController : ControllerBase
 }
 ```
 
-- [ ] **Passo 8: Build** — `dotnet build Climato.slnx` → sem erros e sem avisos `CS86xx`.
+- [x] **Passo 8: Build** — `dotnet build Climato.slnx` → sem erros e sem avisos `CS86xx`.
 
 - [x] **Passo 9: Commit** (após `/revisar-padrao`)
 

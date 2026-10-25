@@ -40,6 +40,12 @@ public sealed class OpenWeatherClient : IOpenWeatherClient
         return GetAsync<OpenWeatherForecastResponse>(url, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<OpenWeatherLocationResponse>> GetLocationsAsync(string query, CancellationToken cancellationToken)
+    {
+        var url = $"geo/1.0/direct?q={Uri.EscapeDataString(query)}&limit=5&appid={apiKey}";
+        return await GetAsync<List<OpenWeatherLocationResponse>>(url, cancellationToken) ?? [];
+    }
+
     private async Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken) where T : class
     {
         try
