@@ -33,4 +33,9 @@ public class WeatherAppService : IWeatherAppService
 
         return weather;
     }
+
+    public Task<ForecastDto?> GetForecastAsync(string cityName, CancellationToken cancellationToken)
+    {
+        return weatherProviderClient.GetForecastAsync(cityName, cancellationToken);
+    }
 }

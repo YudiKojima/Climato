@@ -68,7 +68,7 @@ API ──▶ Application ──▶ Domain
 - Usuário atual: `User.GetUserId()` (`Api/Extensions/ClaimsPrincipalExtensions`), que lê a claim `sub`.
 
 ### DTOs (Application)
-- Ficam em `Application/Model/<Agregado>/`; sufixos `Dto` (resposta), `PostDto`/`PutDto` (entrada).
+- Ficam em `Application/Model/<Agregado>/`; sufixos `Dto` (resposta), `PostDto`/`PutDto` (entrada pelo corpo), `Query` (entrada pela query string, recebida com `[FromQuery]`, ex.: `LocationSearchQuery`). Propriedades de `Query` são anuláveis: com `string` não anulável o `[ApiController]` aplica `[Required]` implícito e responde em inglês antes do validator.
 - DTO de resposta **nunca** expõe senha, hash ou dado interno.
 - Entidades do Domain nunca saem pelo controller.
 - Todo DTO de entrada tem um `AbstractValidator<T>` em `Application/Validators/`, com mensagens em português.

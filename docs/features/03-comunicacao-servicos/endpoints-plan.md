@@ -27,6 +27,7 @@
 | `units=metric&lang=pt_br` nos três endpoints | Só em `weather` e `forecast`; `geo/1.0/direct` usa `q`, `limit=5` e `appid` | A Geocoding API não aceita esses parâmetros; o nome em português vem de `local_names.pt` |
 | `LocationSearchQuery.Query` | `string?`, validado com `NotEmpty` antes do tamanho | Com `string` não anulável, o `[ApiController]` aplica `[Required]` implícito e devolve a mensagem em inglês antes do validator |
 | Docs de `OpenWeatherClient`/`ProviderCache` e BE-28 na Tarefa 5 | Feitos no commit da Tarefa 1 (itens **Comunicação HTTP** e **Cache** do Passo 1 e o Passo 3 da Tarefa 5) | GE-01 no `/revisar-padrao` da Tarefa 1: o `backend.md` citava o `IWeatherCache` removido |
+| Sufixo dos DTOs de entrada (`backend.md`) | Novo sufixo `Query` documentado em **DTOs** e incluído no BE-22, no commit da Tarefa 4 | GE-01 no `/revisar-padrao` da Tarefa 4: `LocationSearchQuery` não cabia em `PostDto`/`PutDto` |
 | Mensagem do 400 da busca no Gateway | Título "Dados inválidos." (padrão do `ValidationFilter`) com a mensagem do design em `errors.Query` | Mesmo formato de toda validação do Gateway |
 
 ## Mapa de arquivos
@@ -792,7 +793,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `GET /forecasts?cityName=` e `GET /locations?query=` do Provider (Tarefas 2 e 3).
 - Produces: `IWeatherProviderClient.GetForecastAsync(string, CancellationToken) : Task<ForecastDto?>` e `SearchLocationsAsync(string, CancellationToken) : Task<IReadOnlyList<LocationDto>>`; `IWeatherAppService.GetForecastAsync(string, CancellationToken) : Task<ForecastDto?>`; `ILocationAppService.SearchAsync(string, CancellationToken) : Task<IReadOnlyList<LocationDto>>`; `GET /forecasts/{cityName}` e `GET /locations?query=` no Gateway.
 
-- [ ] **Passo 1: `Model/Weathers/ForecastDayDto.cs` (criar)**
+- [x] **Passo 1: `Model/Weathers/ForecastDayDto.cs` (criar)**
 
 ```csharp
 namespace Climato.Gateway.Application.Model.Weathers;
@@ -809,7 +810,7 @@ public sealed class ForecastDayDto
 }
 ```
 
-- [ ] **Passo 2: `Model/Weathers/ForecastDto.cs` (criar)**
+- [x] **Passo 2: `Model/Weathers/ForecastDto.cs` (criar)**
 
 ```csharp
 namespace Climato.Gateway.Application.Model.Weathers;
@@ -822,7 +823,7 @@ public sealed class ForecastDto
 }
 ```
 
-- [ ] **Passo 3: `Model/Locations/LocationDto.cs` (criar)**
+- [x] **Passo 3: `Model/Locations/LocationDto.cs` (criar)**
 
 ```csharp
 namespace Climato.Gateway.Application.Model.Locations;
@@ -835,7 +836,7 @@ public sealed class LocationDto
 }
 ```
 
-- [ ] **Passo 4: `Model/Locations/LocationSearchQuery.cs` (criar)** — `string?` para não cair no `[Required]` implícito (ver Ajustes).
+- [x] **Passo 4: `Model/Locations/LocationSearchQuery.cs` (criar)** — `string?` para não cair no `[Required]` implícito (ver Ajustes).
 
 ```csharp
 namespace Climato.Gateway.Application.Model.Locations;
@@ -846,7 +847,7 @@ public sealed class LocationSearchQuery
 }
 ```
 
-- [ ] **Passo 5: `Validators/LocationSearchQueryValidator.cs` (criar)**
+- [x] **Passo 5: `Validators/LocationSearchQueryValidator.cs` (criar)**
 
 ```csharp
 using Climato.Gateway.Application.Model.Locations;
@@ -866,7 +867,7 @@ public class LocationSearchQueryValidator : AbstractValidator<LocationSearchQuer
 }
 ```
 
-- [ ] **Passo 6: `Contracts/IWeatherProviderClient.cs`**
+- [x] **Passo 6: `Contracts/IWeatherProviderClient.cs`**
 
 ```csharp
 using Climato.Gateway.Application.Model.Locations;
@@ -882,7 +883,7 @@ public interface IWeatherProviderClient
 }
 ```
 
-- [ ] **Passo 7: `Gateway/Climato.Gateway.Infrastructure/Http/WeatherProviderClient.cs` (reescrever)** — o tratamento de erro atual vai para `GetAsync<T>`.
+- [x] **Passo 7: `Gateway/Climato.Gateway.Infrastructure/Http/WeatherProviderClient.cs` (reescrever)** — o tratamento de erro atual vai para `GetAsync<T>`.
 
 ```csharp
 using System.Net;
@@ -947,7 +948,7 @@ public class WeatherProviderClient : IWeatherProviderClient
 }
 ```
 
-- [ ] **Passo 8: `Contracts/IWeatherAppService.cs` e `Services/WeatherAppService.cs`** — acrescentar na interface:
+- [x] **Passo 8: `Contracts/IWeatherAppService.cs` e `Services/WeatherAppService.cs`** — acrescentar na interface:
 
 ```csharp
     Task<ForecastDto?> GetForecastAsync(string cityName, CancellationToken cancellationToken);
@@ -962,7 +963,7 @@ e no serviço (sem gravar histórico):
     }
 ```
 
-- [ ] **Passo 9: `Contracts/ILocationAppService.cs` e `Services/LocationAppService.cs` (criar)**
+- [x] **Passo 9: `Contracts/ILocationAppService.cs` e `Services/LocationAppService.cs` (criar)**
 
 ```csharp
 using Climato.Gateway.Application.Model.Locations;
@@ -997,13 +998,13 @@ public class LocationAppService : ILocationAppService
 }
 ```
 
-- [ ] **Passo 10: `Gateway/Climato.Gateway.Application/DependencyInjection.cs`** — após `IWeatherAppService`:
+- [x] **Passo 10: `Gateway/Climato.Gateway.Application/DependencyInjection.cs`** — após `IWeatherAppService`:
 
 ```csharp
         services.AddScoped<ILocationAppService, LocationAppService>();
 ```
 
-- [ ] **Passo 11: `Gateway/Climato.Gateway.Api/Controllers/ForecastController.cs` (criar)**
+- [x] **Passo 11: `Gateway/Climato.Gateway.Api/Controllers/ForecastController.cs` (criar)**
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -1049,7 +1050,7 @@ public class ForecastController : ControllerBase
 }
 ```
 
-- [ ] **Passo 12: `Gateway/Climato.Gateway.Api/Controllers/LocationController.cs` (criar)** — `query.Query!`: o `ValidationFilter` já barrou nulo/vazio.
+- [x] **Passo 12: `Gateway/Climato.Gateway.Api/Controllers/LocationController.cs` (criar)** — `query.Query!`: o `ValidationFilter` já barrou nulo/vazio.
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -1089,9 +1090,9 @@ public class LocationController : ControllerBase
 }
 ```
 
-- [ ] **Passo 13: Build** — `dotnet build Climato.slnx` → sem erros e sem avisos `CS86xx`.
+- [x] **Passo 13: Build** — `dotnet build Climato.slnx` → sem erros e sem avisos `CS86xx`.
 
-- [ ] **Passo 14: Commit** (após `/revisar-padrao`)
+- [x] **Passo 14: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add src/Gateway
