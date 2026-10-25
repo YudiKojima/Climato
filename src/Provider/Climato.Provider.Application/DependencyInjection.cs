@@ -47,6 +47,7 @@ public static class DependencyInjection
             });
 
         services.AddScoped<IWeatherAppService, WeatherAppService>();
+        services.AddScoped<IForecastAppService, ForecastAppService>();
 
         services.AddHttpClient<ICityImageAppService, CityImageAppService>((serviceProvider, client) =>
             {

@@ -363,7 +363,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `IOpenWeatherClient`, `IProviderCache` (Tarefa 1).
 - Produces: `IOpenWeatherClient.GetForecastAsync(string cityName, CancellationToken) : Task<OpenWeatherForecastResponse?>`; `IForecastAppService.GetByCityAsync(string cityName, CancellationToken) : Task<Forecast?>`; `GET /forecasts?cityName=` com o JSON da seção 1 do design.
 
-- [ ] **Passo 1: `Model/OpenWeather/OpenWeatherForecastResponse.cs` (criar)** — reaproveita `OpenWeatherCondition` do clima atual.
+- [x] **Passo 1: `Model/OpenWeather/OpenWeatherForecastResponse.cs` (criar)** — reaproveita `OpenWeatherCondition` do clima atual.
 
 ```csharp
 namespace Climato.Provider.Application.Model.OpenWeather;
@@ -384,7 +384,7 @@ public sealed record OpenWeatherForecastWind(double Speed);
 public sealed record OpenWeatherForecastCity(string Name, string Country, int Timezone);
 ```
 
-- [ ] **Passo 2: `Provider/Climato.Provider.Domain/Weathers/ForecastDay.cs` (criar)**
+- [x] **Passo 2: `Provider/Climato.Provider.Domain/Weathers/ForecastDay.cs` (criar)**
 
 ```csharp
 namespace Climato.Provider.Domain.Weathers;
@@ -401,7 +401,7 @@ public sealed class ForecastDay
 }
 ```
 
-- [ ] **Passo 3: `Provider/Climato.Provider.Domain/Weathers/Forecast.cs` (criar)**
+- [x] **Passo 3: `Provider/Climato.Provider.Domain/Weathers/Forecast.cs` (criar)**
 
 ```csharp
 namespace Climato.Provider.Domain.Weathers;
@@ -414,7 +414,7 @@ public sealed class Forecast
 }
 ```
 
-- [ ] **Passo 4: `IOpenWeatherClient` / `OpenWeatherClient`** — acrescentar:
+- [x] **Passo 4: `IOpenWeatherClient` / `OpenWeatherClient`** — acrescentar:
 
 ```csharp
     Task<OpenWeatherForecastResponse?> GetForecastAsync(string cityName, CancellationToken cancellationToken);
@@ -428,7 +428,7 @@ public sealed class Forecast
     }
 ```
 
-- [ ] **Passo 5: `Contracts/IForecastAppService.cs` (criar)**
+- [x] **Passo 5: `Contracts/IForecastAppService.cs` (criar)**
 
 ```csharp
 using Climato.Provider.Domain.Weathers;
@@ -441,7 +441,7 @@ public interface IForecastAppService
 }
 ```
 
-- [ ] **Passo 6: `Services/ForecastAppService.cs` (criar)** — agrega por data local (regras da seção 1 do design).
+- [x] **Passo 6: `Services/ForecastAppService.cs` (criar)** — agrega por data local (regras da seção 1 do design).
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -528,13 +528,13 @@ public sealed class ForecastAppService : IForecastAppService
 }
 ```
 
-- [ ] **Passo 7: `DependencyInjection.cs`** — após o registro do `IWeatherAppService`:
+- [x] **Passo 7: `DependencyInjection.cs`** — após o registro do `IWeatherAppService`:
 
 ```csharp
         services.AddScoped<IForecastAppService, ForecastAppService>();
 ```
 
-- [ ] **Passo 8: `Provider/Climato.Provider.Api/Controllers/ForecastController.cs` (criar)**
+- [x] **Passo 8: `Provider/Climato.Provider.Api/Controllers/ForecastController.cs` (criar)**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -585,9 +585,9 @@ public class ForecastController : ControllerBase
 }
 ```
 
-- [ ] **Passo 9: Build** — `dotnet build Climato.slnx` → sem erros e sem avisos `CS86xx`.
+- [x] **Passo 9: Build** — `dotnet build Climato.slnx` → sem erros e sem avisos `CS86xx`.
 
-- [ ] **Passo 10: Commit** (após `/revisar-padrao`)
+- [x] **Passo 10: Commit** (após `/revisar-padrao`)
 
 ```bash
 git add src/Provider

@@ -34,6 +34,12 @@ public sealed class OpenWeatherClient : IOpenWeatherClient
         return GetAsync<OpenWeatherCurrentResponse>(url, cancellationToken);
     }
 
+    public Task<OpenWeatherForecastResponse?> GetForecastAsync(string cityName, CancellationToken cancellationToken)
+    {
+        var url = $"data/2.5/forecast?q={Uri.EscapeDataString(cityName)}&appid={apiKey}&units=metric&lang=pt_br";
+        return GetAsync<OpenWeatherForecastResponse>(url, cancellationToken);
+    }
+
     private async Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken) where T : class
     {
         try
