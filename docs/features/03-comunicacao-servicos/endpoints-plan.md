@@ -28,6 +28,7 @@
 | `LocationSearchQuery.Query` | `string?`, validado com `NotEmpty` antes do tamanho | Com `string` não anulável, o `[ApiController]` aplica `[Required]` implícito e devolve a mensagem em inglês antes do validator |
 | Docs de `OpenWeatherClient`/`ProviderCache` e BE-28 na Tarefa 5 | Feitos no commit da Tarefa 1 (itens **Comunicação HTTP** e **Cache** do Passo 1 e o Passo 3 da Tarefa 5) | GE-01 no `/revisar-padrao` da Tarefa 1: o `backend.md` citava o `IWeatherCache` removido |
 | Sufixo dos DTOs de entrada (`backend.md`) | Novo sufixo `Query` documentado em **DTOs** e incluído no BE-22, no commit da Tarefa 4 | GE-01 no `/revisar-padrao` da Tarefa 4: `LocationSearchQuery` não cabia em `PostDto`/`PutDto` |
+| Parâmetro `LocationSearchQuery query` no `LocationController` do Gateway | Renomeado para `request` | Verificação manual (Tarefa 7): com o nome igual à chave `?query=`, o binder procurava `query.Query` e toda busca válida virava 400 |
 | Mensagem do 400 da busca no Gateway | Título "Dados inválidos." (padrão do `ValidationFilter`) com a mensagem do design em `errors.Query` | Mesmo formato de toda validação do Gateway |
 
 ## Mapa de arquivos
@@ -1050,7 +1051,7 @@ public class ForecastController : ControllerBase
 }
 ```
 
-- [x] **Passo 12: `Gateway/Climato.Gateway.Api/Controllers/LocationController.cs` (criar)** — `query.Query!`: o `ValidationFilter` já barrou nulo/vazio.
+- [x] **Passo 12: `Gateway/Climato.Gateway.Api/Controllers/LocationController.cs` (criar)** — `request.Query!`: o `ValidationFilter` já barrou nulo/vazio; o parâmetro não pode se chamar `query` (ver Ajustes).
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -1073,7 +1074,7 @@ public class LocationController : ControllerBase
     }
 
     /// <summary>Busca cidades pelo nome para o autocomplete (até 5 resultados).</summary>
-    /// <param name="query">Parte do nome da cidade (2 a 100 caracteres), exemplo: São Pa</param>
+    /// <param name="request">Parte do nome da cidade em `query` (2 a 100 caracteres), exemplo: São Pa</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     /// <response code="200">Cidades encontradas, com nome em português quando houver; lista vazia sem resultado.</response>
     /// <response code="400">Parâmetro 'query' com menos de 2 ou mais de 100 caracteres.</response>
@@ -1082,9 +1083,9 @@ public class LocationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-    public async Task<ActionResult<IReadOnlyList<LocationDto>>> Search([FromQuery] LocationSearchQuery query, CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<LocationDto>>> Search([FromQuery] LocationSearchQuery request, CancellationToken cancellationToken)
     {
-        var locations = await appService.SearchAsync(query.Query!, cancellationToken);
+        var locations = await appService.SearchAsync(request.Query!, cancellationToken);
         return Ok(locations);
     }
 }
@@ -1200,7 +1201,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ### Tarefa 7: Verificação final e PR
 
-- [ ] **Passo 1:** `/verification-before-completion` com os comandos da [Verificação](../../../CLAUDE.md#verificação):
+- [x] **Passo 1:** `/verification-before-completion` com os comandos da [Verificação](../../../CLAUDE.md#verificação):
 
 ```bash
 dotnet build Climato.slnx --no-incremental
@@ -1210,9 +1211,9 @@ npm --prefix web run build
 
 Esperado: build sem erros e sem avisos `CS86xx`; lint limpo; build do web ok (front não mudou).
 
-- [ ] **Passo 2:** roteiro manual da seção [Verificação do design](endpoints-design.md#verificação) (itens 1–7) pelo Scalar, anotando o resultado de cada um no PR. Para o item 2, conferir no log do `System.Net.Http.HttpClient` do Provider que a segunda chamada não sai para a OpenWeather.
+- [x] **Passo 2:** roteiro manual da seção [Verificação do design](endpoints-design.md#verificação) (itens 1–7) pelo Scalar, anotando o resultado de cada um no PR. Para o item 2, conferir no log do `System.Net.Http.HttpClient` do Provider que a segunda chamada não sai para a OpenWeather.
 
-- [ ] **Passo 3:** `/revisar-padrao` no diff completo da branch → sem 🔴 (ou liberados pelo usuário).
+- [x] **Passo 3:** `/revisar-padrao` no diff completo da branch → sem 🔴 (ou liberados pelo usuário).
 
 - [ ] **Passo 4:** `/requesting-code-review`.
 

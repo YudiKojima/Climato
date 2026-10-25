@@ -102,3 +102,4 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 - [Fase 08] 400 automático expõe mensagens do System.Text.Json em inglês e nomes de tipo .NET em `errors` — desligar `AllowInputFormatterExceptionMessages` ou mapear para "JSON inválido."
 - [Fase 07] Autocomplete da busca com *debounce* (~300 ms) e mínimo de 2 caracteres antes de chamar `GET /locations`
 - [Fase 04] Previsão: resposta 200 da OpenWeather com `list` vazia ou `weather` vazio em algum ponto vira 500 — mesma correção da resposta incompleta do clima atual
+- [Fase 07] Previsão devolve `city` como a OpenWeather manda em `data/2.5/forecast` (sem tradução, ex.: "Tokyo"); na tela, usar o nome do clima atual ou da busca

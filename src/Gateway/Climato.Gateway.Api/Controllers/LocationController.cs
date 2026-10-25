@@ -18,7 +18,7 @@ public class LocationController : ControllerBase
     }
 
     /// <summary>Busca cidades pelo nome para o autocomplete (até 5 resultados).</summary>
-    /// <param name="query">Parte do nome da cidade (2 a 100 caracteres), exemplo: São Pa</param>
+    /// <param name="request">Parte do nome da cidade em `query` (2 a 100 caracteres), exemplo: São Pa</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     /// <response code="200">Cidades encontradas, com nome em português quando houver; lista vazia sem resultado.</response>
     /// <response code="400">Parâmetro 'query' com menos de 2 ou mais de 100 caracteres.</response>
@@ -27,9 +27,9 @@ public class LocationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-    public async Task<ActionResult<IReadOnlyList<LocationDto>>> Search([FromQuery] LocationSearchQuery query, CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyList<LocationDto>>> Search([FromQuery] LocationSearchQuery request, CancellationToken cancellationToken)
     {
-        var locations = await appService.SearchAsync(query.Query!, cancellationToken);
+        var locations = await appService.SearchAsync(request.Query!, cancellationToken);
         return Ok(locations);
     }
 }
