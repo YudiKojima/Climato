@@ -32,9 +32,9 @@ public static class DependencyInjection
             services.AddStackExchangeRedisCache(options => options.Configuration = redisConnectionString);
         }
 
-        services.AddSingleton<IWeatherCache, WeatherCache>();
+        services.AddSingleton<IProviderCache, ProviderCache>();
 
-        services.AddHttpClient<IWeatherAppService, WeatherAppService>((serviceProvider, client) =>
+        services.AddHttpClient<IOpenWeatherClient, OpenWeatherClient>((serviceProvider, client) =>
             {
                 var options = serviceProvider.GetRequiredService<IOptions<OpenWeatherOptions>>().Value;
                 client.BaseAddress = new Uri(options.BaseUrl);
@@ -45,6 +45,10 @@ public static class DependencyInjection
                 options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(15);
                 options.Retry.MaxRetryAttempts = 2;
             });
+
+        services.AddScoped<IWeatherAppService, WeatherAppService>();
+        services.AddScoped<IForecastAppService, ForecastAppService>();
+        services.AddScoped<ILocationAppService, LocationAppService>();
 
         services.AddHttpClient<ICityImageAppService, CityImageAppService>((serviceProvider, client) =>
             {

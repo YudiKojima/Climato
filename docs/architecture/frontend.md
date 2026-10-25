@@ -55,6 +55,7 @@ Proteção de rota **só** em `ProtectedRoute`/router — páginas não redireci
 - Sessão só via `services/session.js` (`saveSession`, `getToken`, `clearSession`, `hasValidSession`); nenhum outro arquivo usa `localStorage` para auth. Mensagem de erro com `getApiErrorMessage(err)`.
 - Parâmetros de rota/query com `encodeURIComponent`.
 - Erros da API chegam como `ProblemDetails`: exibir `title`/`detail`, não a mensagem do axios.
+- Previsão (`GET /forecasts/{cidade}`) e busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) já existem no Gateway; o consumo é da Fase 07. A busca casa o nome inteiro (não prefixo): usar ao confirmar, não a cada tecla.
 
 ## Tema e estilo **(a partir da Fase 07)**
 

@@ -31,8 +31,8 @@ src/Gateway/
 └── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients, ProviderHealthCheck), Auth (JwtTokenService), DependencyInjection.cs
 src/Provider/
 ├── Climato.Provider.Api/            ← Program.cs, DependencyInjection.cs, Controllers, Errors
-├── Climato.Provider.Application/    ← Clientes das APIs externas e cache (Services), Contracts, Model (DTOs da OpenWeather/Pexels), Exceptions, Options, DependencyInjection.cs
-└── Climato.Provider.Domain/         ← Weather (contrato devolvido ao Gateway)
+├── Climato.Provider.Application/    ← OpenWeatherClient, AppServices (clima, previsão, busca, imagem) e cache (Services), Contracts, Model (DTOs da OpenWeather/Pexels), Exceptions, Options, DependencyInjection.cs
+└── Climato.Provider.Domain/         ← Weathers (Weather, Forecast — contratos devolvidos ao Gateway), Locations
 ```
 
 Testes em `tests/` (Fase 04).
@@ -63,12 +63,12 @@ API ──▶ Application ──▶ Domain
 ### Controllers
 - Finos: validam a entrada (via `ValidationFilter`, que roda o `IValidator<T>` do argumento), chamam um AppService e traduzem o resultado em status HTTP.
 - `ActionResult<T>` com o DTO de resposta; XML doc (`/// <summary>`) em português em cada action — aparece na documentação OpenAPI/Scalar.
-- Rotas no plural e minúsculas (`/cities`, `/weathers`, `/auth`).
+- Rotas no plural e minúsculas (`/cities`, `/weathers`, `/forecasts`, `/locations`, `/auth`).
 - `[Authorize]` em todo controller; `[AllowAnonymous]` explícito só em registro, login e health checks. O usuário atual vem das claims, nunca de parâmetro.
 - Usuário atual: `User.GetUserId()` (`Api/Extensions/ClaimsPrincipalExtensions`), que lê a claim `sub`.
 
 ### DTOs (Application)
-- Ficam em `Application/Model/<Agregado>/`; sufixos `Dto` (resposta), `PostDto`/`PutDto` (entrada).
+- Ficam em `Application/Model/<Agregado>/`; sufixos `Dto` (resposta), `PostDto`/`PutDto` (entrada pelo corpo), `Query` (entrada pela query string, recebida com `[FromQuery]`, ex.: `LocationSearchQuery`). Propriedades de `Query` são anuláveis: com `string` não anulável o `[ApiController]` aplica `[Required]` implícito e responde em inglês antes do validator. O parâmetro da action não pode ter o nome de uma chave da query string (`[FromQuery] LocationSearchQuery request`, não `query`): o binder usaria o nome como prefixo e procuraria `query.Query`.
 - DTO de resposta **nunca** expõe senha, hash ou dado interno.
 - Entidades do Domain nunca saem pelo controller.
 - Todo DTO de entrada tem um `AbstractValidator<T>` em `Application/Validators/`, com mensagens em português.
@@ -96,6 +96,7 @@ API ──▶ Application ──▶ Domain
 - `using` em todo `HttpResponseMessage` (e `HttpRequestMessage`, quando criado à mão). Headers fixos (ex.: `Authorization` do Pexels) vão em `DefaultRequestHeaders` no registro do client.
 - Resiliência com `AddStandardResilienceHandler()` em todo typed client. Timeouts escalonados: a tentativa de quem chama é maior que a soma dos timeouts totais das dependências que o chamado consulta em sequência (Gateway → Provider 25 s/30 s > OpenWeather 15 s + Pexels 5 s + folga do cache; Provider → OpenWeather 5 s/15 s; Provider → Pexels 2 s/5 s). `CircuitBreaker.SamplingDuration` ≥ 2× o timeout por tentativa. O Gateway só re-tenta falha de transporte (`Retry.ShouldHandle` com `HttpRequestException`); 5xx do Provider não é re-tentado.
 - Client traduz a resposta: 404 → `null`; outro status de erro, `HttpRequestException`, `ExecutionRejectedException` (Polly) ou `JsonException` → exceção tipada de indisponibilidade (`ExternalServiceUnavailableException` no Provider, `ProviderUnavailableException` no Gateway).
+- Provider: toda chamada à OpenWeather passa pelo typed client `IOpenWeatherClient` (`OpenWeatherClient`), que concentra a tradução de erros num `GetAsync<T>` privado; AppServices não recebem `HttpClient` da OpenWeather. No Gateway, o `WeatherProviderClient` faz o mesmo para o Provider.
 
 ### Erros
 - Respostas de erro em `ProblemDetails` (`AddProblemDetails` + `UseStatusCodePages` + `GlobalExceptionHandler`). `DomainException` → 409 com a mensagem; validação → 400 `ValidationProblemDetails`; resto → 500 "Erro interno." sem detalhes. Erros esperados no controller com `Problem(statusCode, title)` ou `NotFound()`.
@@ -107,8 +108,8 @@ API ──▶ Application ──▶ Domain
 - Falha opcional (imagem do Pexels, cache) não derruba a resposta: log `Warning` e segue.
 
 ### Cache (Provider)
-- `IDistributedCache` atrás de `IWeatherCache` (`Services/WeatherCache`). Redis se `ConnectionStrings:Redis` estiver preenchida; senão `AddDistributedMemoryCache`.
-- Chave `clima:{cidade-normalizada}` (trim, espaços colapsados, minúsculas, sem acentos); valor em JSON; TTL absoluto de 10 min.
+- `IDistributedCache` atrás de `IProviderCache` (`Services/ProviderCache`), genérico: `GetAsync<T>(prefixo, texto)` / `SetAsync<T>(prefixo, texto, valor, duração)`. Redis se `ConnectionStrings:Redis` estiver preenchida; senão `AddDistributedMemoryCache`.
+- Chave `{prefixo}:{texto-normalizado}` (trim, espaços colapsados, minúsculas, sem acentos); valor em JSON; TTL absoluto por uso: `clima` 10 min, `previsao` 30 min, `locais` 24 h (lista vazia também é cacheada).
 - Só resposta de sucesso entra no cache (404 e falhas não). Erro do cache → `Warning` e segue sem cache.
 
 ### Health checks
@@ -132,7 +133,7 @@ API ──▶ Application ──▶ Domain
 O frontend só conhece o Gateway. Novos dados para o front (previsão, autocomplete) são expostos pelo Gateway e buscados no Provider, mesmo quando o Gateway só repassa. Ver [`system-design.md`](system-design.md).
 
 ### Provider como camada anticorrupção
-O formato da OpenWeather/Pexels não vaza para o Gateway: o Provider devolve contratos próprios (`Weather`, previsão, cidades). Trocar o provedor de clima afeta só o Provider. No Gateway, o contrato recebido do Provider é o `WeatherDto` da Application; o Domain do Gateway não conhece o formato do Provider.
+O formato da OpenWeather/Pexels não vaza para o Gateway: o Provider devolve contratos próprios (`Weather`, previsão, cidades). Trocar o provedor de clima afeta só o Provider. No Gateway, o contrato recebido do Provider é o `WeatherDto` da Application; o Domain do Gateway não conhece o formato do Provider. A previsão é agregada por dia no Provider (data local da cidade, mín/máx, condição do ponto mais próximo de 12:00, maior `pop` × 100, maior vento em km/h); o Gateway e o front não veem os pontos de 3 h.
 
 ### Autenticação
 JWT HS256 emitido pelo Gateway em `POST /auth/register` e `POST /auth/login` (claims `sub`, `email`, `name`, `jti`; validade `Jwt:ExpirationMinutes`). Sem refresh token ([ADR 0006](decisions/0006-jwt-localstorage-sem-refresh.md)). Senha com `PasswordHasher<User>` (PBKDF2), rehash no login quando o formato envelhece. E-mail normalizado (`User.NormalizeEmail`). Recurso de outro usuário responde 404, nunca 403. Pipeline: `UseExceptionHandler` → `UseStatusCodePages` → `UseHttpsRedirection` → `UseCors` → `UseAuthentication` → `UseAuthorization`.

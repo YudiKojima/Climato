@@ -36,12 +36,13 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | BE-19 | 🟡 | 01 | Mapeamento fora de `Mappings/` | `.Adapt(`, `TypeAdapterConfig` ou mapeamento manual campo a campo de entidade → DTO fora de `Application/Mappings/` e `DependencyInjection.cs` | [Mapeamento](backend.md#mapeamento-mapster) |
 | BE-20 | 🔴 | 01 | Options sem validação | Classe `*Options` registrada sem `ValidateOnStart()` ou chave obrigatória sem `[Required]` | [Injeção de dependência por camada](backend.md#injeção-de-dependência-por-camada) |
 | BE-21 | 🟡 | 01 | Versão de pacote no `.csproj` | `PackageReference` com atributo `Version` (versões só em `Directory.Packages.props`) | [Dependências entre camadas](backend.md#dependências-entre-camadas) |
-| BE-22 | 🟡 | 02 | DTO de entrada sem validator | `*PostDto`/`*PutDto` novo sem `AbstractValidator<T>` em `Application/Validators/` | [DTOs](backend.md#dtos-application) |
+| BE-22 | 🟡 | 02 | DTO de entrada sem validator | `*PostDto`/`*PutDto`/`*Query` novo sem `AbstractValidator<T>` em `Application/Validators/` | [DTOs](backend.md#dtos-application) |
 | BE-23 | 🟡 | 02 | Regra de negócio com status HTTP solto | AppService/controller devolvendo 409 por regra que pertence à entidade, em vez de `DomainException` | [Erros](backend.md#erros) |
 | BE-24 | 🟡 | 03 | Typed client sem resiliência | `AddHttpClient<...>()` sem `AddStandardResilienceHandler()` (exceto client nomeado de health check) | [Comunicação HTTP](backend.md#comunicação-http) |
 | BE-25 | 🟡 | 03 | `HttpResponseMessage` sem `using` | `await client.GetAsync/SendAsync(...)` atribuído sem `using` | [Comunicação HTTP](backend.md#comunicação-http) |
 | BE-26 | 🟡 | 03 | Falha de dependência como 404/500 | `catch` de `HttpRequestException` devolvendo 404, ou `EnsureSuccessStatusCode()` deixando o erro do serviço chamado virar 500 | [Erros](backend.md#erros) |
 | BE-27 | 🟡 | 03 | Falha opcional derrubando a resposta | Erro de imagem/cache propagado em vez de `Warning` + resposta sem o dado opcional | [Erros](backend.md#erros) |
+| BE-28 | 🟡 | 03 | Chamada à OpenWeather fora do client | `HttpClient` da OpenWeather injetado em AppService ou URL `data/2.5`/`geo/1.0` montada fora do `OpenWeatherClient` | [Comunicação HTTP](backend.md#comunicação-http) |
 
 ## Frontend
 

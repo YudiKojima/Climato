@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ICityAppService, CityAppService>();
         services.AddScoped<IUserAppService, UserAppService>();
         services.AddScoped<IWeatherAppService, WeatherAppService>();
+        services.AddScoped<ILocationAppService, LocationAppService>();
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
