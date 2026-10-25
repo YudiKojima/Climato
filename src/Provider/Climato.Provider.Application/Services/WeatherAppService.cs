@@ -1,48 +1,36 @@
-﻿using System.Net;
-using System.Net.Http.Json;
-using System.Text.Json;
-using Climato.Provider.Application.Contracts;
-using Climato.Provider.Application.Exceptions;
+﻿using Climato.Provider.Application.Contracts;
 using Climato.Provider.Application.Model.OpenWeather;
-using Climato.Provider.Application.Options;
 using Climato.Provider.Domain.Weathers;
-using Microsoft.Extensions.Options;
-using Polly;
 
 namespace Climato.Provider.Application.Services;
 
 public sealed class WeatherAppService : IWeatherAppService
 {
-    private const string ServiceName = "OpenWeather";
+    private const string CachePrefix = "clima";
 
-    private static readonly JsonSerializerOptions jsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-    };
+    private static readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(10);
 
-    private readonly HttpClient client;
-    private readonly string apiKey;
+    private readonly IOpenWeatherClient openWeatherClient;
     private readonly ICityImageAppService cityImageAppService;
-    private readonly IWeatherCache weatherCache;
+    private readonly IProviderCache cache;
 
-    public WeatherAppService(HttpClient httpClient, IOptions<OpenWeatherOptions> options, ICityImageAppService cityImageAppService, IWeatherCache weatherCache)
+    public WeatherAppService(IOpenWeatherClient openWeatherClient, ICityImageAppService cityImageAppService, IProviderCache cache)
     {
-        client = httpClient;
-        apiKey = options.Value.ApiKey;
+        this.openWeatherClient = openWeatherClient;
         this.cityImageAppService = cityImageAppService;
-        this.weatherCache = weatherCache;
+        this.cache = cache;
     }
 
     public async Task<Weather?> GetByCityAsync(string cityName, CancellationToken cancellationToken)
     {
-        var cached = await weatherCache.GetAsync(cityName, cancellationToken);
+        var cached = await cache.GetAsync<Weather>(CachePrefix, cityName, cancellationToken);
 
         if (cached != null)
         {
             return cached;
         }
 
-        var current = await GetCurrentAsync(cityName, cancellationToken);
+        var current = await openWeatherClient.GetCurrentAsync(cityName, cancellationToken);
 
         if (current == null)
         {
@@ -52,35 +40,8 @@ public sealed class WeatherAppService : IWeatherAppService
         var imageUrl = await cityImageAppService.GetImageUrlAsync(current.Name, cancellationToken);
         var weather = ToWeather(current, imageUrl);
 
-        await weatherCache.SetAsync(cityName, weather, cancellationToken);
+        await cache.SetAsync(CachePrefix, cityName, weather, cacheDuration, cancellationToken);
         return weather;
-    }
-
-    private async Task<OpenWeatherCurrentResponse?> GetCurrentAsync(string cityName, CancellationToken cancellationToken)
-    {
-        var url = $"data/2.5/weather?q={Uri.EscapeDataString(cityName)}&appid={apiKey}&units=metric&lang=pt_br";
-
-        try
-        {
-            using var response = await client.GetAsync(url, cancellationToken);
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new ExternalServiceUnavailableException(ServiceName, $"status {(int)response.StatusCode}");
-            }
-
-            return await response.Content.ReadFromJsonAsync<OpenWeatherCurrentResponse>(jsonOptions, cancellationToken)
-                ?? throw new ExternalServiceUnavailableException(ServiceName, "resposta vazia");
-        }
-        catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException or JsonException)
-        {
-            throw new ExternalServiceUnavailableException(ServiceName, "falha na chamada", exception);
-        }
     }
 
     private static Weather ToWeather(OpenWeatherCurrentResponse current, string? imageUrl)
