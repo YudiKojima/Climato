@@ -162,4 +162,5 @@ Manual (Scalar):
 
 - **Nome ambíguo** ("Springfield"): previsão e clima usam a primeira cidade que a OpenWeather achar, como hoje. A busca mostra `state`/`country`, mas a seleção na Fase 07 ainda envia só o nome — reavaliar `lat`/`lon` se incomodar.
 - **Primeiro e último dia parciais** na previsão (janela de 120 h da OpenWeather): aceito; `tempMin`/`tempMax` refletem só os horários disponíveis.
+- **A busca não é autocomplete por prefixo** (constatado no code review, 2026-10-25): o `geo/1.0/direct` casa o nome inteiro ("São Pa" → `[]`, "Lond" → a cidade "Lond"). O endpoint serve para busca ao confirmar; autocomplete por tecla fica para a Fase 07 decidir (outro provedor de geocoding, com ADR). Pendência registrada no `project-overview.md`.
 - **Renomear `WeatherCache` → `ProviderCache`** toca código da 03a: comportamento e chave do clima mantidos (item 5 da verificação).

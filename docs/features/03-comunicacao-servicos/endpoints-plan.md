@@ -29,6 +29,7 @@
 | Docs de `OpenWeatherClient`/`ProviderCache` e BE-28 na Tarefa 5 | Feitos no commit da Tarefa 1 (itens **Comunicação HTTP** e **Cache** do Passo 1 e o Passo 3 da Tarefa 5) | GE-01 no `/revisar-padrao` da Tarefa 1: o `backend.md` citava o `IWeatherCache` removido |
 | Sufixo dos DTOs de entrada (`backend.md`) | Novo sufixo `Query` documentado em **DTOs** e incluído no BE-22, no commit da Tarefa 4 | GE-01 no `/revisar-padrao` da Tarefa 4: `LocationSearchQuery` não cabia em `PostDto`/`PutDto` |
 | Parâmetro `LocationSearchQuery query` no `LocationController` do Gateway | Renomeado para `request` | Verificação manual (Tarefa 7): com o nome igual à chave `?query=`, o binder procurava `query.Query` e toda busca válida virava 400 |
+| Pendência `[Fase 07]` de *debounce* no autocomplete (Tarefa 6) | Trocada por pendência de busca ao confirmar / outro provedor; exemplos "São Pa" dos XML docs viraram "São Paulo"; risco no design | Code review: o `geo/1.0/direct` não casa prefixo (confirmado com "São Pa" e "Lond") |
 | Mensagem do 400 da busca no Gateway | Título "Dados inválidos." (padrão do `ValidationFilter`) com a mensagem do design em `errors.Query` | Mesmo formato de toda validação do Gateway |
 
 ## Mapa de arquivos
@@ -1215,6 +1216,6 @@ Esperado: build sem erros e sem avisos `CS86xx`; lint limpo; build do web ok (fr
 
 - [x] **Passo 3:** `/revisar-padrao` no diff completo da branch → sem 🔴 (ou liberados pelo usuário).
 
-- [ ] **Passo 4:** `/requesting-code-review`.
+- [x] **Passo 4:** `/requesting-code-review`.
 
 - [ ] **Passo 5:** `/finishing-a-development-branch` → PR `dev/novos-endpoints` → `master` "Fase 03b: previsão de 5 dias e busca de cidades"; trocar os `AAAA-MM-DD` da Tarefa 6 pela data real no commit final.

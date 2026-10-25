@@ -17,8 +17,8 @@ public class LocationController : ControllerBase
         this.appService = appService;
     }
 
-    /// <summary>Busca cidades pelo nome para o autocomplete (até 5 resultados).</summary>
-    /// <param name="request">Parte do nome da cidade em `query` (2 a 100 caracteres), exemplo: São Pa</param>
+    /// <summary>Busca cidades pelo nome (até 5 resultados). A OpenWeather casa o nome inteiro, não prefixo.</summary>
+    /// <param name="request">Nome da cidade em `query` (2 a 100 caracteres), exemplo: São Paulo</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     /// <response code="200">Cidades encontradas, com nome em português quando houver; lista vazia sem resultado.</response>
     /// <response code="400">Parâmetro 'query' com menos de 2 ou mais de 100 caracteres.</response>

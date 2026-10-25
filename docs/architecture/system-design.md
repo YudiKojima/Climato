@@ -66,7 +66,7 @@ flowchart LR
 3. Provider consulta o cache (`previsao:{cidade-normalizada}`, TTL 30 min); em miss, chama OpenWeather `data/2.5/forecast` e agrega os pontos de 3 h por dia no fuso da cidade (até 5 dias).
 4. Gateway devolve a previsão **sem** registrar a cidade no histórico.
 
-### Busca de cidades (autocomplete)
+### Busca de cidades
 
 1. `GET /locations?query=` no Gateway (2 a 100 caracteres; senão 400).
 2. Gateway chama `GET /locations?query=` no Provider.
