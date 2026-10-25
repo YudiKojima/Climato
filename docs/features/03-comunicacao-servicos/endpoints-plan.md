@@ -1218,4 +1218,4 @@ Esperado: build sem erros e sem avisos `CS86xx`; lint limpo; build do web ok (fr
 
 - [x] **Passo 4:** `/requesting-code-review`.
 
-- [ ] **Passo 5:** `/finishing-a-development-branch` → PR `dev/novos-endpoints` → `master` "Fase 03b: previsão de 5 dias e busca de cidades"; trocar os `AAAA-MM-DD` da Tarefa 6 pela data real no commit final.
+- [x] **Passo 5:** `/finishing-a-development-branch` → PR `dev/novos-endpoints` → `master` "Fase 03b: previsão de 5 dias e busca de cidades"; trocar os `AAAA-MM-DD` da Tarefa 6 pela data real no commit final.
