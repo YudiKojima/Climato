@@ -1167,7 +1167,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `docs/project-overview.md`
 
-- [ ] **Passo 1: Fase 03** — trocar o bloco por:
+- [x] **Passo 1: Fase 03** — trocar o bloco por:
 
 ```markdown
 #### Fase 03 — Comunicação entre serviços ✅ Concluída (AAAA-MM-DD)
@@ -1178,16 +1178,16 @@ Dividida em dois blocos:
 Auditoria: A14–A17, A19 (resolvidas na 03a).
 ```
 
-- [ ] **Passo 2: Estado atual** — título `## Estado Atual (AAAA-MM-DD, após a Fase 03)`; em **Funciona**, acrescentar "previsão de 5 dias e busca de cidades na API (ainda sem tela no front)".
+- [x] **Passo 2: Estado atual** — título `## Estado Atual (AAAA-MM-DD, após a Fase 03)`; em **Funciona**, acrescentar "previsão de 5 dias e busca de cidades na API (ainda sem tela no front)".
 
-- [ ] **Passo 3: Pendências** — acrescentar:
+- [x] **Passo 3: Pendências** — acrescentar:
 
 ```markdown
 - [Fase 07] Autocomplete da busca com *debounce* (~300 ms) e mínimo de 2 caracteres antes de chamar `GET /locations`
 - [Fase 04] Previsão: resposta 200 da OpenWeather com `list` vazia ou `weather` vazio em algum ponto vira 500 — mesma correção da resposta incompleta do clima atual
 ```
 
-- [ ] **Passo 4: Commit** (após `/revisar-padrao`; o `AAAA-MM-DD` é trocado pela data real no commit final da Tarefa 7)
+- [x] **Passo 4: Commit** (após `/revisar-padrao`; o `AAAA-MM-DD` é trocado pela data real no commit final da Tarefa 7)
 
 ```bash
 git add docs/project-overview.md

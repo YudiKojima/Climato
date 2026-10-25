@@ -28,9 +28,9 @@ Definido no [`CLAUDE.md`](../CLAUDE.md): brainstorming → `design.md` → `plan
 
 ---
 
-## Estado Atual (2026-10-19, após a Fase 03a)
+## Estado Atual (2026-10-25, após a Fase 03)
 
-**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks.
+**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, previsão de 5 dias e busca de cidades na API (ainda sem tela no front).
 
 **Não há:** testes, Docker, CI, logs estruturados, deploy.
 
@@ -54,10 +54,10 @@ Hash de senha, JWT, autorização por dono, CORS, validação, ProblemDetails; f
 Design: [`design.md`](features/02-seguranca/design.md) · Plano: [`plan.md`](features/02-seguranca/plan.md)
 Auditoria: A1–A4, A6, A7, A18.
 
-#### Fase 03 — Comunicação entre serviços
-Dividida em dois blocos ([design 03a](features/03-comunicacao-servicos/design.md)):
-- **03a — Contrato e robustez** ✅ (2026-10-19): DTOs tipados, erros 404/503, resiliência, cache (Redis opcional), health checks, vento em km/h e horários no fuso da cidade.
-- **03b — Novos endpoints**: previsão de 5 dias e busca de cidades (geocoding).
+#### Fase 03 — Comunicação entre serviços ✅ Concluída (2026-10-25)
+Dividida em dois blocos:
+- **03a — Contrato e robustez** ✅ (2026-10-19): DTOs tipados, erros 404/503, resiliência, cache (Redis opcional), health checks, vento em km/h e horários no fuso da cidade. [Design](features/03-comunicacao-servicos/design.md) · [Plano](features/03-comunicacao-servicos/plan.md)
+- **03b — Novos endpoints** ✅ (2026-10-25): previsão de 5 dias e busca de cidades (geocoding), com `OpenWeatherClient` único e cache genérico no Provider. [Design](features/03-comunicacao-servicos/endpoints-design.md) · [Plano](features/03-comunicacao-servicos/endpoints-plan.md)
 
 Auditoria: A14–A17, A19 (resolvidas na 03a).
 
@@ -100,3 +100,5 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 - [Fase 05] Timeout por check nos health checks (`AddDbContextCheck`/`ProviderHealthCheck`, ~3 s) para os probes do compose
 - [Fase 06] Log forging: `cityName` interpolado nos logs do Provider (`CityImageAppService`, `WeatherCache`) — resolver com Serilog/sink JSON; não desligar a redação de URI do `HttpClient` (chave da OpenWeather em `appid=`)
 - [Fase 08] 400 automático expõe mensagens do System.Text.Json em inglês e nomes de tipo .NET em `errors` — desligar `AllowInputFormatterExceptionMessages` ou mapear para "JSON inválido."
+- [Fase 07] Autocomplete da busca com *debounce* (~300 ms) e mínimo de 2 caracteres antes de chamar `GET /locations`
+- [Fase 04] Previsão: resposta 200 da OpenWeather com `list` vazia ou `weather` vazio em algum ponto vira 500 — mesma correção da resposta incompleta do clima atual
