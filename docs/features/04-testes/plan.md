@@ -73,7 +73,7 @@ git commit -m "Adiciona design e planos da Fase 04 (testes)" -m "Co-Authored-By:
 **Interfaces:**
 - Produces: `tests/Directory.Build.props` (todo projeto em `tests/` herda xUnit v3 + Shouldly e os `global using` de `Xunit` e `Shouldly`); pacotes centralizados para as tarefas 2–3.
 
-- [ ] **Passo 1: runner de testes no `global.json`**
+- [x] **Passo 1: runner de testes no `global.json`**
 
 ```json
 {
@@ -87,7 +87,7 @@ git commit -m "Adiciona design e planos da Fase 04 (testes)" -m "Co-Authored-By:
 }
 ```
 
-- [ ] **Passo 2: pacotes no `Directory.Packages.props`** — acrescentar, em ordem alfabética dentro do `ItemGroup` existente:
+- [x] **Passo 2: pacotes no `Directory.Packages.props`** — acrescentar, em ordem alfabética dentro do `ItemGroup` existente:
 
 ```xml
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
@@ -95,7 +95,7 @@ git commit -m "Adiciona design e planos da Fase 04 (testes)" -m "Co-Authored-By:
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
 ```
 
-- [ ] **Passo 3: `tests/Directory.Build.props`**
+- [x] **Passo 3: `tests/Directory.Build.props`**
 
 ```xml
 <Project>
@@ -119,7 +119,7 @@ git commit -m "Adiciona design e planos da Fase 04 (testes)" -m "Co-Authored-By:
 </Project>
 ```
 
-- [ ] **Passo 4: `tests/Climato.Provider.UnitTests/Climato.Provider.UnitTests.csproj`**
+- [x] **Passo 4: `tests/Climato.Provider.UnitTests/Climato.Provider.UnitTests.csproj`**
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -139,7 +139,7 @@ git commit -m "Adiciona design e planos da Fase 04 (testes)" -m "Co-Authored-By:
 </Project>
 ```
 
-- [ ] **Passo 5: incluir os projetos no `Climato.slnx`** — nova pasta depois de `/Provider/` (o `Climato.Gateway.UnitTests` entra na Tarefa 3, nesta mesma pasta):
+- [x] **Passo 5: incluir os projetos no `Climato.slnx`** — nova pasta depois de `/Provider/` (o `Climato.Gateway.UnitTests` entra na Tarefa 3, nesta mesma pasta):
 
 ```xml
   <Folder Name="/Tests/">
@@ -147,7 +147,7 @@ git commit -m "Adiciona design e planos da Fase 04 (testes)" -m "Co-Authored-By:
   </Folder>
 ```
 
-- [ ] **Passo 6: `ProviderCacheTests.cs`**
+- [x] **Passo 6: `ProviderCacheTests.cs`**
 
 ```csharp
 using Climato.Provider.Application.Services;
@@ -243,16 +243,16 @@ public class ProviderCacheTests
 }
 ```
 
-- [ ] **Passo 7: rodar**
+- [x] **Passo 7: rodar**
 
 Run: `dotnet test --project tests/Climato.Provider.UnitTests`
 Expected: 8 testes, 0 falhas. Trocar `"clima:sao paulo"` por `"clima:são paulo"`, ver falhar, desfazer.
 
-- [ ] **Passo 8: build e suíte pela solução**
+- [x] **Passo 8: build e suíte pela solução**
 
 Run: `dotnet build Climato.slnx` → 0 erros, 0 avisos novos. `dotnet test --solution Climato.slnx` → mesmos 8 testes.
 
-- [ ] **Passo 9: `/revisar-padrao` e commit**
+- [x] **Passo 9: `/revisar-padrao` e commit**
 
 ```bash
 git add global.json Directory.Packages.props Climato.slnx tests/
