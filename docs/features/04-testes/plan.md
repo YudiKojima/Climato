@@ -270,7 +270,7 @@ git commit -m "Cria a infraestrutura de testes e cobre a chave do cache do Provi
 - Consumes: projeto da Tarefa 1.
 - Produces: `OpenWeatherFakes` (interno ao projeto de unitários do Provider).
 
-- [ ] **Passo 1: `OpenWeatherFakes.cs`**
+- [x] **Passo 1: `OpenWeatherFakes.cs`**
 
 ```csharp
 using Climato.Provider.Application.Model.OpenWeather;
@@ -324,7 +324,7 @@ internal static class OpenWeatherFakes
 }
 ```
 
-- [ ] **Passo 2: `ForecastAppServiceTests.cs`**
+- [x] **Passo 2: `ForecastAppServiceTests.cs`**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -465,7 +465,7 @@ public class ForecastAppServiceTests
 }
 ```
 
-- [ ] **Passo 3: `WeatherAppServiceTests.cs`**
+- [x] **Passo 3: `WeatherAppServiceTests.cs`**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -565,7 +565,7 @@ public class WeatherAppServiceTests
 }
 ```
 
-- [ ] **Passo 4: `LocationAppServiceTests.cs`**
+- [x] **Passo 4: `LocationAppServiceTests.cs`**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -642,12 +642,12 @@ public class LocationAppServiceTests
 }
 ```
 
-- [ ] **Passo 5: rodar**
+- [x] **Passo 5: rodar**
 
 Run: `dotnet test --project tests/Climato.Provider.UnitTests`
 Expected: 8 (Tarefa 1) + 8 + 5 + 5 = 26 testes, 0 falhas. Em cada classe nova, trocar um valor esperado, ver falhar, desfazer.
 
-- [ ] **Passo 6: `/revisar-padrao` e commit**
+- [x] **Passo 6: `/revisar-padrao` e commit**
 
 ```bash
 git add tests/Climato.Provider.UnitTests
