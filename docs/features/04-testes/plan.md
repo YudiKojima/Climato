@@ -665,7 +665,7 @@ git commit -m "Cobre os AppServices do Provider com testes unitários" -m "Co-Au
 **Interfaces:**
 - Produces: `TestMapper.Create()` (`MapsterMapper.IMapper` com uma `TypeAdapterConfig` própria lendo os `IRegister` da Application); `TestData.Weather(string city)` (`WeatherDto` completo).
 
-- [ ] **Passo 1: `.csproj`** e linha no `Climato.slnx`
+- [x] **Passo 1: `.csproj`** e linha no `Climato.slnx`
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -689,7 +689,7 @@ git commit -m "Cobre os AppServices do Provider com testes unitários" -m "Co-Au
     <Project Path="tests/Climato.Gateway.UnitTests/Climato.Gateway.UnitTests.csproj" />
 ```
 
-- [ ] **Passo 2: `TestMapper.cs` e `TestData.cs`**
+- [x] **Passo 2: `TestMapper.cs` e `TestData.cs`**
 
 `TestMapper` usa uma instância própria de `TypeAdapterConfig` (não a `GlobalSettings`) para não compartilhar estado entre testes paralelos. Não é mapeamento de produção (BE-19 vale para `src/`).
 
@@ -741,7 +741,7 @@ internal static class TestData
 }
 ```
 
-- [ ] **Passo 3: `Domain/CityTests.cs` e `Domain/UserTests.cs`**
+- [x] **Passo 3: `Domain/CityTests.cs` e `Domain/UserTests.cs`**
 
 ```csharp
 using Climato.Gateway.Domain.Cities;
@@ -824,7 +824,7 @@ public class UserTests
 }
 ```
 
-- [ ] **Passo 4: `Application/Services/CityAppServiceTests.cs`**
+- [x] **Passo 4: `Application/Services/CityAppServiceTests.cs`**
 
 ```csharp
 using Climato.Gateway.Application.Services;
@@ -920,7 +920,7 @@ public class CityAppServiceTests
 }
 ```
 
-- [ ] **Passo 5: `Application/Services/WeatherAppServiceTests.cs`**
+- [x] **Passo 5: `Application/Services/WeatherAppServiceTests.cs`**
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -992,7 +992,7 @@ public class WeatherAppServiceTests
 }
 ```
 
-- [ ] **Passo 6: `Application/Services/AuthAppServiceTests.cs`**
+- [x] **Passo 6: `Application/Services/AuthAppServiceTests.cs`**
 
 ```csharp
 using Climato.Gateway.Application.Contracts;
@@ -1105,7 +1105,7 @@ public class AuthAppServiceTests
 }
 ```
 
-- [ ] **Passo 7: `Application/Services/UserAppServiceTests.cs` e `LocationAppServiceTests.cs`**
+- [x] **Passo 7: `Application/Services/UserAppServiceTests.cs` e `LocationAppServiceTests.cs`**
 
 ```csharp
 using Climato.Gateway.Application.Services;
@@ -1174,7 +1174,7 @@ public class LocationAppServiceTests
 }
 ```
 
-- [ ] **Passo 8: validators** (`Application/Validators/`)
+- [x] **Passo 8: validators** (`Application/Validators/`)
 
 ```csharp
 using Climato.Gateway.Application.Model.Auth;
@@ -1278,7 +1278,7 @@ public class LocationSearchQueryValidatorTests
 }
 ```
 
-- [ ] **Passo 9: `Api/Errors/GlobalExceptionHandlerTests.cs`**
+- [x] **Passo 9: `Api/Errors/GlobalExceptionHandlerTests.cs`**
 
 ```csharp
 using Climato.Gateway.Api.Errors;
@@ -1371,12 +1371,12 @@ public class GlobalExceptionHandlerTests
 }
 ```
 
-- [ ] **Passo 10: rodar**
+- [x] **Passo 10: rodar**
 
 Run: `dotnet test --project tests/Climato.Gateway.UnitTests`
 Expected: 4 + 3 + 6 + 4 + 6 + 2 + 1 + 6 + 3 + 6 + 6 = 47 testes, 0 falhas. Em cada classe, trocar um valor esperado, ver falhar, desfazer.
 
-- [ ] **Passo 11: `/revisar-padrao` e commit**
+- [x] **Passo 11: `/revisar-padrao` e commit**
 
 ```bash
 git add Climato.slnx tests/Climato.Gateway.UnitTests

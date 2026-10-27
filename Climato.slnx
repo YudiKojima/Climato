@@ -18,6 +18,7 @@
     <Project Path="src/Provider/Climato.Provider.Domain/Climato.Provider.Domain.csproj" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="tests/Climato.Gateway.UnitTests/Climato.Gateway.UnitTests.csproj" />
     <Project Path="tests/Climato.Provider.UnitTests/Climato.Provider.UnitTests.csproj" />
   </Folder>
 </Solution>
