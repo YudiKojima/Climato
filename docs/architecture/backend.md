@@ -15,7 +15,7 @@ Vale para `src/Gateway/` e `src/Provider/`. Seções marcadas **(a partir da Fas
 | Auth | JWT Bearer (`Microsoft.AspNetCore.Authentication.JwtBearer`) + `PasswordHasher<User>` | — |
 | Resiliência / cache | `Microsoft.Extensions.Http.Resilience` (`AddStandardResilienceHandler`) / `IDistributedCache` (Redis opcional, memória sem connection string) no Provider | — |
 | Health checks | `/health/live` e `/health/ready` (`Microsoft.Extensions.Diagnostics.HealthChecks`) | — |
-| Testes | — | xUnit, NSubstitute, Testcontainers, WireMock.Net (Fase 04) |
+| Testes | xUnit v3 (Microsoft.Testing.Platform), Shouldly, NSubstitute | Testcontainers, WireMock.Net (integração, backlog) |
 | Logs | padrão do ASP.NET | Serilog (Fase 06) |
 
 ## Estrutura da Solução
@@ -35,7 +35,11 @@ src/Provider/
 └── Climato.Provider.Domain/         ← Weathers (Weather, Forecast — contratos devolvidos ao Gateway), Locations
 ```
 
-Testes em `tests/` (Fase 04).
+```
+tests/
+├── Climato.Provider.UnitTests/  ← AppServices e cache do Provider
+└── Climato.Gateway.UnitTests/   ← domínio, AppServices, validators e GlobalExceptionHandler
+```
 
 ### Dependências entre camadas
 
@@ -117,6 +121,13 @@ API ──▶ Application ──▶ Domain
 - Gateway: Postgres (`AddDbContextCheck`) e Provider (`ProviderHealthCheck` → `GET health/ready`, client nomeado sem resiliência, 5 s). Provider: Redis, só se configurado, com `failureStatus: HealthStatus.Degraded` (200; Redis fora não derruba o `ready` do Gateway).
 - APIs externas (OpenWeather, Pexels) **não** entram: gastariam cota.
 - No Gateway, `MapHealthChecks(...).AllowAnonymous()`.
+
+### Testes
+- **TDD é regra a partir da Fase 04:** regra, AppService, entidade ou endpoint novo/alterado nasce com teste em `tests/` (BE-18); correção de bug começa com um teste que reproduz o bug.
+- Um projeto de unitários por serviço (`Climato.{Gateway,Provider}.UnitTests`); pastas espelham `src/`. `tests/Directory.Build.props` traz xUnit v3 e Shouldly; versões no `Directory.Packages.props`.
+- Nome `Metodo_Cenario_ResultadoEsperado` em português; corpo Arrange/Act/Assert separado por linha em branco, sem comentários de seção. `TestContext.Current.CancellationToken` como token (também nos `DidNotReceiveWithAnyArgs`, para o analisador xUnit1051).
+- Dependências com NSubstitute; sem rede, Docker ou chave real. Métodos privados testados pelo comportamento público (sem `InternalsVisibleTo`). Mapper de teste com `TypeAdapterConfig` própria (`TestMapper`).
+- Testes de integração (`WebApplicationFactory` + Testcontainers + WireMock) estão em backlog: [`integracao-plan.md`](../features/04-testes/integracao-plan.md).
 
 ### Configuração e segredos
 - `appsettings.json` versionado **sem segredos**; valores locais em `appsettings.Development.json` (ignorado) ou `dotnet user-secrets`; em container, variáveis de ambiente (`OpenWeather__ApiKey`).

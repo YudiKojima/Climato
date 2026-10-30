@@ -1390,7 +1390,7 @@ git commit -m "Cobre domínio, AppServices, validators e erros do Gateway com te
 **Files:**
 - Modify: `docs/architecture/backend.md`, `CLAUDE.md`, `docs/runbook.md`, `docs/project-overview.md`, `docs/features/00-roteiro-portfolio/auditoria-inicial.md`
 
-- [ ] **Passo 1: `backend.md`**
+- [x] **Passo 1: `backend.md`**
   - Stack: linha **Testes** com `xUnit v3 (Microsoft.Testing.Platform), Shouldly, NSubstitute` na coluna **Atual** e `Testcontainers, WireMock.Net (integração, backlog)` em **Alvo**.
   - Estrutura da Solução: trocar "Testes em `tests/` (Fase 04)." por:
 
@@ -1413,7 +1413,7 @@ tests/
 
   - Verificação: sem mudança (já aponta para o `CLAUDE.md`).
 
-- [ ] **Passo 2: `CLAUDE.md`**
+- [x] **Passo 2: `CLAUDE.md`**
   - Verificação:
 
 ```bash
@@ -1426,7 +1426,7 @@ npm --prefix web run build
   - Frase abaixo do bloco: "A Fase 05 (`docker compose`) atualiza esta seção e o [`runbook.md`](docs/runbook.md)."
   - Tabela de skills, linha `test-driven-development`: "**Regra** desde a Fase 04: toda regra nova nasce com teste; bug começa com teste que o reproduz".
 
-- [ ] **Passo 3: `runbook.md`** — nova seção `## 5. Testes` (renumerar as seguintes se houver):
+- [x] **Passo 3: `runbook.md`** — nova seção `## 5. Testes` (renumerar as seguintes se houver):
 
 ````markdown
 ## 5. Testes
@@ -1438,9 +1438,9 @@ dotnet test --solution Climato.slnx
 Roda os testes unitários de `tests/` (sem banco, Docker ou chaves). O `global.json` usa o runner Microsoft.Testing.Platform; por isso o comando é `dotnet test --solution`/`--project` (o modo VSTest não é suportado pelo xUnit v3 no SDK 10).
 ````
 
-- [ ] **Passo 4: `auditoria-inicial.md`** — linha A24, coluna Status: `✅ Fase 04 (unitários; integração em backlog)`.
+- [x] **Passo 4: `auditoria-inicial.md`** — linha A24, coluna Status: `✅ Fase 04 (unitários; integração em backlog)`.
 
-- [ ] **Passo 5: `project-overview.md`**
+- [x] **Passo 5: `project-overview.md`**
   - Estado Atual: data e "(após a Fase 04)"; em **Funciona**, acrescentar "testes unitários nos dois serviços"; em **Não há**, trocar "testes" por "testes de integração"; na **Stack**, acrescentar `xUnit v3 · Shouldly · NSubstitute`.
   - Fase 04:
 
@@ -1457,7 +1457,7 @@ Auditoria: A24.
 - [Backlog] Testes de integração (WebApplicationFactory + Testcontainers Postgres/Redis + WireMock), plano em [`integracao-plan.md`](features/04-testes/integracao-plan.md); ao executar, incluir no CI da Fase 05 (Docker no runner)
 ```
 
-- [ ] **Passo 6: verificação completa**
+- [x] **Passo 6: verificação completa**
 
 Run, na raiz:
 - `dotnet build Climato.slnx` → 0 erros, 0 avisos novos
@@ -1465,7 +1465,7 @@ Run, na raiz:
 - `npm --prefix web run lint` e `npm --prefix web run build` → sem erros (nada mudou no web)
 - `git status` → nenhum arquivo em `src/` alterado.
 
-- [ ] **Passo 7: `/revisar-padrao` e commit**
+- [x] **Passo 7: `/revisar-padrao` e commit**
 
 ```bash
 git add CLAUDE.md docs/
