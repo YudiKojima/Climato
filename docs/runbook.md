@@ -85,7 +85,15 @@ npm --prefix web install && npm --prefix web run dev
 
 Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
 
-## 5. Problemas comuns
+## 5. Testes
+
+```bash
+dotnet test --solution Climato.slnx
+```
+
+Roda os testes unitários de `tests/` (sem banco, Docker ou chaves). O `global.json` usa o runner Microsoft.Testing.Platform; por isso o comando é `dotnet test --solution`/`--project` (o modo VSTest não é suportado pelo xUnit v3 no SDK 10).
+
+## 6. Problemas comuns
 
 | Sintoma | Causa |
 |---|---|
@@ -100,6 +108,6 @@ Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
 | `fail: Microsoft.EntityFrameworkCore.Database.Connection` no primeiro startup | Esperado: o banco `climato` ainda não existe; o Gateway o cria e aplica as migrations logo em seguida |
 | `The SSL connection could not be established` no log do Gateway | Certificado de desenvolvimento não confiável — `dotnet dev-certs https --trust` (seção Pré-requisitos) |
 
-## 6. Verificação antes de PR
+## 7. Verificação antes de PR
 
 Comandos na seção [Verificação do CLAUDE.md](../CLAUDE.md#verificação).

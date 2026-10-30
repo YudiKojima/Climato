@@ -26,7 +26,7 @@ Plugin: **`superpowers`** (`superpowers@claude-plugins-official`).
 | `brainstorming` | Início de cada fase ou decisão de design — explora requisitos antes de implementar |
 | `writing-plans` | Após o design aprovado — converte o design em plano passo a passo |
 | `executing-plans` / `subagent-driven-development` | Executar um plano existente com checkpoints |
-| `test-driven-development` | A partir da Fase 04 (projetos de teste existem): toda regra nova nasce com teste |
+| `test-driven-development` | **Regra** desde a Fase 04: toda regra nova nasce com teste; bug começa com teste que o reproduz |
 | `using-git-worktrees` | Ao iniciar uma fase — branch isolado a partir do `master` |
 | `systematic-debugging` | Qualquer bug ou comportamento inesperado — antes de propor fix |
 | `verification-before-completion` | Antes de declarar fase concluída — rodar os comandos de verificação e confirmar o output |
@@ -53,11 +53,12 @@ Plugin: **`superpowers`** (`superpowers@claude-plugins-official`).
 
 ```bash
 dotnet build Climato.slnx
+dotnet test --solution Climato.slnx
 npm --prefix web run lint
 npm --prefix web run build
 ```
 
-Cada fase que mudar isso (`dotnet test` na 04, `docker compose` na 05) atualiza esta seção e o [`runbook.md`](docs/runbook.md).
+A Fase 05 (`docker compose`) atualiza esta seção e o [`runbook.md`](docs/runbook.md).
 
 ---
 

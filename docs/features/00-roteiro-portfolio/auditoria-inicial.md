@@ -47,7 +47,7 @@ Levantamento feito antes do roteiro de portfólio ([`design.md`](design.md)), so
 | Código | Sev. | Achado | Onde | Fase | Status |
 |---|---|---|---|---|---|
 | A23 | 🔴 | `.gitignore` ignora `*.sln`, `appsettings.json`, `launchSettings.json`, `Dockerfile` e `.dockerignore`: um clone não compila nem roda | [.gitignore](../../../.gitignore) | 01 (sln, appsettings, launchSettings) · 05 (Docker) | ✅ Fase 01 (sln, appsettings, launchSettings) · Docker na 05 |
-| A24 | 🟡 | Nenhum projeto de testes | — | 04 | |
+| A24 | 🟡 | Nenhum projeto de testes | — | 04 | ✅ Fase 04 (unitários; integração em backlog) |
 | A25 | 🟡 | Sem CI, sem Docker, sem health checks, sem logs estruturados | — | 05, 06 | |
 | A26 | 🟡 | README só com o título; `web/README.md` é o template do Vite | [README.md](../../../README.md) | 08 | |
 
