@@ -1,11 +1,32 @@
 # Runbook — Ambiente local
 
-Alvo futuro: `docker compose up` (Fase 05). Até lá, os serviços sobem com `dotnet run`.
+Dois jeitos de rodar: **Docker** (tudo de uma vez, recomendado para avaliar) ou **`dotnet run`** (desenvolvimento, seções 1–4).
 
+## Docker (recomendado)
+
+Pré-requisitos: Docker com Compose v2 e as chaves gratuitas da OpenWeather e da Pexels.
+
+```bash
+cp .env.example .env
+# preencher OPENWEATHER_API_KEY, PEXELS_API_KEY, JWT_SECRET_KEY (≥ 32 caracteres) e POSTGRES_PASSWORD
+docker compose up --build
+```
+
+| Serviço | URL |
+|---|---|
+| Web | `http://localhost:8080` |
+| Gateway | `http://localhost:5001` (`/health/ready`) |
+
+Provider, Postgres e Redis ficam só na rede interna do compose. As APIs rodam em `Production` (sem Scalar); o Gateway aplica as migrations na subida (`Database__MigrateOnStartup=true`). A primeira subida baixa imagens e compila tudo (alguns minutos).
+
+- Zerar o banco: `docker compose down -v`.
+- Faltou variável no `.env`: o compose para com "Defina … no .env".
+- A URL do Gateway fica fixada no build do web (`VITE_API_URL`); mudou a porta, rode `docker compose build web`.
+- Porta 8080 ou 5001 ocupada: troque o mapeamento no `docker-compose.yml`; no caso do 8080, acrescente a nova origem ao CORS (`Cors__AllowedOrigins__0`).
 ## Pré-requisitos
 
 - .NET SDK 10 (versão fixada em `global.json`)
-- Node.js LTS (≥ 20)
+- Node.js 24 LTS
 - PostgreSQL rodando em `localhost:5432`
 - (Opcional) Redis em `localhost:6379` — sem ele o Provider usa cache em memória
 - Certificado HTTPS de desenvolvimento confiável: `dotnet dev-certs https --trust`
@@ -38,7 +59,7 @@ Frontend: copiar `web/.env.example` para `web/.env` — **obrigatório**: sem `V
 
 ## 3. Banco de dados
 
-O banco `climato` é criado e migrado **automaticamente** quando o Gateway sobe fora de `Production`. Para aplicar manualmente:
+No caminho `dotnet run` (`Development`), o banco `climato` é criado e migrado **automaticamente** quando o Gateway sobe. Fora de `Development` a migration só roda com `Database__MigrateOnStartup=true` (o compose já define). Para aplicar manualmente:
 
 ```bash
 dotnet ef database update --project src/Gateway/Climato.Gateway.Infrastructure --startup-project src/Gateway/Climato.Gateway.Api
@@ -111,3 +132,7 @@ Roda os testes unitários de `tests/` (sem banco, Docker ou chaves). O `global.j
 ## 7. Verificação antes de PR
 
 Comandos na seção [Verificação do CLAUDE.md](../CLAUDE.md#verificação).
+
+## 8. CI e proteção do `master`
+
+O workflow `.github/workflows/ci.yml` roda em todo PR e push no `master`: **Backend (.NET)** (build + testes), **Web** (lint + build) e **Imagens Docker** (`docker compose build`). Para impedir merge com CI ❌ (regra do `CLAUDE.md`), o dono do repositório ativa uma vez no GitHub: *Settings → Branches → Add branch ruleset* (ou *Branch protection rule*) para `master` → *Require status checks to pass* → marcar os três jobs.

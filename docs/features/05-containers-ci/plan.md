@@ -478,7 +478,7 @@ git commit -m "Adiciona o CI com build e testes .NET, lint e build do web e buil
 **Files:**
 - Modify: `docs/runbook.md`, `CLAUDE.md`, `docs/architecture/backend.md`, `docs/architecture/frontend.md`, `docs/architecture/system-design.md`, `docs/project-overview.md`, `docs/features/00-roteiro-portfolio/auditoria-inicial.md`
 
-- [ ] **Passo 1: `runbook.md`**
+- [x] **Passo 1: `runbook.md`**
   - Trocar a linha "Alvo futuro: `docker compose up` (Fase 05). Até lá, os serviços sobem com `dotnet run`." por: "Dois jeitos de rodar: **Docker** (tudo de uma vez, recomendado para avaliar) ou **`dotnet run`** (desenvolvimento, seções 1–4)."
   - Nova seção logo depois do título, antes de **Pré-requisitos**:
 
@@ -514,7 +514,7 @@ Provider, Postgres e Redis ficam só na rede interna do compose. As APIs rodam e
 O workflow `.github/workflows/ci.yml` roda em todo PR e push no `master`: **Backend (.NET)** (build + testes), **Web** (lint + build) e **Imagens Docker** (`docker compose build`). Para impedir merge com CI ❌ (regra do `CLAUDE.md`), o dono do repositório ativa uma vez no GitHub: *Settings → Branches → Add branch ruleset* (ou *Branch protection rule*) para `master` → *Require status checks to pass* → marcar os três jobs.
 ```
 
-- [ ] **Passo 2: `CLAUDE.md` › Verificação**
+- [x] **Passo 2: `CLAUDE.md` › Verificação**
 
 ```bash
 dotnet build Climato.slnx
@@ -526,16 +526,16 @@ docker compose build
 
 Frase abaixo do bloco: "O CI (`.github/workflows/ci.yml`) roda os mesmos passos em todo PR; o `docker compose build` precisa de um `.env` preenchido (ver [`runbook.md`](docs/runbook.md#docker-recomendado))."
 
-- [ ] **Passo 3: `backend.md`**
+- [x] **Passo 3: `backend.md`**
   - **Migrations:** trocar "Aplicadas automaticamente no startup fora de `Production`;" por "Aplicadas no startup quando `Database:MigrateOnStartup` é `true` (padrão: `true` só em `Development`; o compose liga explicitamente);".
   - **Health checks:** acrescentar o item "- Timeout de 3 s por check (`PostConfigure<HealthCheckServiceOptions>`), para um check travado não segurar o `/health/ready`."
   - **Configuração e segredos:** acrescentar o item "- Containers: imagens multi-stage (`sdk:10.0` → `aspnet:10.0`, usuário não-root), HTTP na porta 8080, `ASPNETCORE_ENVIRONMENT=Production`; configuração só por variáveis de ambiente (`docker-compose.yml` lê do `.env`, que não é versionado)."
 
-- [ ] **Passo 4: `frontend.md`**
+- [x] **Passo 4: `frontend.md`**
   - **Stack:** acrescentar "· npm (`package-lock.json` versionado; `npm ci` no CI e na imagem)".
   - **Chamadas à API:** depois do item da URL base, acrescentar "- Na imagem Docker o `VITE_API_URL` é fixado no build (`--build-arg`), não em runtime; o web é servido por nginx com fallback de SPA (`web/nginx.conf`)."
 
-- [ ] **Passo 5: `system-design.md`** — trocar o título "### Estado atual" por "### Estado atual (compose)" e o diagrama por:
+- [x] **Passo 5: `system-design.md`** — trocar o título "### Estado atual" por "### Estado atual (compose)" e o diagrama por:
 
 ````markdown
 ```mermaid
@@ -555,11 +555,11 @@ flowchart LR
 `docker compose up` sobe os cinco containers; Provider, Postgres e Redis não expõem porta no host.
 ````
 
-- [ ] **Passo 6: `auditoria-inicial.md`**
+- [x] **Passo 6: `auditoria-inicial.md`**
   - A23, Status: `✅ Fase 01 (sln, appsettings, launchSettings) · ✅ Fase 05 (Docker)`.
   - A25, Status: `🟡 CI, Docker e health checks ✅ (Fases 03 e 05) · logs estruturados na 06`.
 
-- [ ] **Passo 7: `project-overview.md`**
+- [x] **Passo 7: `project-overview.md`**
   - Estado Atual: data e "(após a Fase 05)"; em **Funciona**, acrescentar "`docker compose up` com os cinco serviços e CI em todo PR"; em **Não há**, remover "Docker, CI"; na **Stack**, acrescentar `Docker · Docker Compose · nginx · GitHub Actions`.
   - Fase 05:
 
@@ -572,7 +572,7 @@ Auditoria: A23 (Docker), A25 (parcial: CI).
 
   - Pendências: remover os três itens `[Fase 05]` (lockfile, estratégia de migration, timeout dos health checks). No item `[Backlog]` de testes de integração, manter a nota de incluir no CI.
 
-- [ ] **Passo 8: verificação completa**
+- [x] **Passo 8: verificação completa**
 
 Run, na raiz, com um `.env` fictício local (não versionado):
 - `dotnet build Climato.slnx` → 0 erros, 0 avisos
@@ -581,7 +581,7 @@ Run, na raiz, com um `.env` fictício local (não versionado):
 - `docker compose build` → sucesso
 - `git status` → nenhum `.env` nem segredo rastreado
 
-- [ ] **Passo 9: `/revisar-padrao` e commit**
+- [x] **Passo 9: `/revisar-padrao` e commit**
 
 ```bash
 git add CLAUDE.md docs/

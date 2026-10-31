@@ -56,9 +56,10 @@ dotnet build Climato.slnx
 dotnet test --solution Climato.slnx
 npm --prefix web run lint
 npm --prefix web run build
+docker compose build
 ```
 
-A Fase 05 (`docker compose`) atualiza esta seção e o [`runbook.md`](docs/runbook.md).
+O CI (`.github/workflows/ci.yml`) roda os mesmos passos em todo PR; o `docker compose build` precisa das variáveis do `.env` (ver [`runbook.md`](docs/runbook.md#docker-recomendado)).
 
 ---
 

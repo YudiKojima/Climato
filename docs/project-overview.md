@@ -28,13 +28,13 @@ Definido no [`CLAUDE.md`](../CLAUDE.md): brainstorming → `design.md` → `plan
 
 ---
 
-## Estado Atual (2026-10-29, após a Fase 04)
+## Estado Atual (2026-10-31, após a Fase 05)
 
-**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, previsão de 5 dias e busca de cidades na API (ainda sem tela no front), testes unitários nos dois serviços.
+**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, previsão de 5 dias e busca de cidades na API (ainda sem tela no front), testes unitários nos dois serviços, `docker compose up` com os cinco serviços e CI em todo PR.
 
-**Não há:** testes de integração, Docker, CI, logs estruturados, deploy.
+**Não há:** testes de integração, logs estruturados, deploy.
 
-**Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Microsoft.Extensions.Http.Resilience · IDistributedCache (Redis opcional) · React 19 · Vite 6 · Ant Design 5 · axios · xUnit v3 · Shouldly · NSubstitute.
+**Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Microsoft.Extensions.Http.Resilience · IDistributedCache (Redis opcional) · React 19 · Vite 6 · Ant Design 5 · axios · xUnit v3 · Shouldly · NSubstitute · Docker · Docker Compose · nginx · GitHub Actions.
 
 ---
 
@@ -66,9 +66,10 @@ Reduzida a testes unitários para acelerar o roteiro: dois projetos (`Climato.{G
 Design: [`design.md`](features/04-testes/design.md) · Plano: [`plan.md`](features/04-testes/plan.md) · Integração (backlog): [`integracao-plan.md`](features/04-testes/integracao-plan.md)
 Auditoria: A24.
 
-#### Fase 05 — Containers e CI
-Dockerfiles, docker-compose, GitHub Actions.
-Auditoria: A23 (Docker), A25.
+#### Fase 05 — Containers e CI ✅ Concluída (2026-10-31)
+Dockerfiles multi-stage (Gateway, Provider, web com nginx), `docker-compose.yml` com Postgres e Redis, `.env.example`, flag `Database:MigrateOnStartup`, timeout nos health checks e GitHub Actions (backend, web, imagens).
+Design: [`design.md`](features/05-containers-ci/design.md) · Plano: [`plan.md`](features/05-containers-ci/plan.md)
+Auditoria: A23 (Docker), A25 (parcial: CI).
 
 #### Fase 06 — Observabilidade
 Serilog, correlation ID, OpenTelemetry opcional.
@@ -88,9 +89,7 @@ Auditoria: A26.
 
 Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: `- [Fase NN] descrição`.
 
-- [Fase 05] Versionar um lockfile do web e padronizar o gerenciador (hoje há um `yarn.lock` local não versionado e o runbook usa npm)
 - [Backlog] Mapster: trocar `TypeAdapterConfig.GlobalSettings` por instância própria e validar com `Compile()`/teste
-- [Fase 05] Estratégia de migration em produção (bundle, job dedicado ou flag `Database:MigrateOnStartup`); hoje qualquer ambiente ≠ Production migra no startup
 - [Fase 07] `CityCard.jsx`: `handleFavoriteClick` sem `try/catch` (falha no `PATCH` vira rejeição não tratada)
 - [Fase 08] Rate limiting em `/auth/*` (`AddRateLimiter`, janela fixa por IP) — obrigatório antes do deploy público
 - [Backlog] Provider: resposta 200 incompleta da OpenWeather (lista `weather` vazia, `sys` nulo) vira 500 — lançar `ExternalServiceUnavailableException("resposta incompleta")` e cobrir com WireMock; `sys.country` ausente sai como `null`
@@ -98,7 +97,6 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 - [Backlog] Extrair a criação do `ValidationProblemDetails` duplicada entre `ValidationFilter` e `InvalidModelStateResponseFactory`
 - [Backlog] Confirmar se o ramo 499 dos `GlobalExceptionHandler` é alcançado (o `ExceptionHandlerMiddleware` do .NET 8+ já trata `OperationCanceledException` com `RequestAborted`); remover ou ajustar o `backend.md`
 - [Backlog] Índice único (`userid`, `name`) em `city`: duas buscas simultâneas da mesma cidade nova gravam duplicata
-- [Fase 05] Timeout por check nos health checks (`AddDbContextCheck`/`ProviderHealthCheck`, ~3 s) para os probes do compose
 - [Fase 06] Log forging: `cityName` interpolado nos logs do Provider (`CityImageAppService`, `ProviderCache`, que também loga a `query` livre da busca de cidades) — resolver com Serilog/sink JSON; não desligar a redação de URI do `HttpClient` (chave da OpenWeather em `appid=`)
 - [Fase 08] 400 automático expõe mensagens do System.Text.Json em inglês e nomes de tipo .NET em `errors` — desligar `AllowInputFormatterExceptionMessages` ou mapear para "JSON inválido."
 - [Fase 07] Busca de cidades: o `geo/1.0/direct` da OpenWeather casa o nome inteiro, não prefixo ("São Pa" → `[]`, "Lond" → a cidade "Lond") — usar como busca ao confirmar (Enter/botão), não como autocomplete por tecla; se o autocomplete for essencial, avaliar outro provedor de geocoding (ADR). Prefixos também ocupariam o cache `locais:` com `[]` por 24 h

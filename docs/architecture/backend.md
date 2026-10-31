@@ -121,6 +121,7 @@ API ──▶ Application ──▶ Domain
 - Gateway: Postgres (`AddDbContextCheck`) e Provider (`ProviderHealthCheck` → `GET health/ready`, client nomeado sem resiliência, 5 s). Provider: Redis, só se configurado, com `failureStatus: HealthStatus.Degraded` (200; Redis fora não derruba o `ready` do Gateway).
 - APIs externas (OpenWeather, Pexels) **não** entram: gastariam cota.
 - No Gateway, `MapHealthChecks(...).AllowAnonymous()`.
+- Timeout de 3 s por check (`PostConfigure<HealthCheckServiceOptions>`), para um check travado não segurar o `/health/ready`.
 
 ### Testes
 - **TDD é regra a partir da Fase 04:** regra, AppService, entidade ou endpoint novo/alterado nasce com teste em `tests/` (BE-18); correção de bug começa com um teste que reproduz o bug.
@@ -132,10 +133,11 @@ API ──▶ Application ──▶ Domain
 ### Configuração e segredos
 - `appsettings.json` versionado **sem segredos**; valores locais em `appsettings.Development.json` (ignorado) ou `dotnet user-secrets`; em container, variáveis de ambiente (`OpenWeather__ApiKey`).
 - Seções tipadas com `IOptions<T>` e `ValidateOnStart()` para chaves obrigatórias.
+- Containers: imagens multi-stage (`sdk:10.0` → `aspnet:10.0`, usuário não-root), HTTP na porta 8080, `ASPNETCORE_ENVIRONMENT=Production`; configuração só por variáveis de ambiente (`docker-compose.yml` lê do `.env`, que não é versionado).
 
 ### Injeção de dependência por camada
 - Cada projeto expõe `DependencyInjection.cs` com uma extensão `Add<Servico><Camada>()` (`AddGatewayApi(configuration)`, `AddGatewayApplication`, `AddGatewayInfrastructure(configuration)`, `AddProviderApi(configuration)`, `AddProviderApplication(configuration)`).
-- `Program.cs` só chama essas extensões, configura o pipeline e (no Gateway) aplica migrations fora de `Production`.
+- `Program.cs` só chama essas extensões, configura o pipeline e (no Gateway) aplica migrations conforme `Database:MigrateOnStartup`.
 - Options: classe `*Options` com `const string SectionName`, registrada com `AddOptions<T>().BindConfiguration(...).ValidateDataAnnotations().ValidateOnStart()`; mensagens de `[Required]` em português citando a chave.
 
 ## Decisões Técnicas
@@ -153,7 +155,7 @@ JWT HS256 emitido pelo Gateway em `POST /auth/register` e `POST /auth/login` (cl
 A tabela se chama `user`, reservada no PostgreSQL: em SQL manual, sempre `"user"`.
 
 ### Migrations
-EF Core Migrations em `Gateway.Infrastructure/Data/Migrations/`. Mudança de entidade ou configuration → nova migration no mesmo PR. Aplicadas automaticamente no startup fora de `Production`; comandos no [`runbook.md`](../runbook.md#3-banco-de-dados).
+EF Core Migrations em `Gateway.Infrastructure/Data/Migrations/`. Mudança de entidade ou configuration → nova migration no mesmo PR. Aplicadas no startup quando `Database:MigrateOnStartup` é `true` (padrão: `true` só em `Development`; o compose liga explicitamente); comandos no [`runbook.md`](../runbook.md#3-banco-de-dados).
 
 ## Verificação
 
