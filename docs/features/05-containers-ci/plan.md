@@ -117,7 +117,7 @@ git commit -m "Adiciona flag de migration no startup e timeout nos health checks
 **Interfaces:**
 - Produces: imagens construídas com **contexto na raiz do repositório** (`docker build -f <Dockerfile> .`), escutando HTTP na porta 8080; DLLs de entrada `Climato.Gateway.Api.dll` e `Climato.Provider.Api.dll`.
 
-- [ ] **Passo 1: `.dockerignore`** (raiz)
+- [x] **Passo 1: `.dockerignore`** (raiz)
 
 ```
 **/bin/
@@ -141,7 +141,7 @@ tests/
 web/
 ```
 
-- [ ] **Passo 2: `src/Gateway/Climato.Gateway.Api/Dockerfile`**
+- [x] **Passo 2: `src/Gateway/Climato.Gateway.Api/Dockerfile`**
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -165,7 +165,7 @@ EXPOSE 8080
 ENTRYPOINT ["dotnet", "Climato.Gateway.Api.dll"]
 ```
 
-- [ ] **Passo 3: `src/Provider/Climato.Provider.Api/Dockerfile`**
+- [x] **Passo 3: `src/Provider/Climato.Provider.Api/Dockerfile`**
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -188,7 +188,7 @@ EXPOSE 8080
 ENTRYPOINT ["dotnet", "Climato.Provider.Api.dll"]
 ```
 
-- [ ] **Passo 4: verificar**
+- [x] **Passo 4: verificar**
 
 Run (raiz):
 - `docker build -f src/Gateway/Climato.Gateway.Api/Dockerfile -t climato-gateway .` → sucesso
@@ -196,7 +196,7 @@ Run (raiz):
 - `docker run --rm -e ASPNETCORE_ENVIRONMENT=Production -e OpenWeather__ApiKey=chave-ficticia -e Pexels__ApiKey=chave-ficticia -p 5002:8080 climato-provider` e, em outro terminal, `curl -s http://localhost:5002/health/live` → `Healthy`. Parar o container.
 - Se o `restore` falhar porque o `global.json` pede um SDK que a imagem não tem, **parar e reportar** (não alterar o `global.json` sem acordo).
 
-- [ ] **Passo 5: `/revisar-padrao` e commit**
+- [x] **Passo 5: `/revisar-padrao` e commit**
 
 ```bash
 git add .dockerignore src/Gateway/Climato.Gateway.Api/Dockerfile src/Provider/Climato.Provider.Api/Dockerfile
