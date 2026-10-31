@@ -59,7 +59,7 @@ git commit -m "Adiciona design e plano da Fase 05 (containers e CI)" -m "Co-Auth
 **Interfaces:**
 - Produces: chave de configuração `Database:MigrateOnStartup` (bool; padrão `true` só em `Development`), usada pelo compose (Tarefa 4) como `Database__MigrateOnStartup`.
 
-- [ ] **Passo 1: `Program.cs` do Gateway** — trocar
+- [x] **Passo 1: `Program.cs` do Gateway** — trocar
 
 ```csharp
 if (!app.Environment.IsProduction())
@@ -75,7 +75,7 @@ if (app.Configuration.GetValue("Database:MigrateOnStartup", app.Environment.IsDe
 
 (o corpo do `if` não muda).
 
-- [ ] **Passo 2: timeout no Gateway** — em `Climato.Gateway.Infrastructure/DependencyInjection.cs`, acrescentar `using Microsoft.Extensions.Diagnostics.HealthChecks;`, a constante na classe
+- [x] **Passo 2: timeout no Gateway** — em `Climato.Gateway.Infrastructure/DependencyInjection.cs`, acrescentar `using Microsoft.Extensions.Diagnostics.HealthChecks;`, a constante na classe
 
 ```csharp
     private static readonly TimeSpan healthCheckTimeout = TimeSpan.FromSeconds(3);
@@ -93,14 +93,14 @@ e, logo depois do `services.AddHealthChecks()...;` existente:
         });
 ```
 
-- [ ] **Passo 3: timeout no Provider** — em `Climato.Provider.Api/DependencyInjection.cs` (já tem `using Microsoft.Extensions.Diagnostics.HealthChecks;`), mesma constante na classe e o mesmo bloco `services.PostConfigure<HealthCheckServiceOptions>(...)` logo antes do `return services;`.
+- [x] **Passo 3: timeout no Provider** — em `Climato.Provider.Api/DependencyInjection.cs` (já tem `using Microsoft.Extensions.Diagnostics.HealthChecks;`), mesma constante na classe e o mesmo bloco `services.PostConfigure<HealthCheckServiceOptions>(...)` logo antes do `return services;`.
 
-- [ ] **Passo 4: verificar**
+- [x] **Passo 4: verificar**
 
 Run: `dotnet build Climato.slnx` → 0 erros, 0 avisos. `dotnet test --solution Climato.slnx` → 73/73.
 Run: `dotnet run --project src/Gateway/Climato.Gateway.Api --launch-profile https` com o Postgres local do runbook → sobe e migra como antes (ambiente `Development`, flag ausente). Parar com Ctrl+C. (Se não houver Postgres local, esta checagem fica para o `docker compose up` da Tarefa 4.)
 
-- [ ] **Passo 5: `/revisar-padrao` e commit**
+- [x] **Passo 5: `/revisar-padrao` e commit**
 
 ```bash
 git add src/

@@ -15,7 +15,7 @@ builder.Services
 
 var app = builder.Build();
 
-if (!app.Environment.IsProduction())
+if (app.Configuration.GetValue("Database:MigrateOnStartup", app.Environment.IsDevelopment()))
 {
     await using var scope = app.Services.CreateAsyncScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ClimatoDbContext>();
