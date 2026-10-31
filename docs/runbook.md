@@ -21,9 +21,10 @@ Provider, Postgres e Redis ficam só na rede interna do compose. As APIs rodam e
 
 - Zerar o banco: `docker compose down -v`.
 - Faltou variável no `.env`: o compose para com "Defina … no .env".
-- A URL do Gateway fica fixada no build do web (`VITE_API_URL`); mudou a porta, rode `docker compose build web`.
-- Porta 8080 ou 5001 ocupada: troque o mapeamento no `docker-compose.yml`; no caso do 8080, acrescente a nova origem ao CORS (`Cors__AllowedOrigins__0`).
-## Pré-requisitos
+- A URL do Gateway fica fixada no build do web: mudou a porta 5001, troque também o `VITE_API_URL` no `docker-compose.yml` e rode `docker compose build web`.
+- Porta 8080 ocupada: troque o mapeamento do `web` no `docker-compose.yml` e a origem em `Cors__AllowedOrigins__0`.
+
+## Pré-requisitos (`dotnet run`)
 
 - .NET SDK 10 (versão fixada em `global.json`)
 - Node.js 24 LTS

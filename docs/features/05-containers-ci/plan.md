@@ -41,8 +41,8 @@
 
 ### Tarefa 0: Preparar a branch e versionar o design
 
-- [ ] **Passo 1:** com o PR #12 mergeado: `git fetch`, `git switch -c dev/containers-ci origin/master`, `git branch --unset-upstream`. `git log --oneline -1` mostra o merge do PR #12. Os arquivos não rastreados de `docs/features/05-containers-ci/` acompanham a troca de branch.
-- [ ] **Passo 2:** commit dos documentos:
+- [x] **Passo 1:** com o PR #12 mergeado: `git fetch`, `git switch -c dev/containers-ci origin/master`, `git branch --unset-upstream`. `git log --oneline -1` mostra o merge do PR #12. Os arquivos não rastreados de `docs/features/05-containers-ci/` acompanham a troca de branch.
+- [x] **Passo 2:** commit dos documentos:
 
 ```bash
 git add docs/features/05-containers-ci/
