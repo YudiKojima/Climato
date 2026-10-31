@@ -1,0 +1,70 @@
+name: climato
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: climato
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env (ver .env.example)}
+    volumes:
+      - climato-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d climato"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  provider:
+    build:
+      context: .
+      dockerfile: src/Provider/Climato.Provider.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      OpenWeather__ApiKey: ${OPENWEATHER_API_KEY:?Defina OPENWEATHER_API_KEY no .env (ver .env.example)}
+      Pexels__ApiKey: ${PEXELS_API_KEY:?Defina PEXELS_API_KEY no .env (ver .env.example)}
+      ConnectionStrings__Redis: redis:6379,abortConnect=false,connectTimeout=1000
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: .
+      dockerfile: src/Gateway/Climato.Gateway.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Climato: Host=postgres;Port=5432;Database=climato;Username=postgres;Password=${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env (ver .env.example)}
+      Jwt__SecretKey: ${JWT_SECRET_KEY:?Defina JWT_SECRET_KEY no .env (ver .env.example)}
+      Provider__BaseUrl: http://provider:8080/
+      Cors__AllowedOrigins__0: http://localhost:8080
+      Database__MigrateOnStartup: "true"
+    ports:
+      - "5001:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      provider:
+        condition: service_started
+
+  web:
+    build:
+      context: web
+      args:
+        VITE_API_URL: http://localhost:5001
+    ports:
+      - "8080:80"
+    depends_on:
+      gateway:
+        condition: service_started
+
+volumes:
+  climato-postgres:

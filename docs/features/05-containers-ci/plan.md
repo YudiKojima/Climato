@@ -282,7 +282,7 @@ git commit -m "Versiona o lockfile npm e adiciona a imagem do web com nginx" -m 
 - Consumes: Dockerfiles das Tarefas 2–3; `Database__MigrateOnStartup` da Tarefa 1.
 - Produces: variáveis `OPENWEATHER_API_KEY`, `PEXELS_API_KEY`, `JWT_SECRET_KEY`, `POSTGRES_PASSWORD` (usadas também pelo CI da Tarefa 5).
 
-- [ ] **Passo 1: `.env.example`** (raiz)
+- [x] **Passo 1: `.env.example`** (raiz)
 
 ```dotenv
 # Copie para .env e preencha. O .env é ignorado pelo git.
@@ -298,7 +298,7 @@ JWT_SECRET_KEY=
 POSTGRES_PASSWORD=
 ```
 
-- [ ] **Passo 2: `docker-compose.yml`** (raiz)
+- [x] **Passo 2: `docker-compose.yml`** (raiz)
 
 ```yaml
 name: climato
@@ -373,9 +373,9 @@ volumes:
   climato-postgres:
 ```
 
-- [ ] **Passo 3: verificar a falta de variáveis** — sem `.env`: `docker compose config` → erro citando `Defina POSTGRES_PASSWORD no .env`.
+- [x] **Passo 3: verificar a falta de variáveis** — sem `.env`: `docker compose config` → erro citando `Defina POSTGRES_PASSWORD no .env`.
 
-- [ ] **Passo 4: verificar a subida** — criar um `.env` **local e não versionado** com valores fictícios (`OPENWEATHER_API_KEY=chave-ficticia`, `PEXELS_API_KEY=chave-ficticia`, `JWT_SECRET_KEY=` 48 caracteres aleatórios, `POSTGRES_PASSWORD=senha-local-123`). Então:
+- [x] **Passo 4: verificar a subida** — criar um `.env` **local e não versionado** com valores fictícios (`OPENWEATHER_API_KEY=chave-ficticia`, `PEXELS_API_KEY=chave-ficticia`, `JWT_SECRET_KEY=` 48 caracteres aleatórios, `POSTGRES_PASSWORD=senha-local-123`). Então:
   - `docker compose up --build -d` → os 5 serviços `running`; `docker compose ps` mostra postgres e redis `healthy`.
   - `curl -s http://localhost:5001/health/ready` → `Healthy` (Postgres + Provider).
   - `docker compose logs gateway` mostra as migrations aplicadas no banco vazio.
@@ -385,7 +385,7 @@ volumes:
   - Busca de clima com chave fictícia: `GET /weathers/Lima` autenticado → **503** (OpenWeather recusa a chave): confirma a cadeia Gateway → Provider → OpenWeather. O teste com chaves reais é do usuário (runbook).
   - `docker compose down -v`; apagar o `.env` fictício.
 
-- [ ] **Passo 5: `/revisar-padrao` e commit** (conferir `git status`: `.env` **não** aparece)
+- [x] **Passo 5: `/revisar-padrao` e commit** (conferir `git status`: `.env` **não** aparece)
 
 ```bash
 git add docker-compose.yml .env.example
