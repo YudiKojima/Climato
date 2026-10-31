@@ -399,7 +399,7 @@ git commit -m "Adiciona o docker-compose com gateway, provider, postgres, redis 
 **Files:**
 - Create: `.github/workflows/ci.yml`
 
-- [ ] **Passo 1: `.github/workflows/ci.yml`**
+- [x] **Passo 1: `.github/workflows/ci.yml`**
 
 ```yaml
 name: CI
@@ -462,9 +462,9 @@ jobs:
 
 Os valores do job `docker` só satisfazem a interpolação do compose no build; não são segredos e nenhum container sobe.
 
-- [ ] **Passo 2: verificar localmente** — com as mesmas variáveis exportadas no shell (`OPENWEATHER_API_KEY=ci PEXELS_API_KEY=ci JWT_SECRET_KEY=... POSTGRES_PASSWORD=ci docker compose build`) → sucesso. A execução real acontece no PR (Tarefa 6): se algum job falhar no GitHub, corrigir antes do merge.
+- [x] **Passo 2: verificar localmente** — com as mesmas variáveis exportadas no shell (`OPENWEATHER_API_KEY=ci PEXELS_API_KEY=ci JWT_SECRET_KEY=... POSTGRES_PASSWORD=ci docker compose build`) → sucesso. A execução real acontece no PR (Tarefa 6): se algum job falhar no GitHub, corrigir antes do merge.
 
-- [ ] **Passo 3: `/revisar-padrao` e commit**
+- [x] **Passo 3: `/revisar-padrao` e commit**
 
 ```bash
 git add .github/workflows/ci.yml
