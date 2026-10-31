@@ -588,4 +588,4 @@ git add CLAUDE.md docs/
 git commit -m "Documenta Docker e CI e fecha a Fase 05" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
-- [ ] **Passo 10: PR** — com o usuário de acordo: push e PR `dev/containers-ci` → `master` citando **A23** e **A25 (parcial)**. Os três jobs do CI precisam ficar verdes no próprio PR; com ❌, corrigir antes do merge. Lembrar o usuário de ativar a proteção do `master` (runbook).
+- [x] **Passo 10: PR** — com o usuário de acordo: push e PR `dev/containers-ci` → `master` citando **A23** e **A25 (parcial)**. Os três jobs do CI precisam ficar verdes no próprio PR; com ❌, corrigir antes do merge. Lembrar o usuário de ativar a proteção do `master` (runbook).
