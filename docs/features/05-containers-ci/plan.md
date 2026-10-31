@@ -213,9 +213,9 @@ git commit -m "Adiciona as imagens Docker do Gateway e do Provider" -m "Co-Autho
 **Interfaces:**
 - Produces: imagem do web construída com **contexto `web/`** e `--build-arg VITE_API_URL=...`, servindo na porta 80.
 
-- [ ] **Passo 1: lockfile** — em `web/`: `npm install` (gera `package-lock.json` a partir do `package.json`, sem mudar o `package.json`). Conferir `git diff web/package.json` vazio. Depois `npm run lint` e `npm run build` → sem erros.
+- [x] **Passo 1: lockfile** — em `web/`: `npm install` (gera `package-lock.json` a partir do `package.json`, sem mudar o `package.json`). Conferir `git diff web/package.json` vazio. Depois `npm run lint` e `npm run build` → sem erros.
 
-- [ ] **Passo 2: `web/.dockerignore`**
+- [x] **Passo 2: `web/.dockerignore`**
 
 ```
 node_modules/
@@ -224,7 +224,7 @@ dist/
 .env.*
 ```
 
-- [ ] **Passo 3: `web/nginx.conf`**
+- [x] **Passo 3: `web/nginx.conf`**
 
 ```nginx
 server {
@@ -238,7 +238,7 @@ server {
 }
 ```
 
-- [ ] **Passo 4: `web/Dockerfile`**
+- [x] **Passo 4: `web/Dockerfile`**
 
 ```dockerfile
 FROM node:24-alpine AS build
@@ -258,13 +258,13 @@ COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 ```
 
-- [ ] **Passo 5: verificar**
+- [x] **Passo 5: verificar**
 
 Run:
 - `docker build --build-arg VITE_API_URL=http://localhost:5001 -t climato-web web` → sucesso
 - `docker run --rm -p 8080:80 climato-web`; `curl -s http://localhost:8080/` e `curl -s http://localhost:8080/signin` → ambos devolvem o HTML do `index.html` (fallback de SPA). Confirmar que o bundle contém a URL: `docker run --rm climato-web sh -c "grep -l 'localhost:5001' /usr/share/nginx/html/assets/*.js"` → um arquivo. Parar o container.
 
-- [ ] **Passo 6: `/revisar-padrao` e commit**
+- [x] **Passo 6: `/revisar-padrao` e commit**
 
 ```bash
 git add web/package-lock.json web/Dockerfile web/nginx.conf web/.dockerignore
