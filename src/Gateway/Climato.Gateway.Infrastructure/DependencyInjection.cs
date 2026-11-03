@@ -9,12 +9,15 @@ using Climato.Gateway.Infrastructure.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
 namespace Climato.Gateway.Infrastructure;
 
 public static class DependencyInjection
 {
+    private static readonly TimeSpan healthCheckTimeout = TimeSpan.FromSeconds(3);
+
     public static IServiceCollection AddGatewayInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Climato");
@@ -59,6 +62,14 @@ public static class DependencyInjection
         services.AddHealthChecks()
             .AddDbContextCheck<ClimatoDbContext>("postgres", tags: ["ready"])
             .AddCheck<ProviderHealthCheck>("provider", tags: ["ready"]);
+
+        services.PostConfigure<HealthCheckServiceOptions>(options =>
+        {
+            foreach (var registration in options.Registrations)
+            {
+                registration.Timeout = healthCheckTimeout;
+            }
+        });
 
         return services;
     }

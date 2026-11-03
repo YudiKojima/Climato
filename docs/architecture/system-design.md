@@ -4,18 +4,23 @@
 
 Dois serviços .NET e um SPA React. O frontend fala **só** com o Gateway; o Gateway é o único que conhece o Provider; o Provider é o único que conhece as APIs externas.
 
-### Estado atual
+### Estado atual (compose)
 
 ```mermaid
 flowchart LR
-    web["web<br/>React + Vite + AntD"] -- "HTTPS + JWT (Bearer)" --> gw
-    subgraph Gateway["Climato.Gateway"]
+    web["web (nginx :8080)<br/>React + Vite + AntD"] -- "HTTP + JWT (Bearer)" --> gw
+    subgraph Gateway["Climato.Gateway (:5001)"]
         gw["API"] --> db[(PostgreSQL)]
     end
-    gw -- "HTTP (Provider:BaseUrl)" --> pv["Climato.Provider"]
-    pv --> ow["OpenWeather<br/>/data/2.5/weather"]
-    pv --> px["Pexels<br/>/v1/search"]
+    gw -- "HTTP (Provider:BaseUrl)" --> pv
+    subgraph Provider["Climato.Provider (rede interna)"]
+        pv["API"] --> cache[(Redis)]
+    end
+    pv --> ow["OpenWeather"]
+    pv --> px["Pexels"]
 ```
+
+`docker compose up` sobe os cinco containers; Provider, Postgres e Redis não expõem porta no host.
 
 ### Arquitetura-alvo (fim da Fase 08)
 

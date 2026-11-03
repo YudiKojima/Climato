@@ -4,7 +4,7 @@ Vale para `web/`. Seções marcadas **(a partir da Fase NN)** descrevem padrões
 
 ## Stack
 
-React 19 · Vite 6 · JavaScript (JSX) · Ant Design 5 + `@ant-design/icons` · React Router 7 · axios · ESLint 9 + Prettier.
+React 19 · Vite 6 · JavaScript (JSX) · Ant Design 5 + `@ant-design/icons` · React Router 7 · axios · ESLint 9 + Prettier · npm (`package-lock.json` versionado; `npm ci` no CI e na imagem).
 
 Decisão de manter Ant Design e JavaScript: [ADR 0002](decisions/0002-frontend-ant-design-modernizado.md).
 
@@ -51,6 +51,7 @@ Proteção de rota **só** em `ProtectedRoute`/router — páginas não redireci
 
 - Toda chamada passa por `services/`; páginas e componentes nunca usam `axios` direto.
 - URL base de `import.meta.env.VITE_API_URL`. `web/.env.example` versionado, `web/.env` local ignorado e obrigatório (ver [`runbook.md`](../runbook.md#2-segredos-user-secrets)).
+- Na imagem Docker o `VITE_API_URL` é fixado no build (`--build-arg`), não em runtime; o web é servido por nginx com fallback de SPA (`web/nginx.conf`).
 - Instância única do axios com interceptor de request (`Authorization: Bearer <token>`) e de response (401 → limpa sessão e vai para `/signin`). `userId` nunca é enviado pelo front.
 - Sessão só via `services/session.js` (`saveSession`, `getToken`, `clearSession`, `hasValidSession`); nenhum outro arquivo usa `localStorage` para auth. Mensagem de erro com `getApiErrorMessage(err)`.
 - Parâmetros de rota/query com `encodeURIComponent`.

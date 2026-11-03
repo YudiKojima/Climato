@@ -5,6 +5,8 @@ namespace Climato.Provider.Api;
 
 public static class DependencyInjection
 {
+    private static readonly TimeSpan healthCheckTimeout = TimeSpan.FromSeconds(3);
+
     public static IServiceCollection AddProviderApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers();
@@ -18,6 +20,14 @@ public static class DependencyInjection
         {
             healthChecks.AddRedis(redisConnectionString, name: "redis", failureStatus: HealthStatus.Degraded, tags: ["ready"]);
         }
+
+        services.PostConfigure<HealthCheckServiceOptions>(options =>
+        {
+            foreach (var registration in options.Registrations)
+            {
+                registration.Timeout = healthCheckTimeout;
+            }
+        });
 
         return services;
     }

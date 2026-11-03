@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build Climato.slnx
+      - run: dotnet test --solution Climato.slnx
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+        env:
+          VITE_API_URL: http://localhost:5001
+
+  docker:
+    name: Imagens Docker
+    runs-on: ubuntu-latest
+    env:
+      OPENWEATHER_API_KEY: ci
+      PEXELS_API_KEY: ci
+      JWT_SECRET_KEY: ci-somente-build-sem-uso-real-0123456789abcdef
+      POSTGRES_PASSWORD: ci
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker compose build
