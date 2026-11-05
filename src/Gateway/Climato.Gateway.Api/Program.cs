@@ -1,13 +1,16 @@
 using Climato.Gateway.Api;
+using Climato.Gateway.Api.Observability;
 using Climato.Gateway.Application;
 using Climato.Gateway.Infrastructure;
 using Climato.Gateway.Infrastructure.Data;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddObservability();
 builder.Services
     .AddGatewayApi(builder.Configuration)
     .AddGatewayApplication()
@@ -28,6 +31,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseSerilogRequestLogging(options => options.GetLevel = RequestLogLevel.Get);
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();
