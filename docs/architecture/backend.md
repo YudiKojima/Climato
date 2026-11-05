@@ -16,7 +16,7 @@ Vale para `src/Gateway/` e `src/Provider/`. Seções marcadas **(a partir da Fas
 | Resiliência / cache | `Microsoft.Extensions.Http.Resilience` (`AddStandardResilienceHandler`) / `IDistributedCache` (Redis opcional, memória sem connection string) no Provider | — |
 | Health checks | `/health/live` e `/health/ready` (`Microsoft.Extensions.Diagnostics.HealthChecks`) | — |
 | Testes | xUnit v3 (Microsoft.Testing.Platform), Shouldly, NSubstitute | Testcontainers, WireMock.Net (integração, backlog) |
-| Logs | padrão do ASP.NET | Serilog (Fase 06) |
+| Logs e traces | Serilog (console; JSON compacto fora de Development) + OpenTelemetry (traces; exportador OTLP opcional) | — |
 
 ## Estrutura da Solução
 
@@ -25,20 +25,20 @@ Cada serviço segue camadas no estilo Clean Architecture:
 ```
 Climato.slnx                         ← solução única; Directory.Build.props / Directory.Packages.props / global.json na raiz
 src/Gateway/
-├── Climato.Gateway.Api/             ← Program.cs, DependencyInjection.cs, Controllers, Filters, Errors, Extensions, OpenApi
+├── Climato.Gateway.Api/             ← Program.cs, DependencyInjection.cs, Controllers, Filters, Errors, Extensions, Observability, OpenApi
 ├── Climato.Gateway.Application/     ← Contracts, Services, Model (DTOs: Auth, Cities, Users, Weathers), Mappings (Mapster), Validators, Options, Exceptions, DependencyInjection.cs
 ├── Climato.Gateway.Domain/          ← Entidades e interfaces de repositório por agregado (Cities/, Users/), Exceptions/
 └── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients, ProviderHealthCheck), Auth (JwtTokenService), DependencyInjection.cs
 src/Provider/
-├── Climato.Provider.Api/            ← Program.cs, DependencyInjection.cs, Controllers, Errors
+├── Climato.Provider.Api/            ← Program.cs, DependencyInjection.cs, Controllers, Errors, Observability
 ├── Climato.Provider.Application/    ← OpenWeatherClient, AppServices (clima, previsão, busca, imagem) e cache (Services), Contracts, Model (DTOs da OpenWeather/Pexels), Exceptions, Options, DependencyInjection.cs
 └── Climato.Provider.Domain/         ← Weathers (Weather, Forecast — contratos devolvidos ao Gateway), Locations
 ```
 
 ```
 tests/
-├── Climato.Provider.UnitTests/  ← AppServices e cache do Provider
-└── Climato.Gateway.UnitTests/   ← domínio, AppServices, validators e GlobalExceptionHandler
+├── Climato.Provider.UnitTests/  ← AppServices e cache do Provider; Api (Errors, Observability)
+└── Climato.Gateway.UnitTests/   ← domínio, AppServices, validators; Api (GlobalExceptionHandler, Errors, Observability)
 ```
 
 ### Dependências entre camadas
@@ -123,6 +123,14 @@ API ──▶ Application ──▶ Domain
 - No Gateway, `MapHealthChecks(...).AllowAnonymous()`.
 - Timeout de 3 s por check (`PostConfigure<HealthCheckServiceOptions>`), para um check travado não segurar o `/health/ready`.
 
+### Observabilidade
+- **Serilog** via `builder.AddObservability()` (`Api/Observability/ObservabilityExtensions`, duplicada de propósito em cada Api). Nível em `Serilog:MinimumLevel` no `appsettings.json` (a seção `Logging` não é usada). Console em texto com `{TraceId}` em Development e `CompactJsonFormatter` fora dele; propriedades `Service` e `Environment` em todo evento. Código de aplicação loga só por `ILogger<T>`.
+- Entrada do usuário entra no log **sempre por placeholder** (`{CityName}`), nunca por interpolação `$"..."` ou concatenação: o JSON escapa o valor (`\n` não forja linha) e a propriedade fica pesquisável.
+- `UseSerilogRequestLogging` é o primeiro middleware: uma linha por requisição com o status final, sem repetir a exceção que o `GlobalExceptionHandler` já loga. `RequestLogLevel` decide o nível: `/health/*` → `Verbose` (fora do log), exceção ou ≥ 500 → `Error`, resto → `Information`.
+- **Correlation ID = TraceId W3C.** O `HttpClient` propaga `traceparent` ao Provider. O Gateway devolve o TraceId em `X-Correlation-ID` (`CorrelationIdMiddleware`, via `Response.OnStarting` para sobreviver ao `Response.Clear()` do exception handler; exposto no CORS). O `traceId` do `ProblemDetails` é o TraceId puro (`ProblemDetailsTraceId` em `CustomizeProblemDetails`).
+- **OpenTelemetry** (traces): ASP.NET Core (sem `/health`), HttpClient e, no Gateway, Npgsql (`Npgsql.OpenTelemetry`). O exportador OTLP só é registrado com `OTEL_EXPORTER_OTLP_ENDPOINT` definido; sem ele o trace só alimenta o TraceId dos logs e do header.
+- A redação de URI do `HttpClient` e do OTel fica ligada (a query aparece como `?*`): a chave da OpenWeather vai em `appid=`.
+
 ### Testes
 - **TDD é regra a partir da Fase 04:** regra, AppService, entidade ou endpoint novo/alterado nasce com teste em `tests/` (BE-18); correção de bug começa com um teste que reproduz o bug.
 - Um projeto de unitários por serviço (`Climato.{Gateway,Provider}.UnitTests`); pastas espelham `src/`. `tests/Directory.Build.props` traz xUnit v3 e Shouldly; versões no `Directory.Packages.props`.
@@ -149,7 +157,7 @@ O frontend só conhece o Gateway. Novos dados para o front (previsão, autocompl
 O formato da OpenWeather/Pexels não vaza para o Gateway: o Provider devolve contratos próprios (`Weather`, previsão, cidades). Trocar o provedor de clima afeta só o Provider. No Gateway, o contrato recebido do Provider é o `WeatherDto` da Application; o Domain do Gateway não conhece o formato do Provider. A previsão é agregada por dia no Provider (data local da cidade, mín/máx, condição do ponto mais próximo de 12:00, maior `pop` × 100, maior vento em km/h); o Gateway e o front não veem os pontos de 3 h.
 
 ### Autenticação
-JWT HS256 emitido pelo Gateway em `POST /auth/register` e `POST /auth/login` (claims `sub`, `email`, `name`, `jti`; validade `Jwt:ExpirationMinutes`). Sem refresh token ([ADR 0006](decisions/0006-jwt-localstorage-sem-refresh.md)). Senha com `PasswordHasher<User>` (PBKDF2), rehash no login quando o formato envelhece. E-mail normalizado (`User.NormalizeEmail`). Recurso de outro usuário responde 404, nunca 403. Pipeline: `UseExceptionHandler` → `UseStatusCodePages` → `UseHttpsRedirection` → `UseCors` → `UseAuthentication` → `UseAuthorization`.
+JWT HS256 emitido pelo Gateway em `POST /auth/register` e `POST /auth/login` (claims `sub`, `email`, `name`, `jti`; validade `Jwt:ExpirationMinutes`). Sem refresh token ([ADR 0006](decisions/0006-jwt-localstorage-sem-refresh.md)). Senha com `PasswordHasher<User>` (PBKDF2), rehash no login quando o formato envelhece. E-mail normalizado (`User.NormalizeEmail`). Recurso de outro usuário responde 404, nunca 403. Pipeline: `UseSerilogRequestLogging` → `CorrelationIdMiddleware` → `UseExceptionHandler` → `UseStatusCodePages` → `UseHttpsRedirection` → `UseCors` → `UseAuthentication` → `UseAuthorization`.
 
 ### Palavra reservada `user`
 A tabela se chama `user`, reservada no PostgreSQL: em SQL manual, sempre `"user"`.

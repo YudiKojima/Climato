@@ -98,6 +98,10 @@ Todas as respostas de erro em `application/problem+json`.
 | Provider | processo vivo | Redis (se configurado; falha = `Degraded`, 200) |
 | Gateway | processo vivo | Postgres + `/health/ready` do Provider |
 
+### Observabilidade
+
+O TraceId W3C do Gateway é o correlation ID: web → Gateway (resposta com `X-Correlation-ID` e `traceId` no `ProblemDetails`) → Provider (`traceparent` propagado pelo `HttpClient`) → OpenWeather/Pexels. Os dois serviços logam em JSON (Serilog) com o mesmo `@tr`; com `docker compose --profile observability`, os traces vão via OTLP para o Jaeger (`localhost:16686`).
+
 ## Dados
 
 PostgreSQL, propriedade exclusiva do Gateway.

@@ -28,13 +28,13 @@ Definido no [`CLAUDE.md`](../CLAUDE.md): brainstorming → `design.md` → `plan
 
 ---
 
-## Estado Atual (2026-10-31, após a Fase 05)
+## Estado Atual (2026-11-04, após a Fase 06)
 
-**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, previsão de 5 dias e busca de cidades na API (ainda sem tela no front), testes unitários nos dois serviços, `docker compose up` com os cinco serviços e CI em todo PR.
+**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, previsão de 5 dias e busca de cidades na API (ainda sem tela no front), testes unitários nos dois serviços, `docker compose up` com os cinco serviços e CI em todo PR, logs JSON com correlation ID (TraceId) e traces OpenTelemetry no Jaeger (profile `observability`).
 
-**Não há:** testes de integração, logs estruturados, deploy.
+**Não há:** testes de integração, métricas, deploy.
 
-**Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Microsoft.Extensions.Http.Resilience · IDistributedCache (Redis opcional) · React 19 · Vite 6 · Ant Design 5 · axios · xUnit v3 · Shouldly · NSubstitute · Docker · Docker Compose · nginx · GitHub Actions.
+**Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Microsoft.Extensions.Http.Resilience · IDistributedCache (Redis opcional) · React 19 · Vite 6 · Ant Design 5 · axios · xUnit v3 · Shouldly · NSubstitute · Docker · Docker Compose · nginx · GitHub Actions · Serilog · OpenTelemetry · Jaeger.
 
 ---
 
@@ -71,9 +71,10 @@ Dockerfiles multi-stage (Gateway, Provider, web com nginx), `docker-compose.yml`
 Design: [`design.md`](features/05-containers-ci/design.md) · Plano: [`plan.md`](features/05-containers-ci/plan.md)
 Auditoria: A23 (Docker), A25 (parcial: CI).
 
-#### Fase 06 — Observabilidade
-Serilog, correlation ID, OpenTelemetry opcional.
-Auditoria: A25.
+#### Fase 06 — Observabilidade ✅ Concluída (2026-11-04)
+Serilog (JSON fora de Development), correlation ID = TraceId W3C (`X-Correlation-ID` e `traceId` no `ProblemDetails`), OpenTelemetry (ASP.NET Core, HttpClient, Npgsql) com Jaeger no profile `observability` do compose; log forging fechado pelo JSON.
+Design: [`design.md`](features/06-observabilidade/design.md) · Plano: [`plan.md`](features/06-observabilidade/plan.md)
+Auditoria: A25 (logs estruturados).
 
 #### Fase 07 — Frontend moderno
 Tema AntD próprio, modo escuro, responsivo, autocomplete, previsão com gráfico, skeletons.
@@ -97,7 +98,6 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 - [Backlog] Extrair a criação do `ValidationProblemDetails` duplicada entre `ValidationFilter` e `InvalidModelStateResponseFactory`
 - [Backlog] Confirmar se o ramo 499 dos `GlobalExceptionHandler` é alcançado (o `ExceptionHandlerMiddleware` do .NET 8+ já trata `OperationCanceledException` com `RequestAborted`); remover ou ajustar o `backend.md`
 - [Backlog] Índice único (`userid`, `name`) em `city`: duas buscas simultâneas da mesma cidade nova gravam duplicata
-- [Fase 06] Log forging: `cityName` interpolado nos logs do Provider (`CityImageAppService`, `ProviderCache`, que também loga a `query` livre da busca de cidades) — resolver com Serilog/sink JSON; não desligar a redação de URI do `HttpClient` (chave da OpenWeather em `appid=`)
 - [Fase 08] 400 automático expõe mensagens do System.Text.Json em inglês e nomes de tipo .NET em `errors` — desligar `AllowInputFormatterExceptionMessages` ou mapear para "JSON inválido."
 - [Fase 08] Health checks: com Redis travado, o check do Gateway (3 s) pode estourar junto com o do Provider (3 s) e virar Unhealthy, contrariando "Redis fora não derruba o ready do Gateway" — dar ao Gateway um timeout maior que o do Provider; o `client.Timeout` de 5 s do health do Provider ficou inalcançável
 - [Fase 07] Busca de cidades: o `geo/1.0/direct` da OpenWeather casa o nome inteiro, não prefixo ("São Pa" → `[]`, "Lond" → a cidade "Lond") — usar como busca ao confirmar (Enter/botão), não como autocomplete por tecla; se o autocomplete for essencial, avaliar outro provedor de geocoding (ADR). Prefixos também ocupariam o cache `locais:` com `[]` por 24 h

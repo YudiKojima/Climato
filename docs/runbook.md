@@ -16,12 +16,14 @@ docker compose up --build
 |---|---|
 | Web | `http://localhost:8080` |
 | Gateway | `http://localhost:5001` (`/health/ready`) |
+| Jaeger | `http://localhost:16686` (só com `--profile observability`) |
 
 Provider, Postgres e Redis ficam só na rede interna do compose. As APIs rodam em `Production` (sem Scalar); o Gateway aplica as migrations na subida (`Database__MigrateOnStartup=true`). A primeira subida baixa imagens e compila tudo (alguns minutos).
 
 - Zerar o banco: `docker compose down -v`.
 - Faltou variável no `.env`: o compose para com "Defina … no .env".
 - A URL do Gateway fica fixada no build do web: mudou a porta 5001, troque também o `VITE_API_URL` no `docker-compose.yml` e rode `docker compose build web`.
+- **Logs e traces:** `docker compose logs -f gateway provider` mostra uma linha JSON por evento; `@tr` é o TraceId, o mesmo do header `X-Correlation-ID` da resposta do Gateway e do `traceId` dos erros. Para ver os traces, descomente `OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317` no `.env` e rode `docker compose --profile observability up --build`; busque o TraceId em `http://localhost:16686`.
 - Porta 8080 ocupada: troque o mapeamento do `web` no `docker-compose.yml` e a origem em `Cors__AllowedOrigins__0`.
 
 ## Pré-requisitos (`dotnet run`)
@@ -106,6 +108,8 @@ npm --prefix web install && npm --prefix web run dev
 | Web | `http://localhost:5173` | — | — |
 
 Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
+
+Em Development o console sai em texto, com o TraceId em cada linha. O nível vem de `Serilog:MinimumLevel`: uma seção `Logging` num `appsettings.Development.json` local não tem mais efeito.
 
 ## 5. Testes
 

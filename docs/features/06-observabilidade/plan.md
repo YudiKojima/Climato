@@ -57,8 +57,8 @@
 
 ### Tarefa 0: Documentos da fase
 
-- [ ] **Passo 1:** conferir que `docs/features/06-observabilidade/design.md` e `plan.md` existem e que o usuário aprovou o plano.
-- [ ] **Passo 2:** `/revisar-padrao` e commit.
+- [x] **Passo 1:** conferir que `docs/features/06-observabilidade/design.md` e `plan.md` existem e que o usuário aprovou o plano.
+- [x] **Passo 2:** `/revisar-padrao` e commit.
 
 ```bash
 git add docs/features/06-observabilidade/design.md docs/features/06-observabilidade/plan.md
@@ -75,7 +75,7 @@ git commit -m "Adiciona design e plano da Fase 06 (observabilidade)"
 - `Climato.Provider.Api.Errors.ProblemDetailsTraceId.Apply(ProblemDetailsContext context)`: `static void`, usada como `CustomizeProblemDetails`.
 - `Climato.Provider.Api.Observability.RequestLogLevel.Get(HttpContext context, double elapsedMilliseconds, Exception? exception)`: `static LogEventLevel`, usada como `GetLevel` do `UseSerilogRequestLogging`.
 
-- [ ] **Passo 1: pacotes.** Em `Directory.Packages.props`, dentro do `<ItemGroup>` e em ordem alfabética:
+- [x] **Passo 1: pacotes.** Em `Directory.Packages.props`, dentro do `<ItemGroup>` e em ordem alfabética:
 
 ```xml
     <PackageVersion Include="Npgsql.OpenTelemetry" Version="10.0.3" />
@@ -102,7 +102,7 @@ Em `tests/Climato.Provider.UnitTests/Climato.Provider.UnitTests.csproj`, trocar 
     <ProjectReference Include="..\..\src\Provider\Climato.Provider.Api\Climato.Provider.Api.csproj" />
 ```
 
-- [ ] **Passo 2: testes que falham.** Criar `tests/Climato.Provider.UnitTests/Api/Errors/ProblemDetailsTraceIdTests.cs`:
+- [x] **Passo 2: testes que falham.** Criar `tests/Climato.Provider.UnitTests/Api/Errors/ProblemDetailsTraceIdTests.cs`:
 
 ```csharp
 using System.Diagnostics;
@@ -209,12 +209,12 @@ public class RequestLogLevelTests
 }
 ```
 
-- [ ] **Passo 3: confirmar a falha.**
+- [x] **Passo 3: confirmar a falha.**
 
 Run: `dotnet test --project tests/Climato.Provider.UnitTests`
 Expected: erro de compilação (`ProblemDetailsTraceId` e `RequestLogLevel` não existem).
 
-- [ ] **Passo 4: implementação mínima.** Criar `src/Provider/Climato.Provider.Api/Errors/ProblemDetailsTraceId.cs`:
+- [x] **Passo 4: implementação mínima.** Criar `src/Provider/Climato.Provider.Api/Errors/ProblemDetailsTraceId.cs`:
 
 ```csharp
 using System.Diagnostics;
@@ -256,12 +256,12 @@ public static class RequestLogLevel
 }
 ```
 
-- [ ] **Passo 5: confirmar que passa.**
+- [x] **Passo 5: confirmar que passa.**
 
 Run: `dotnet test --project tests/Climato.Provider.UnitTests`
 Expected: todos verdes (os anteriores + 8 novos).
 
-- [ ] **Passo 6:** `/revisar-padrao` e commit.
+- [x] **Passo 6:** `/revisar-padrao` e commit.
 
 ```bash
 git add Directory.Packages.props src/Provider/Climato.Provider.Api tests/Climato.Provider.UnitTests
@@ -275,7 +275,7 @@ git commit -m "Adiciona o traceId puro no ProblemDetails e o nível do request l
 **Interfaces consumidas:** `ProblemDetailsTraceId.Apply` e `RequestLogLevel.Get` (Tarefa 1).
 **Interfaces produzidas:** `Climato.Provider.Api.Observability.ObservabilityExtensions.AddObservability(this WebApplicationBuilder builder)`: devolve `WebApplicationBuilder`.
 
-- [ ] **Passo 1:** criar `src/Provider/Climato.Provider.Api/Observability/ObservabilityExtensions.cs`:
+- [x] **Passo 1:** criar `src/Provider/Climato.Provider.Api/Observability/ObservabilityExtensions.cs`:
 
 ```csharp
 using OpenTelemetry.Resources;
@@ -333,13 +333,13 @@ public static class ObservabilityExtensions
 }
 ```
 
-- [ ] **Passo 2:** em `src/Provider/Climato.Provider.Api/DependencyInjection.cs`, trocar `services.AddProblemDetails();` por:
+- [x] **Passo 2:** em `src/Provider/Climato.Provider.Api/DependencyInjection.cs`, trocar `services.AddProblemDetails();` por:
 
 ```csharp
         services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemDetailsTraceId.Apply);
 ```
 
-- [ ] **Passo 3:** em `src/Provider/Climato.Provider.Api/Program.cs`:
+- [x] **Passo 3:** em `src/Provider/Climato.Provider.Api/Program.cs`:
 
 ```csharp
 using Climato.Provider.Api;
@@ -376,7 +376,7 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check 
 app.Run();
 ```
 
-- [ ] **Passo 4:** em `src/Provider/Climato.Provider.Api/appsettings.json`, trocar a seção `Logging` por:
+- [x] **Passo 4:** em `src/Provider/Climato.Provider.Api/appsettings.json`, trocar a seção `Logging` por:
 
 ```json
   "Serilog": {
@@ -390,12 +390,12 @@ app.Run();
   },
 ```
 
-- [ ] **Passo 5: build e testes.**
+- [x] **Passo 5: build e testes.**
 
 Run: `dotnet build Climato.slnx` → 0 erros, 0 avisos novos.
 Run: `dotnet test --solution Climato.slnx` → todos verdes.
 
-- [ ] **Passo 6: verificação manual (Production, sem segredo real).** Num terminal em background:
+- [x] **Passo 6: verificação manual (Production, sem segredo real).** Num terminal em background:
 
 ```bash
 ASPNETCORE_ENVIRONMENT=Production OpenWeather__ApiKey=chave-ficticia Pexels__ApiKey=chave-ficticia dotnet run --project src/Provider/Climato.Provider.Api --no-launch-profile --urls http://localhost:5182
@@ -407,7 +407,7 @@ Depois:
 - No console: uma linha JSON por evento, com `@tr` igual ao `traceId` da resposta, `Service: "Climato.Provider"`, a linha `HTTP GET /weathers/... responded 503` e o `Warning` do `GlobalExceptionHandler`. Nenhuma URL com `appid=` aparece. Se o `traceId` do `ProblemDetails` não for o TraceId puro (o writer padrão gravou depois do `Customize`), parar e investigar com `systematic-debugging`.
 - Encerrar o processo.
 
-- [ ] **Passo 7:** `/revisar-padrao` e commit.
+- [x] **Passo 7:** `/revisar-padrao` e commit.
 
 ```bash
 git add src/Provider/Climato.Provider.Api
@@ -423,7 +423,7 @@ git commit -m "Adiciona Serilog e OpenTelemetry no Provider"
 - `Climato.Gateway.Api.Observability.RequestLogLevel.Get(HttpContext, double, Exception?)`: `static LogEventLevel`.
 - `Climato.Gateway.Api.Observability.CorrelationIdMiddleware`: middleware por convenção (`ctor(RequestDelegate next)`, `Task InvokeAsync(HttpContext context)`), com `public const string HeaderName = "X-Correlation-ID"`.
 
-- [ ] **Passo 1: pacotes.** Em `src/Gateway/Climato.Gateway.Api/Climato.Gateway.Api.csproj`, no `ItemGroup` de pacotes:
+- [x] **Passo 1: pacotes.** Em `src/Gateway/Climato.Gateway.Api/Climato.Gateway.Api.csproj`, no `ItemGroup` de pacotes:
 
 ```xml
     <PackageReference Include="Npgsql.OpenTelemetry" />
@@ -434,7 +434,7 @@ git commit -m "Adiciona Serilog e OpenTelemetry no Provider"
     <PackageReference Include="Serilog.AspNetCore" />
 ```
 
-- [ ] **Passo 2: testes que falham.** Criar `tests/Climato.Gateway.UnitTests/Api/Errors/ProblemDetailsTraceIdTests.cs`:
+- [x] **Passo 2: testes que falham.** Criar `tests/Climato.Gateway.UnitTests/Api/Errors/ProblemDetailsTraceIdTests.cs`:
 
 ```csharp
 using System.Diagnostics;
@@ -616,12 +616,12 @@ public class CorrelationIdMiddlewareTests
 
 Se `HttpResponseFeature` estiver marcado como obsoleto no .NET 10 (aviso CS0618), implementar `IHttpResponseFeature` diretamente na classe aninhada (`StatusCode`, `ReasonPhrase`, `Headers = new HeaderDictionary()`, `Body = Stream.Null`, `HasStarted => false`, `OnCompleted` vazio), mantendo o mesmo `OnStarting`/`StartAsync`.
 
-- [ ] **Passo 3: confirmar a falha.**
+- [x] **Passo 3: confirmar a falha.**
 
 Run: `dotnet test --project tests/Climato.Gateway.UnitTests`
 Expected: erro de compilação (`ProblemDetailsTraceId`, `RequestLogLevel` e `CorrelationIdMiddleware` não existem).
 
-- [ ] **Passo 4: implementação mínima.** Criar `src/Gateway/Climato.Gateway.Api/Errors/ProblemDetailsTraceId.cs`:
+- [x] **Passo 4: implementação mínima.** Criar `src/Gateway/Climato.Gateway.Api/Errors/ProblemDetailsTraceId.cs`:
 
 ```csharp
 using System.Diagnostics;
@@ -700,12 +700,12 @@ public class CorrelationIdMiddleware
 }
 ```
 
-- [ ] **Passo 5: confirmar que passa.**
+- [x] **Passo 5: confirmar que passa.**
 
 Run: `dotnet test --project tests/Climato.Gateway.UnitTests`
 Expected: todos verdes (os anteriores + 10 novos).
 
-- [ ] **Passo 6:** `/revisar-padrao` e commit.
+- [x] **Passo 6:** `/revisar-padrao` e commit.
 
 ```bash
 git add src/Gateway/Climato.Gateway.Api tests/Climato.Gateway.UnitTests
@@ -719,7 +719,7 @@ git commit -m "Adiciona o correlation ID, o traceId puro no ProblemDetails e o n
 **Interfaces consumidas:** as três da Tarefa 3.
 **Interfaces produzidas:** `Climato.Gateway.Api.Observability.ObservabilityExtensions.AddObservability(this WebApplicationBuilder builder)`.
 
-- [ ] **Passo 1:** criar `src/Gateway/Climato.Gateway.Api/Observability/ObservabilityExtensions.cs`. Conferir no pacote `Npgsql.OpenTelemetry` o namespace da extensão `AddNpgsql()` (esperado: `OpenTelemetry.Trace`, nesse caso não precisa de `using` extra; se for `Npgsql`, adicionar `using Npgsql;`).
+- [x] **Passo 1:** criar `src/Gateway/Climato.Gateway.Api/Observability/ObservabilityExtensions.cs`. Conferir no pacote `Npgsql.OpenTelemetry` o namespace da extensão `AddNpgsql()` (esperado: `OpenTelemetry.Trace`, nesse caso não precisa de `using` extra; se for `Npgsql`, adicionar `using Npgsql;`).
 
 ```csharp
 using OpenTelemetry.Resources;
@@ -778,7 +778,7 @@ public static class ObservabilityExtensions
 }
 ```
 
-- [ ] **Passo 2:** em `src/Gateway/Climato.Gateway.Api/DependencyInjection.cs`:
+- [x] **Passo 2:** em `src/Gateway/Climato.Gateway.Api/DependencyInjection.cs`:
   - Trocar `services.AddProblemDetails();` por `services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemDetailsTraceId.Apply);`.
   - Na política `Web` do CORS, incluir o header exposto e o `using Climato.Gateway.Api.Observability;`:
 
@@ -790,7 +790,7 @@ public static class ObservabilityExtensions
                 .WithExposedHeaders(CorrelationIdMiddleware.HeaderName));
 ```
 
-- [ ] **Passo 3:** em `src/Gateway/Climato.Gateway.Api/Program.cs`, adicionar `using Climato.Gateway.Api.Observability;` e `using Serilog;`, chamar `builder.AddObservability();` antes do `builder.Services.AddGatewayApi(...)` e abrir o pipeline assim:
+- [x] **Passo 3:** em `src/Gateway/Climato.Gateway.Api/Program.cs`, adicionar `using Climato.Gateway.Api.Observability;` e `using Serilog;`, chamar `builder.AddObservability();` antes do `builder.Services.AddGatewayApi(...)` e abrir o pipeline assim:
 
 ```csharp
 app.UseSerilogRequestLogging(options => options.GetLevel = RequestLogLevel.Get);
@@ -805,7 +805,7 @@ app.UseAuthorization();
 
 O bloco de migrations e o `MapOpenApi`/`MapScalarApiReference` continuam onde estão.
 
-- [ ] **Passo 4:** em `src/Gateway/Climato.Gateway.Api/appsettings.json`, trocar a seção `Logging` por:
+- [x] **Passo 4:** em `src/Gateway/Climato.Gateway.Api/appsettings.json`, trocar a seção `Logging` por:
 
 ```json
   "Serilog": {
@@ -820,14 +820,14 @@ O bloco de migrations e o `MapOpenApi`/`MapScalarApiReference` continuam onde es
   },
 ```
 
-- [ ] **Passo 5: build e testes.**
+- [x] **Passo 5: build e testes.**
 
 Run: `dotnet build Climato.slnx` → 0 erros, 0 avisos novos.
 Run: `dotnet test --solution Climato.slnx` → todos verdes.
 
 A verificação manual do Gateway fica na Tarefa 5, porque ele precisa de Postgres.
 
-- [ ] **Passo 6:** `/revisar-padrao` e commit.
+- [x] **Passo 6:** `/revisar-padrao` e commit.
 
 ```bash
 git add src/Gateway/Climato.Gateway.Api
@@ -838,7 +838,7 @@ git commit -m "Adiciona Serilog, OpenTelemetry e o header X-Correlation-ID no Ga
 
 ### Tarefa 5: Compose com Jaeger e verificação de ponta a ponta
 
-- [ ] **Passo 1:** em `docker-compose.yml`:
+- [x] **Passo 1:** em `docker-compose.yml`:
   - Nos serviços `provider` e `gateway`, incluir em `environment`:
 
 ```yaml
@@ -855,7 +855,7 @@ git commit -m "Adiciona Serilog, OpenTelemetry e o header X-Correlation-ID no Ga
       - "16686:16686"
 ```
 
-- [ ] **Passo 2:** no fim do `.env.example`:
+- [x] **Passo 2:** no fim do `.env.example`:
 
 ```bash
 
@@ -863,34 +863,34 @@ git commit -m "Adiciona Serilog, OpenTelemetry e o header X-Correlation-ID no Ga
 # OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
 ```
 
-- [ ] **Passo 3: validar o compose.**
+- [x] **Passo 3: validar o compose.**
 
 Run: `docker compose config --quiet` → sem erro. Se faltar o `.env`, exportar as variáveis com valores fictícios só na sessão do terminal, como no job `docker` do CI.
 Run: `docker compose --profile observability config --services` → inclui `jaeger`.
 
-- [ ] **Passo 4: subir sem o web (porta 8080 ocupada).** Usar o `.env` existente sem abri-lo. Se não houver `.env`, perguntar ao usuário. Exportar `OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317` só na sessão do terminal:
+- [x] **Passo 4: subir sem o web (porta 8080 ocupada).** Usar o `.env` existente sem abri-lo. Se não houver `.env`, perguntar ao usuário. Exportar `OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317` só na sessão do terminal:
 
 ```bash
 OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317 docker compose --profile observability up -d --build postgres redis jaeger provider gateway
 ```
 
-- [ ] **Passo 5: correlation ID e traces.**
+- [x] **Passo 5: correlation ID e traces.**
   - Registrar um usuário de teste e fazer login (`POST http://localhost:5001/auth/register` e `/auth/login`, com `email`, `name` e `password`), guardando o token só na variável do terminal.
   - `curl -s -i -H "Authorization: Bearer $TOKEN" http://localhost:5001/weathers/Londres`: a resposta tem `X-Correlation-ID` com 32 hex.
   - Abrir `http://localhost:16686`, buscar o trace pelo ID: spans `Climato.Gateway` (ASP.NET, Npgsql, HttpClient) → `Climato.Provider` (ASP.NET, HttpClient para OpenWeather/Pexels). A URL da OpenWeather aparece sem o valor de `appid` (query redigida).
   - `curl -s -i -X OPTIONS -H "Origin: http://localhost:8080" -H "Access-Control-Request-Method: GET" http://localhost:5001/cities`: o preflight responde. Com um `GET` com `Origin`, a resposta traz `Access-Control-Expose-Headers: X-Correlation-ID`.
 
-- [ ] **Passo 6: logs JSON e log forging.**
+- [x] **Passo 6: logs JSON e log forging.**
   - `docker compose stop redis`, depois `curl -s -H "Authorization: Bearer $TOKEN" http://localhost:5001/weathers/Lon%0Adon`. Com o Redis fora, o `ProviderCache` loga `Warning` com o texto da cidade.
   - `docker compose logs provider --tail 20`: cada evento é **uma** linha JSON, o `Text` aparece com `\n` escapado, e `@tr` é o mesmo TraceId do `X-Correlation-ID` dessa resposta.
   - `docker compose logs gateway --tail 20`: linhas JSON com `Service: "Climato.Gateway"`, a linha do request log e nenhum log de `/health`.
   - `docker compose start redis`.
 
-- [ ] **Passo 7: 500/503 com o mesmo ID.** `docker compose stop provider`, depois `curl -s -i -H "Authorization: Bearer $TOKEN" http://localhost:5001/weathers/Londres`: 503 `ProblemDetails`, com `traceId` igual ao header `X-Correlation-ID` (o header sobrevive ao `Response.Clear()` do exception handler). Em seguida, `docker compose start provider`.
+- [x] **Passo 7: 500/503 com o mesmo ID.** `docker compose stop provider`, depois `curl -s -i -H "Authorization: Bearer $TOKEN" http://localhost:5001/weathers/Londres`: 503 `ProblemDetails`, com `traceId` igual ao header `X-Correlation-ID` (o header sobrevive ao `Response.Clear()` do exception handler). Em seguida, `docker compose start provider`.
 
-- [ ] **Passo 8:** `docker compose --profile observability down` (sem `-v`, para não apagar o banco local do usuário). Não tocar nos containers do `statement-importer`.
+- [x] **Passo 8:** `docker compose --profile observability down` (sem `-v`, para não apagar o banco local do usuário). Não tocar nos containers do `statement-importer`.
 
-- [ ] **Passo 9:** `/revisar-padrao` e commit.
+- [x] **Passo 9:** `/revisar-padrao` e commit.
 
 ```bash
 git add docker-compose.yml .env.example
@@ -901,7 +901,7 @@ git commit -m "Adiciona o Jaeger no compose com o profile observability"
 
 ### Tarefa 6: Documentação e fechamento da fase
 
-- [ ] **Passo 1: `docs/architecture/backend.md`**
+- [x] **Passo 1: `docs/architecture/backend.md`**
   - Stack: a linha `Logs` passa a "Serilog (console; JSON compacto fora de Development) + OpenTelemetry (traces, OTLP opcional)", com alvo `—`.
   - Estrutura da Solução: incluir `Observability` na lista de pastas das duas Apis.
   - Testes: o Provider.UnitTests cobre também a Api (`Errors`, `Observability`).
@@ -912,23 +912,23 @@ git commit -m "Adiciona o Jaeger no compose com o profile observability"
     - OTel: ASP.NET Core, HttpClient e Npgsql (Gateway). `/health` fora dos traces e do request log (`RequestLogLevel`). Exportador OTLP só com `OTEL_EXPORTER_OTLP_ENDPOINT`.
     - Redação de URI do `HttpClient` mantida (chave em `appid=`).
   - Autenticação: o pipeline passa a ser `UseSerilogRequestLogging` → `CorrelationIdMiddleware` → `UseExceptionHandler` → `UseStatusCodePages` → `UseHttpsRedirection` → `UseCors` → `UseAuthentication` → `UseAuthorization`.
-- [ ] **Passo 2: `docs/architecture/review-checklist.md`**, novas linhas no Backend:
+- [x] **Passo 2: `docs/architecture/review-checklist.md`**, novas linhas no Backend:
 
 ```markdown
 | BE-29 | 🟡 | 06 | Log com interpolação | `logger.Log*($"...")` ou concatenação com dado da requisição em vez de placeholder `{Nome}` | [Observabilidade](backend.md#observabilidade) |
 | BE-30 | 🟡 | 06 | Log fora do `ILogger<T>` | `Console.WriteLine`, `Debug.WriteLine` ou `Log.Logger` estático em código de aplicação | [Observabilidade](backend.md#observabilidade) |
 ```
 
-- [ ] **Passo 3: `docs/architecture/system-design.md`:** nova subseção `### Observabilidade` em Fluxos, com o TraceId atravessando web → Gateway (`X-Correlation-ID`) → Provider (`traceparent`) → OpenWeather/Pexels, e o Jaeger opcional no compose.
-- [ ] **Passo 4: `docs/runbook.md`**
+- [x] **Passo 3: `docs/architecture/system-design.md`:** nova subseção `### Observabilidade` em Fluxos, com o TraceId atravessando web → Gateway (`X-Correlation-ID`) → Provider (`traceparent`) → OpenWeather/Pexels, e o Jaeger opcional no compose.
+- [x] **Passo 4: `docs/runbook.md`**
   - Seção Docker: tabela com `Jaeger | http://localhost:16686 (só com --profile observability)` e um parágrafo "Logs e traces": `docker compose logs -f gateway provider` (JSON, uma linha por evento, `@tr` = TraceId), o header `X-Correlation-ID` para achar a requisição, e como ligar o Jaeger (`OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317` no `.env` + `docker compose --profile observability up`).
   - Seção `dotnet run`: o console sai em texto com o TraceId. O nível agora vem de `Serilog:MinimumLevel`, e a seção `Logging` de um `appsettings.Development.json` local deixa de ter efeito.
-- [ ] **Passo 5: `docs/features/00-roteiro-portfolio/auditoria-inicial.md`:** A25 com status `✅ CI, Docker e health checks (Fases 03 e 05) · logs estruturados (Fase 06)`.
-- [ ] **Passo 6: `docs/project-overview.md`**
+- [x] **Passo 5: `docs/features/00-roteiro-portfolio/auditoria-inicial.md`:** A25 com status `✅ CI, Docker e health checks (Fases 03 e 05) · logs estruturados (Fase 06)`.
+- [x] **Passo 6: `docs/project-overview.md`**
   - Remover a pendência `[Fase 06] Log forging...`.
   - Marcar a Fase 06 como `✅ Concluída (AAAA-MM-DD)` com a data do commit final, no formato das fases anteriores.
   - Registrar as pendências encontradas na execução, se houver.
-- [ ] **Passo 7: verificação final** (`verification-before-completion`):
+- [x] **Passo 7: verificação final** (`verification-before-completion`):
 
 ```bash
 dotnet build Climato.slnx
@@ -939,7 +939,7 @@ npm --prefix web run build
 
 Expected: build sem erros nem avisos novos; todos os testes verdes (73 + 18 novos = 91); lint e build do web sem erro.
 
-- [ ] **Passo 8:** marcar os checkboxes deste plano, `/revisar-padrao` sem 🔴 e commit.
+- [x] **Passo 8:** marcar os checkboxes deste plano, `/revisar-padrao` sem 🔴 e commit.
 
 ```bash
 git add docs
