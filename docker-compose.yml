@@ -23,6 +23,12 @@ services:
       timeout: 3s
       retries: 10
 
+  jaeger:
+    image: jaegertracing/jaeger:2.22.0
+    profiles: [observability]
+    ports:
+      - "16686:16686"
+
   provider:
     build:
       context: .
@@ -32,6 +38,7 @@ services:
       OpenWeather__ApiKey: ${OPENWEATHER_API_KEY:?Defina OPENWEATHER_API_KEY no .env (ver .env.example)}
       Pexels__ApiKey: ${PEXELS_API_KEY:?Defina PEXELS_API_KEY no .env (ver .env.example)}
       ConnectionStrings__Redis: redis:6379,abortConnect=false,connectTimeout=1000
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     depends_on:
       redis:
         condition: service_healthy
@@ -47,6 +54,7 @@ services:
       Provider__BaseUrl: http://provider:8080/
       Cors__AllowedOrigins__0: http://localhost:8080
       Database__MigrateOnStartup: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     ports:
       - "5001:8080"
     depends_on:
