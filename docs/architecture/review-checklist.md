@@ -42,9 +42,9 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | BE-25 | 🟡 | 03 | `HttpResponseMessage` sem `using` | `await client.GetAsync/SendAsync(...)` atribuído sem `using` | [Comunicação HTTP](backend.md#comunicação-http) |
 | BE-26 | 🟡 | 03 | Falha de dependência como 404/500 | `catch` de `HttpRequestException` devolvendo 404, ou `EnsureSuccessStatusCode()` deixando o erro do serviço chamado virar 500 | [Erros](backend.md#erros) |
 | BE-27 | 🟡 | 03 | Falha opcional derrubando a resposta | Erro de imagem/cache propagado em vez de `Warning` + resposta sem o dado opcional | [Erros](backend.md#erros) |
+| BE-28 | 🟡 | 03 | Chamada à OpenWeather fora do client | `HttpClient` da OpenWeather injetado em AppService ou URL `data/2.5`/`geo/1.0` montada fora do `OpenWeatherClient` | [Comunicação HTTP](backend.md#comunicação-http) |
 | BE-29 | 🟡 | 06 | Log com interpolação | `logger.Log*($"...")` ou concatenação com dado da requisição em vez de placeholder `{Nome}` | [Observabilidade](backend.md#observabilidade) |
 | BE-30 | 🟡 | 06 | Log fora do `ILogger<T>` | `Console.WriteLine`, `Debug.WriteLine` ou `Log.Logger` estático em código de aplicação | [Observabilidade](backend.md#observabilidade) |
-| BE-28 | 🟡 | 03 | Chamada à OpenWeather fora do client | `HttpClient` da OpenWeather injetado em AppService ou URL `data/2.5`/`geo/1.0` montada fora do `OpenWeatherClient` | [Comunicação HTTP](backend.md#comunicação-http) |
 
 ## Frontend
 
