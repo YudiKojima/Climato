@@ -1,0 +1,54 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ant-margin-lg);
+}
+
+.hero {
+  min-height: 20rem;
+  border-radius: var(--ant-border-radius-lg);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ant-color-primary), var(--ant-color-primary-active))
+    center / cover no-repeat;
+}
+
+.overlay {
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--ant-margin);
+  padding: var(--ant-padding-lg);
+  background: linear-gradient(to top, var(--ant-color-bg-mask), transparent);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: var(--ant-margin-sm);
+}
+
+.icon {
+  width: 6rem;
+  height: 6rem;
+}
+
+.hero .temperature,
+.hero .city {
+  color: var(--ant-color-white);
+  margin: 0;
+}
+
+.hero .description {
+  color: var(--ant-color-white);
+  font-size: var(--ant-font-size-lg);
+  text-transform: capitalize;
+}
+
+.heroSkeleton {
+  min-height: 20rem;
+}
+
+.metric {
+  height: 100%;
+}

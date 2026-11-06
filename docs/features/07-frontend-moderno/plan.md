@@ -2072,7 +2072,7 @@ git commit -m "Redesenha a Home e os Favoritos com skeleton, estados vazio e de 
 - Consome: `useWeather` (Tarefa 3); `EmptyState`, `ErrorState` (Tarefa 5); `formatTime` (Tarefa 1).
 - Campos do `WeatherDto` usados: `city`, `country`, `description`, `icon`, `temperature`, `tempMin`, `tempMax`, `feelsLike`, `humidity`, `pressure`, `windSpeedKmh`, `windDirection`, `sunrise`, `sunset`, `imageUrl` (opcional).
 
-- [ ] **Passo 1: Reescrever `web/src/pages/WeatherDetails.jsx`**
+- [x] **Passo 1: Reescrever `web/src/pages/WeatherDetails.jsx`**
 
 ```jsx
 import { Button, Card, Col, Row, Skeleton, Space, Statistic, Typography } from "antd";
@@ -2214,7 +2214,7 @@ export default function WeatherDetails() {
 }
 ```
 
-- [ ] **Passo 2: Criar `web/src/pages/WeatherDetails.module.css`**
+- [x] **Passo 2: Criar `web/src/pages/WeatherDetails.module.css`**
 
 ```css
 .page {
@@ -2275,7 +2275,7 @@ export default function WeatherDetails() {
 
 O `style` inline do hero só leva `backgroundImage` com a URL da API (valor dinâmico, FE-07); sem `imageUrl`, fica o gradiente do token primário.
 
-- [ ] **Passo 3: Remover o que saiu**
+- [x] **Passo 3: Remover o que saiu**
 
 ```bash
 git rm -r web/src/components/Loading.jsx web/src/styles
@@ -2283,16 +2283,16 @@ git rm -r web/src/components/Loading.jsx web/src/styles
 
 Conferir: `grep -rn "Loading\"\|styles/\|style={{" web/src` → só o `style` do hero em `WeatherDetails.jsx`.
 
-- [ ] **Passo 4: Verificação completa.**
+- [x] **Passo 4: Verificação completa.**
 
-- [ ] **Passo 5: Conferência manual**
+- [x] **Passo 5: Conferência manual**
   - Cidade existente (ex.: “Tóquio”): skeleton, depois hero com foto, nome traduzido do clima atual, nove métricas com ícones; 375 px → duas por linha.
   - Cidade inexistente (“Xyzabc”): estado vazio “Cidade "Xyzabc" não encontrada.” com Voltar.
   - Provider parado (Gateway de pé): 503 → `ErrorState` com “Código do erro” igual ao `X-Correlation-ID` da resposta (Network → Headers) e botão copiar.
   - Trocar de cidade pela busca rapidamente não mostra a cidade anterior.
   - Tema escuro: texto do hero legível sobre a foto.
 
-- [ ] **Passo 6: Commit**
+- [x] **Passo 6: Commit**
 
 ```bash
 git add web/src
