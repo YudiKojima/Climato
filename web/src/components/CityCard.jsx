@@ -1,10 +1,7 @@
 import { Card, Button, Typography, message } from "antd";
 import { StarFilled, StarOutlined, CloseOutlined } from "@ant-design/icons";
-import {
-  toggleFavorite,
-  deleteCity,
-  getApiErrorMessage,
-} from "../services/api";
+import { deleteCity, toggleFavorite } from "../services/cities";
+import { getApiErrorMessage } from "../services/errors";
 
 const { Title, Text } = Typography;
 

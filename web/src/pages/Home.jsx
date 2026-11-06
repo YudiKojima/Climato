@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllCities } from "../services/api";
+import { getAllCities } from "../services/cities";
 import { clearSession } from "../services/session";
 import CityCard from "../components/CityCard";
 import { Link, useNavigate } from "react-router-dom";

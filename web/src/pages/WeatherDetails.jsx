@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getApiErrorMessage, getWeatherByCity } from "../services/api";
+import { getWeatherByCity } from "../services/weather";
+import { getApiErrorMessage } from "../services/errors";
 import { Button, Empty, Typography } from "antd";
 import "../styles/WeatherDetails.css";
 import Loading from "../components/Loading";
-import formatDatetime from "../components/formatDatetime";
+import { formatTime as formatDatetime } from "../utils/formatTime";
 
 const WeatherDetails = () => {
   const { cityName } = useParams();

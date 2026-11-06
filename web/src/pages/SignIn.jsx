@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, getApiErrorMessage } from "../services/api";
+import { login } from "../services/auth";
+import { getApiErrorMessage } from "../services/errors";
 import { hasValidSession, saveSession } from "../services/session";
 import img from "../assets/Climato sem fundo preto.png";
 import "../styles/Containers.css";
