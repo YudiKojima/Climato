@@ -1035,7 +1035,7 @@ git commit -m "Adiciona hooks de carga e de feedback de erro com o correlation I
   - `AppLayout` e `AuthLayout` renderizam `<Outlet/>`.
   - Rotas: `/signin`, `/signup` (guest + `AuthLayout`); `/p`, `/p/weather/:cityName`, `/p/favorites` (protegidas + `AppLayout`).
 
-- [ ] **Passo 1: Criar `web/src/app/AuthContext.js`**
+- [x] **Passo 1: Criar `web/src/app/AuthContext.js`**
 
 ```js
 import { createContext, useContext } from "react";
@@ -1045,7 +1045,7 @@ export const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 ```
 
-- [ ] **Passo 2: Criar `web/src/app/AuthProvider.jsx`**
+- [x] **Passo 2: Criar `web/src/app/AuthProvider.jsx`**
 
 ```jsx
 import { useCallback, useMemo, useState } from "react";
@@ -1078,7 +1078,7 @@ export default function AuthProvider({ children }) {
 
 `FALLBACK_NAME` cobre sessões gravadas antes desta fase, que não têm `userName`.
 
-- [ ] **Passo 3: Criar `web/src/app/AppProviders.jsx`**
+- [x] **Passo 3: Criar `web/src/app/AppProviders.jsx`**
 
 ```jsx
 import { App } from "antd";
@@ -1096,7 +1096,7 @@ export default function AppProviders({ children }) {
 }
 ```
 
-- [ ] **Passo 4: Criar os guards**
+- [x] **Passo 4: Criar os guards**
 
 `web/src/app/ProtectedRoute.jsx`:
 
@@ -1120,7 +1120,7 @@ export default function GuestRoute() {
 }
 ```
 
-- [ ] **Passo 5: Criar `web/src/components/UserMenu.jsx` e `UserMenu.module.css`**
+- [x] **Passo 5: Criar `web/src/components/UserMenu.jsx` e `UserMenu.module.css`**
 
 ```jsx
 import { Avatar, Button, Dropdown } from "antd";
@@ -1183,7 +1183,7 @@ export default function UserMenu({ showName, showNavigation }) {
 }
 ```
 
-- [ ] **Passo 6: Criar `web/src/layouts/AppLayout.jsx` e `AppLayout.module.css`**
+- [x] **Passo 6: Criar `web/src/layouts/AppLayout.jsx` e `AppLayout.module.css`**
 
 ```jsx
 import { Grid, Layout } from "antd";
@@ -1306,7 +1306,7 @@ export default function AppLayout() {
 }
 ```
 
-- [ ] **Passo 7: Criar `web/src/layouts/AuthLayout.jsx` e `AuthLayout.module.css`**
+- [x] **Passo 7: Criar `web/src/layouts/AuthLayout.jsx` e `AuthLayout.module.css`**
 
 ```jsx
 import { Col, Layout, Row, Typography } from "antd";
@@ -1410,7 +1410,7 @@ export default function AuthLayout() {
 }
 ```
 
-- [ ] **Passo 8: Criar `web/src/pages/Auth.module.css`**
+- [x] **Passo 8: Criar `web/src/pages/Auth.module.css`**
 
 ```css
 .switch {
@@ -1419,7 +1419,7 @@ export default function AuthLayout() {
 }
 ```
 
-- [ ] **Passo 9: Reescrever `web/src/pages/SignIn.jsx`**
+- [x] **Passo 9: Reescrever `web/src/pages/SignIn.jsx`**
 
 ```jsx
 import { useState } from "react";
@@ -1496,7 +1496,7 @@ export default function SignIn() {
 }
 ```
 
-- [ ] **Passo 10: Reescrever `web/src/pages/SignUp.jsx`**
+- [x] **Passo 10: Reescrever `web/src/pages/SignUp.jsx`**
 
 ```jsx
 import { useState } from "react";
@@ -1584,7 +1584,7 @@ export default function SignUp() {
 }
 ```
 
-- [ ] **Passo 11: Criar `web/src/app/router.jsx`**
+- [x] **Passo 11: Criar `web/src/app/router.jsx`**
 
 ```jsx
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
@@ -1624,7 +1624,7 @@ export default function AppRouter() {
 }
 ```
 
-- [ ] **Passo 12: Reescrever `web/src/main.jsx`**
+- [x] **Passo 12: Reescrever `web/src/main.jsx`**
 
 ```jsx
 import { StrictMode } from "react";
@@ -1642,7 +1642,7 @@ createRoot(document.getElementById("root")).render(
 );
 ```
 
-- [ ] **Passo 13: Remover o que saiu**
+- [x] **Passo 13: Remover o que saiu**
 
 ```bash
 git rm -r web/src/App.jsx web/src/App.css web/src/index.css web/src/router web/src/pages/SignOut.jsx web/src/styles/Containers.css
@@ -1650,9 +1650,9 @@ git rm -r web/src/App.jsx web/src/App.css web/src/index.css web/src/router web/s
 
 Conferir: `grep -rn "signout\|SignOut\|Containers.css\|index.css\|/router\"" web/src` → nenhum resultado. (Home e Favorites ainda têm header e footer próprios até a Tarefa 5 — duplicados dentro do `AppLayout` por um commit, esperado.)
 
-- [ ] **Passo 14: Verificação completa.**
+- [x] **Passo 14: Verificação completa.**
 
-- [ ] **Passo 15: Conferência manual** (`npm --prefix web run dev`, backend local conforme o [`runbook.md`](../../runbook.md))
+- [x] **Passo 15: Conferência manual** (`npm --prefix web run dev`, backend local conforme o [`runbook.md`](../../runbook.md))
   - `/signin` em ≥ 768 px: duas colunas (imagem + formulário); em 375 px (DevTools): só o formulário com a logo.
   - Alternar o tema no `/signin`, recarregar: o tema se mantém. Apagar `climato.theme` no Application → Local Storage: volta a seguir o sistema.
   - DevTools → Elements: o elemento `.ant-app` tem classe `css-var-*` e `--ant-color-primary: #0ea5e9` em Computed. Se as `var(--ant-*)` não resolverem dentro dos layouts, parar e investigar com `superpowers:systematic-debugging` antes de seguir.
@@ -1660,7 +1660,7 @@ Conferir: `grep -rn "signout\|SignOut\|Containers.css\|index.css\|/router\"" web
   - Menu do avatar → Sair → `/signin`; voltar no navegador para `/p` → redireciona para `/signin`.
   - Com sessão válida, abrir `/signin` → vai para `/p`.
 
-- [ ] **Passo 16: Commit**
+- [x] **Passo 16: Commit**
 
 ```bash
 git add web/src
