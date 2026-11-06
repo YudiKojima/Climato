@@ -1683,7 +1683,7 @@ git commit -m "Adiciona providers de tema e sessão, rotas aninhadas, AppLayout 
   - `ErrorState({ error, fallback, onRetry })` — usado também na Tarefa 6.
   - `CityCard({ city, onChange, onOpen })`; `CityGrid({ cities, isLoading, error, reload, emptyDescription, onOpen })`.
 
-- [ ] **Passo 1: Criar `web/src/components/EmptyState.jsx` e `EmptyState.module.css`**
+- [x] **Passo 1: Criar `web/src/components/EmptyState.jsx` e `EmptyState.module.css`**
 
 ```jsx
 import { Empty } from "antd";
@@ -1708,7 +1708,7 @@ export default function EmptyState({ description, children }) {
 }
 ```
 
-- [ ] **Passo 2: Criar `web/src/components/ErrorState.jsx`**
+- [x] **Passo 2: Criar `web/src/components/ErrorState.jsx`**
 
 ```jsx
 import { Button, Result } from "antd";
@@ -1739,7 +1739,7 @@ export default function ErrorState({ error, fallback, onRetry }) {
 }
 ```
 
-- [ ] **Passo 3: Reescrever `web/src/components/CityCard.jsx` e criar `CityCard.module.css`** (resolve a pendência do `handleFavoriteClick` sem `try/catch`)
+- [x] **Passo 3: Reescrever `web/src/components/CityCard.jsx` e criar `CityCard.module.css`** (resolve a pendência do `handleFavoriteClick` sem `try/catch`)
 
 ```jsx
 import { useState } from "react";
@@ -1861,7 +1861,7 @@ export default function CityCard({ city, onChange, onOpen }) {
 
 A favorita não mostra o botão remover (o backend recusa com 409 — regra A18); o aviso `message.warning` antigo some junto.
 
-- [ ] **Passo 4: Criar `web/src/components/CityGridSkeleton.jsx`**
+- [x] **Passo 4: Criar `web/src/components/CityGridSkeleton.jsx`**
 
 ```jsx
 import { Card, Col, Row, Skeleton } from "antd";
@@ -1881,7 +1881,7 @@ export default function CityGridSkeleton({ count = 4 }) {
 }
 ```
 
-- [ ] **Passo 5: Criar `web/src/components/CityGrid.jsx`**
+- [x] **Passo 5: Criar `web/src/components/CityGrid.jsx`**
 
 ```jsx
 import { Col, Row } from "antd";
@@ -1928,7 +1928,7 @@ export default function CityGrid({
 }
 ```
 
-- [ ] **Passo 6: Reescrever `web/src/pages/Home.jsx` e criar `Home.module.css`**
+- [x] **Passo 6: Reescrever `web/src/pages/Home.jsx` e criar `Home.module.css`**
 
 ```jsx
 import { Input, Typography } from "antd";
@@ -2005,7 +2005,7 @@ export default function Home() {
 }
 ```
 
-- [ ] **Passo 7: Reescrever `web/src/pages/Favorites.jsx`**
+- [x] **Passo 7: Reescrever `web/src/pages/Favorites.jsx`**
 
 ```jsx
 import { Typography } from "antd";
@@ -2033,7 +2033,7 @@ export default function Favorites() {
 }
 ```
 
-- [ ] **Passo 8: Remover o que saiu**
+- [x] **Passo 8: Remover o que saiu**
 
 ```bash
 git rm web/src/components/Footer.jsx web/src/styles/Favorites.css
@@ -2041,9 +2041,9 @@ git rm web/src/components/Footer.jsx web/src/styles/Favorites.css
 
 Conferir: `grep -rn "Footer\"\|Favorites.css\|clearSession" web/src/pages web/src/components` → nenhum resultado.
 
-- [ ] **Passo 9: Verificação completa.**
+- [x] **Passo 9: Verificação completa.**
 
-- [ ] **Passo 10: Conferência manual**
+- [x] **Passo 10: Conferência manual**
   - Home: skeleton de cards ao carregar; usuário novo vê o estado vazio; busca com Enter abre o detalhe.
   - Favoritar/desfavoritar: botão em loading, `message` de sucesso, lista atualiza sem piscar skeleton.
   - Remover: `modal` de confirmação; Cancelar não remove; Remover some com o card.
@@ -2052,7 +2052,7 @@ Conferir: `grep -rn "Footer\"\|Favorites.css\|clearSession" web/src/pages web/sr
   - 375 px: um card por linha; 1440 px: quatro por linha, conteúdo centralizado.
   - Tema escuro: cards, header e textos legíveis.
 
-- [ ] **Passo 11: Commit**
+- [x] **Passo 11: Commit**
 
 ```bash
 git add web/src
