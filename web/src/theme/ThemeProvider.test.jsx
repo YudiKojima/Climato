@@ -18,6 +18,17 @@ describe("ThemeProvider", () => {
     expect(localStorage.getItem("climato.theme")).toBe("dark");
   });
 
+  it("aplica o color-scheme do modo no documento", () => {
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+    const { result } = renderHook(() => useThemeMode(), { wrapper });
+
+    expect(document.documentElement.style.colorScheme).toBe("dark");
+
+    act(() => result.current.toggleMode());
+
+    expect(document.documentElement.style.colorScheme).toBe("light");
+  });
+
   it("não persiste nada antes de o usuário escolher", () => {
     renderHook(() => useThemeMode(), { wrapper });
 

@@ -5,7 +5,7 @@ import { AuthContext } from "./AuthContext";
 const FALLBACK_NAME = "Usuário";
 
 export default function AuthProvider({ children }) {
-  const [userName, setUserName] = useState(() => getUserName() ?? FALLBACK_NAME);
+  const [userName, setUserName] = useState(() => getUserName() || FALLBACK_NAME);
 
   const signIn = useCallback((auth) => {
     saveSession(auth);

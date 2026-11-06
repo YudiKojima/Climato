@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { App, Button, Card, Tooltip, Typography } from "antd";
 import { DeleteOutlined, StarFilled, StarOutlined } from "@ant-design/icons";
+import { Link, useNavigate } from "react-router-dom";
 import useApiFeedback from "../hooks/useApiFeedback";
 import { deleteCity, toggleFavorite } from "../services/cities";
 import styles from "./CityCard.module.css";
 
-export default function CityCard({ city, onChange, onOpen }) {
+export default function CityCard({ city, onChange }) {
+  const navigate = useNavigate();
   const { message, modal } = App.useApp();
   const notifyError = useApiFeedback();
   const [isSaving, setIsSaving] = useState(false);
@@ -44,12 +46,20 @@ export default function CityCard({ city, onChange, onOpen }) {
     });
   };
 
+  const weatherPath = `/p/weather/${encodeURIComponent(city.name)}`;
+
   return (
-    <Card hoverable className={styles.card} onClick={() => onOpen(city)}>
+    <Card hoverable className={styles.card} onClick={() => navigate(weatherPath)}>
       <div className={styles.header}>
         <div>
           <Typography.Title level={4} className={styles.title}>
-            {city.name}
+            <Link
+              to={weatherPath}
+              className={styles.link}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {city.name}
+            </Link>
           </Typography.Title>
           <Typography.Text type="secondary">{city.country}</Typography.Text>
         </div>

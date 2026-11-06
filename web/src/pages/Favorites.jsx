@@ -1,10 +1,8 @@
 import { Typography } from "antd";
-import { useNavigate } from "react-router-dom";
 import CityGrid from "../components/CityGrid";
 import useFavorites from "../hooks/useFavorites";
 
 export default function Favorites() {
-  const navigate = useNavigate();
   const { data, isLoading, error, reload } = useFavorites();
 
   return (
@@ -16,7 +14,6 @@ export default function Favorites() {
         error={error}
         reload={reload}
         emptyDescription="Nenhuma cidade favoritada ainda."
-        onOpen={(city) => navigate(`/p/weather/${encodeURIComponent(city.name)}`)}
       />
     </section>
   );

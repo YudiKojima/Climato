@@ -88,7 +88,7 @@ export default function WeatherDetails() {
     <div className={styles.page}>
       <section
         className={styles.hero}
-        style={weather.imageUrl ? { backgroundImage: `url(${weather.imageUrl})` } : undefined}
+        style={weather.imageUrl ? { backgroundImage: `url("${weather.imageUrl}")` } : undefined}
       >
         <div className={styles.overlay}>
           <div>{backButton}</div>

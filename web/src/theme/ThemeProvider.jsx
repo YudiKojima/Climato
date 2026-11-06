@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ConfigProvider } from "antd";
 import ptBR from "antd/locale/pt_BR";
 import { ThemeContext } from "./ThemeContext";
@@ -12,6 +12,10 @@ export default function ThemeProvider({ children }) {
     const next = mode === "dark" ? "light" : "dark";
     saveMode(next);
     setMode(next);
+  }, [mode]);
+
+  useEffect(() => {
+    document.documentElement.style.colorScheme = mode;
   }, [mode]);
 
   const value = useMemo(() => ({ mode, toggleMode }), [mode, toggleMode]);

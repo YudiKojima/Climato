@@ -10,7 +10,6 @@ export default function CityGrid({
   error,
   reload,
   emptyDescription,
-  onOpen,
 }) {
   if (error) {
     return (
@@ -34,7 +33,7 @@ export default function CityGrid({
     <Row gutter={[16, 16]}>
       {cities.map((city) => (
         <Col key={city.id} xs={24} sm={12} md={8} lg={6}>
-          <CityCard city={city} onChange={reload} onOpen={onOpen} />
+          <CityCard city={city} onChange={reload} />
         </Col>
       ))}
     </Row>

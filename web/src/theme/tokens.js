@@ -5,7 +5,7 @@ const baseToken = {
   colorInfo: "#0ea5e9",
   borderRadius: 12,
   fontFamily:
-    "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   boxShadow:
     "0 6px 16px 0 rgba(15, 23, 42, 0.08), 0 3px 6px -4px rgba(15, 23, 42, 0.12)",
 };

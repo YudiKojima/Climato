@@ -8,13 +8,11 @@ export default function Home() {
   const navigate = useNavigate();
   const { data, isLoading, error, reload } = useCities();
 
-  const openCity = (name) => navigate(`/p/weather/${encodeURIComponent(name)}`);
-
   const handleSearch = (value) => {
     const name = value.trim();
 
     if (name) {
-      openCity(name);
+      navigate(`/p/weather/${encodeURIComponent(name)}`);
     }
   };
 
@@ -43,7 +41,6 @@ export default function Home() {
           error={error}
           reload={reload}
           emptyDescription="Pesquise uma cidade para começar."
-          onOpen={(city) => openCity(city.name)}
         />
       </section>
     </div>

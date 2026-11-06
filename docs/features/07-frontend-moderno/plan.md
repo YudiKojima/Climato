@@ -41,6 +41,8 @@ Esperado: lint sem erros, todos os testes `passed`, build `✓ built`.
 | `index.css` | Removido; `main.jsx` importa `antd/dist/reset.css` | Reset oficial do AntD 5; o `index.css` atual tem fonte e cor literais e classes mortas |
 | Logo por tema | `Climato sem fundo preto.png` (traço preto) no claro, `Climato sem fundo.png` (traço branco) no escuro e no painel do `AuthLayout` | Conferido nas imagens; resolve o risco do design sem asset novo |
 | `jsdom` | `^26.1.0` | O `jsdom` 31 exige Node `^24.15`; a máquina local tem 24.13 |
+| `useAsync(fn, deps)` (design §4) | `useAsync(fn)`, com `fn` estável (`useCallback` no chamador) | Sem array de deps dinâmico, o lint de hooks continua valendo |
+| `fontFamily` do sistema | Pilha só de fontes do sistema; removido o `<link>` da Poppins do `index.html` | Code review: a Poppins era baixada e não era usada, e `Inter` não era carregada |
 
 ---
 
@@ -2409,3 +2411,12 @@ Depois, `/finishing-a-development-branch` → PR `dev/frontend-moderno` → `mas
   - O clima atual e o histórico também gravam o nome em inglês ("Tóquio" → "Tokyo, JP"), não só a previsão — a pendência da 07b foi ampliada.
   - Com o Provider fora, o Gateway leva ~30 s para devolver o 503 (resiliência) e a tela fica no skeleton — pendência para a Fase 08.
   - Testes de componentes do web ficaram em backlog.
+
+### Ajustes do code review (2026-11-05)
+
+- Card: o nome da cidade virou `<Link>` (acessível por Tab/Enter, com foco visível); o card monta a própria rota, e a prop `onOpen` saiu de `CityCard`/`CityGrid`/páginas.
+- `ThemeProvider` aplica `color-scheme` no `<html>` (barra de rolagem e controles nativos no escuro), com teste.
+- Teste do `useWeather` (troca de cidade refaz a carga), atendendo à FE-12.
+- `index.html` com `lang="pt-BR"`; `url("...")` com aspas no fundo do detalhe; nome vazio na sessão cai no fallback (`||`).
+- Não acatado: padronizar o default dos contextos (`ThemeContext` com funções vazias × `AuthContext` com `null`) — só estilo.
+- Total: 35 testes Vitest.

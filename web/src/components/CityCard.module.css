@@ -8,6 +8,20 @@
   box-shadow: var(--ant-box-shadow);
 }
 
+.card .link {
+  color: inherit;
+}
+
+.card .link:hover {
+  color: var(--ant-color-primary);
+}
+
+.card .link:focus-visible {
+  outline: 2px solid var(--ant-color-primary);
+  outline-offset: 2px;
+  border-radius: var(--ant-border-radius-sm);
+}
+
 .header {
   display: flex;
   justify-content: space-between;
