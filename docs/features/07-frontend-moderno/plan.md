@@ -767,7 +767,7 @@ git commit -m "Adiciona o tema Céu do Ant Design com modo claro e escuro persis
   - `useApiFeedback()` → `notifyError(error, fallback)`: erro de negócio → `message.error`; erro inesperado (rede/5xx) → `notification.error` com o `CorrelationId` quando houver.
   - `CorrelationId` (default): `({ id })` → “Código do erro: `<id>`” copiável.
 
-- [ ] **Passo 1: Escrever `web/src/hooks/useAsync.test.js`**
+- [x] **Passo 1: Escrever `web/src/hooks/useAsync.test.js`**
 
 ```js
 import { act, renderHook, waitFor } from "@testing-library/react";
@@ -825,7 +825,7 @@ describe("useAsync", () => {
 });
 ```
 
-- [ ] **Passo 2: Escrever `web/src/hooks/useApiFeedback.test.jsx`**
+- [x] **Passo 2: Escrever `web/src/hooks/useApiFeedback.test.jsx`**
 
 ```jsx
 import { act, renderHook, screen } from "@testing-library/react";
@@ -868,12 +868,12 @@ describe("useApiFeedback", () => {
 });
 ```
 
-- [ ] **Passo 3: Rodar e ver falhar**
+- [x] **Passo 3: Rodar e ver falhar**
 
 Run: `npm --prefix web test`
 Esperado: FAIL — `./useAsync` e `./useApiFeedback` não encontrados.
 
-- [ ] **Passo 4: Criar `web/src/hooks/useAsync.js`**
+- [x] **Passo 4: Criar `web/src/hooks/useAsync.js`**
 
 ```js
 import { useCallback, useEffect, useState } from "react";
@@ -914,7 +914,7 @@ export default function useAsync(fn) {
 }
 ```
 
-- [ ] **Passo 5: Criar `web/src/components/CorrelationId.jsx`**
+- [x] **Passo 5: Criar `web/src/components/CorrelationId.jsx`**
 
 ```jsx
 import { Typography } from "antd";
@@ -931,7 +931,7 @@ export default function CorrelationId({ id }) {
 }
 ```
 
-- [ ] **Passo 6: Criar `web/src/hooks/useApiFeedback.jsx`**
+- [x] **Passo 6: Criar `web/src/hooks/useApiFeedback.jsx`**
 
 ```jsx
 import { useCallback } from "react";
@@ -966,7 +966,7 @@ export default function useApiFeedback() {
 }
 ```
 
-- [ ] **Passo 7: Criar os hooks de recurso**
+- [x] **Passo 7: Criar os hooks de recurso**
 
 `web/src/hooks/useCities.js`:
 
@@ -1005,14 +1005,14 @@ export default function useWeather(cityName) {
 
 Os três só ligam um serviço ao `useAsync` (coberto acima); não ganham teste próprio.
 
-- [ ] **Passo 8: Rodar e ver passar**
+- [x] **Passo 8: Rodar e ver passar**
 
 Run: `npm --prefix web test`
 Esperado: todos `passed` (+7 desta tarefa).
 
-- [ ] **Passo 9: Verificação completa.**
+- [x] **Passo 9: Verificação completa.**
 
-- [ ] **Passo 10: Commit**
+- [x] **Passo 10: Commit**
 
 ```bash
 git add web/src/hooks web/src/components/CorrelationId.jsx
