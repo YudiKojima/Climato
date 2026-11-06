@@ -1,6 +1,7 @@
 using System.Text;
 using Climato.Gateway.Api.Errors;
 using Climato.Gateway.Api.Filters;
+using Climato.Gateway.Api.Observability;
 using Climato.Gateway.Api.OpenApi;
 using Climato.Gateway.Application.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,7 +33,7 @@ public static class DependencyInjection
                 };
             });
         services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
-        services.AddProblemDetails();
+        services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemDetailsTraceId.Apply);
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
         var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -42,7 +43,8 @@ public static class DependencyInjection
             options.AddPolicy("Web", policy => policy
                 .WithOrigins(allowedOrigins)
                 .AllowAnyHeader()
-                .AllowAnyMethod());
+                .AllowAnyMethod()
+                .WithExposedHeaders(CorrelationIdMiddleware.HeaderName));
         });
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

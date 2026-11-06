@@ -11,7 +11,7 @@ public static class DependencyInjection
     {
         services.AddControllers();
         services.AddOpenApi();
-        services.AddProblemDetails();
+        services.AddProblemDetails(options => options.CustomizeProblemDetails = ProblemDetailsTraceId.Apply);
         services.AddExceptionHandler<GlobalExceptionHandler>();
         var healthChecks = services.AddHealthChecks();
         var redisConnectionString = configuration.GetConnectionString("Redis");
