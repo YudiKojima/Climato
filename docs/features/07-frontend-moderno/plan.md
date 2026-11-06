@@ -233,7 +233,7 @@ git commit -m "Adiciona Vitest no web e guarda o nome do usuário na sessão"
   - `errors.js`: `getApiErrorMessage(error, fallback?) → string`, `getCorrelationId(error) → string | undefined`, `isUnexpectedError(error) → boolean`.
   - `utils/formatTime.js`: `formatTime(isoWithOffset) → "HH:mm"`.
 
-- [ ] **Passo 1: Escrever `web/src/services/errors.test.js`**
+- [x] **Passo 1: Escrever `web/src/services/errors.test.js`**
 
 ```js
 import { describe, expect, it } from "vitest";
@@ -311,7 +311,7 @@ describe("isUnexpectedError", () => {
 });
 ```
 
-- [ ] **Passo 2: Escrever `web/src/utils/formatTime.test.js`**
+- [x] **Passo 2: Escrever `web/src/utils/formatTime.test.js`**
 
 ```js
 import { describe, expect, it } from "vitest";
@@ -324,12 +324,12 @@ describe("formatTime", () => {
 });
 ```
 
-- [ ] **Passo 3: Rodar e ver falhar**
+- [x] **Passo 3: Rodar e ver falhar**
 
 Run: `npm --prefix web test`
 Esperado: FAIL — módulos `./errors` e `./formatTime` não encontrados.
 
-- [ ] **Passo 4: Criar `web/src/services/errors.js`**
+- [x] **Passo 4: Criar `web/src/services/errors.js`**
 
 ```js
 const DEFAULT_MESSAGE = "Não foi possível concluir a operação.";
@@ -350,18 +350,18 @@ export const isUnexpectedError = (error) =>
   !error?.response || error.response.status >= 500;
 ```
 
-- [ ] **Passo 5: Criar `web/src/utils/formatTime.js`**
+- [x] **Passo 5: Criar `web/src/utils/formatTime.js`**
 
 ```js
 export const formatTime = (isoWithOffset) => isoWithOffset.slice(11, 16);
 ```
 
-- [ ] **Passo 6: Rodar e ver passar**
+- [x] **Passo 6: Rodar e ver passar**
 
 Run: `npm --prefix web test`
 Esperado: todos `passed` (5 de sessão + 13 de erros + 1 de hora).
 
-- [ ] **Passo 7: Criar `web/src/services/client.js`** (conteúdo do topo do `api.js` atual)
+- [x] **Passo 7: Criar `web/src/services/client.js`** (conteúdo do topo do `api.js` atual)
 
 ```js
 import axios from "axios";
@@ -396,7 +396,7 @@ client.interceptors.response.use(
 export default client;
 ```
 
-- [ ] **Passo 8: Criar `web/src/services/auth.js`**
+- [x] **Passo 8: Criar `web/src/services/auth.js`**
 
 ```js
 import client from "./client";
@@ -412,7 +412,7 @@ export const register = async (data) => {
 };
 ```
 
-- [ ] **Passo 9: Criar `web/src/services/cities.js`**
+- [x] **Passo 9: Criar `web/src/services/cities.js`**
 
 ```js
 import client from "./client";
@@ -437,7 +437,7 @@ export const deleteCity = async (id) => {
 };
 ```
 
-- [ ] **Passo 10: Criar `web/src/services/weather.js`**
+- [x] **Passo 10: Criar `web/src/services/weather.js`**
 
 ```js
 import client from "./client";
@@ -448,7 +448,7 @@ export const getWeatherByCity = async (cityName) => {
 };
 ```
 
-- [ ] **Passo 11: Trocar os imports nas telas atuais** (sem mudar mais nada; as telas são reescritas nas Tarefas 4–6)
+- [x] **Passo 11: Trocar os imports nas telas atuais** (sem mudar mais nada; as telas são reescritas nas Tarefas 4–6)
 
 | Arquivo | Import antigo | Import novo |
 |---|---|---|
@@ -459,7 +459,7 @@ export const getWeatherByCity = async (cityName) => {
 | `pages/SignUp.jsx` | `import { register, getApiErrorMessage } from "../services/api";` | `import { register } from "../services/auth";` + `import { getApiErrorMessage } from "../services/errors";` |
 | `components/CityCard.jsx` | `import { toggleFavorite, deleteCity, getApiErrorMessage } from "../services/api";` (multilinha) | `import { deleteCity, toggleFavorite } from "../services/cities";` + `import { getApiErrorMessage } from "../services/errors";` |
 
-- [ ] **Passo 12: Remover os arquivos antigos**
+- [x] **Passo 12: Remover os arquivos antigos**
 
 ```bash
 git rm web/src/services/api.js web/src/components/formatDatetime.jsx
@@ -467,9 +467,9 @@ git rm web/src/services/api.js web/src/components/formatDatetime.jsx
 
 Conferir que nada mais os importa: `grep -rn "services/api\|components/formatDatetime" web/src` → nenhum resultado.
 
-- [ ] **Passo 13: Verificação completa.**
+- [x] **Passo 13: Verificação completa.**
 
-- [ ] **Passo 14: Commit**
+- [x] **Passo 14: Commit**
 
 ```bash
 git add web/src
@@ -491,7 +491,7 @@ git commit -m "Divide os serviços do web por recurso e extrai o tratamento de e
   - `ThemeProvider` (default): envolve `children` em `ThemeContext.Provider` + `ConfigProvider` (tema + `pt_BR`).
   - `ThemeToggle` (default): botão sol/lua.
 
-- [ ] **Passo 1: Escrever `web/src/theme/themeStorage.test.js`**
+- [x] **Passo 1: Escrever `web/src/theme/themeStorage.test.js`**
 
 ```js
 import { describe, expect, it, vi } from "vitest";
@@ -542,7 +542,7 @@ describe("getInitialMode", () => {
 });
 ```
 
-- [ ] **Passo 2: Escrever `web/src/theme/ThemeProvider.test.jsx`**
+- [x] **Passo 2: Escrever `web/src/theme/ThemeProvider.test.jsx`**
 
 ```jsx
 import { act, renderHook } from "@testing-library/react";
@@ -573,12 +573,12 @@ describe("ThemeProvider", () => {
 });
 ```
 
-- [ ] **Passo 3: Rodar e ver falhar**
+- [x] **Passo 3: Rodar e ver falhar**
 
 Run: `npm --prefix web test`
 Esperado: FAIL — `./themeStorage`, `./ThemeProvider`, `./ThemeContext` não encontrados.
 
-- [ ] **Passo 4: Criar `web/src/theme/themeStorage.js`**
+- [x] **Passo 4: Criar `web/src/theme/themeStorage.js`**
 
 ```js
 const STORAGE_KEY = "climato.theme";
@@ -614,7 +614,7 @@ export const saveMode = (mode) => {
 };
 ```
 
-- [ ] **Passo 5: Criar `web/src/theme/tokens.js`**
+- [x] **Passo 5: Criar `web/src/theme/tokens.js`**
 
 ```js
 import { theme } from "antd";
@@ -665,7 +665,7 @@ export const getThemeConfig = (mode) => {
 };
 ```
 
-- [ ] **Passo 6: Criar `web/src/theme/ThemeContext.js`**
+- [x] **Passo 6: Criar `web/src/theme/ThemeContext.js`**
 
 ```js
 import { createContext, useContext } from "react";
@@ -678,7 +678,7 @@ export const ThemeContext = createContext({
 export const useThemeMode = () => useContext(ThemeContext);
 ```
 
-- [ ] **Passo 7: Criar `web/src/theme/ThemeProvider.jsx`**
+- [x] **Passo 7: Criar `web/src/theme/ThemeProvider.jsx`**
 
 ```jsx
 import { useCallback, useMemo, useState } from "react";
@@ -710,12 +710,12 @@ export default function ThemeProvider({ children }) {
 }
 ```
 
-- [ ] **Passo 8: Rodar e ver passar**
+- [x] **Passo 8: Rodar e ver passar**
 
 Run: `npm --prefix web test`
 Esperado: todos `passed` (+7 desta tarefa).
 
-- [ ] **Passo 9: Criar `web/src/components/ThemeToggle.jsx`**
+- [x] **Passo 9: Criar `web/src/components/ThemeToggle.jsx`**
 
 ```jsx
 import { Button, Tooltip } from "antd";
@@ -743,9 +743,9 @@ export default function ThemeToggle() {
 
 O `ThemeProvider` e o `ThemeToggle` só entram na árvore na Tarefa 4.
 
-- [ ] **Passo 10: Verificação completa.**
+- [x] **Passo 10: Verificação completa.**
 
-- [ ] **Passo 11: Commit**
+- [x] **Passo 11: Commit**
 
 ```bash
 git add web/src/theme web/src/components/ThemeToggle.jsx
