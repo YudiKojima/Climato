@@ -28,13 +28,13 @@ Definido no [`CLAUDE.md`](../CLAUDE.md): brainstorming → `design.md` → `plan
 
 ---
 
-## Estado Atual (2026-11-04, após a Fase 06)
+## Estado Atual (2026-11-05, após a Fase 07a)
 
-**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, previsão de 5 dias e busca de cidades na API (ainda sem tela no front), testes unitários nos dois serviços, `docker compose up` com os cinco serviços e CI em todo PR, logs JSON com correlation ID (TraceId) e traces OpenTelemetry no Jaeger (profile `observability`).
+**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, previsão de 5 dias e busca de cidades na API (ainda sem tela no front), testes unitários nos dois serviços, `docker compose up` com os cinco serviços e CI em todo PR, logs JSON com correlation ID (TraceId) e traces OpenTelemetry no Jaeger (profile `observability`), web com tema próprio claro/escuro, layout responsivo, skeletons, estados vazio/erro com o código do erro e testes de lógica (Vitest).
 
 **Não há:** testes de integração, métricas, deploy.
 
-**Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Microsoft.Extensions.Http.Resilience · IDistributedCache (Redis opcional) · React 19 · Vite 6 · Ant Design 5 · axios · xUnit v3 · Shouldly · NSubstitute · Docker · Docker Compose · nginx · GitHub Actions · Serilog · OpenTelemetry · Jaeger.
+**Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Microsoft.Extensions.Http.Resilience · IDistributedCache (Redis opcional) · React 19 · Vite 6 · Ant Design 5 · axios · Vitest · Testing Library · xUnit v3 · Shouldly · NSubstitute · Docker · Docker Compose · nginx · GitHub Actions · Serilog · OpenTelemetry · Jaeger.
 
 ---
 
@@ -77,8 +77,11 @@ Design: [`design.md`](features/06-observabilidade/design.md) · Plano: [`plan.md
 Auditoria: A25 (logs estruturados).
 
 #### Fase 07 — Frontend moderno
-Tema AntD próprio, modo escuro, responsivo, autocomplete, previsão com gráfico, skeletons.
-Auditoria: A27.
+Dividida em dois blocos:
+- **07a — Fundação visual** ✅ (2026-11-05): tema Céu claro/escuro, AppLayout/AuthLayout, CSS Modules, skeletons, estados vazio/erro com correlation ID, Vitest. [Design](features/07-frontend-moderno/design.md) · [Plano](features/07-frontend-moderno/plan.md)
+- **07b — Busca e previsão**: busca de cidades, previsão de 5 dias com gráfico, temperatura nos cards.
+
+Auditoria: A27 (resolvida na 07a).
 
 #### Fase 08 — Vitrine e deploy
 Deploy gratuito, README de portfólio, GIF, diagrama.
@@ -91,7 +94,6 @@ Auditoria: A26.
 Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: `- [Fase NN] descrição`.
 
 - [Backlog] Mapster: trocar `TypeAdapterConfig.GlobalSettings` por instância própria e validar com `Compile()`/teste
-- [Fase 07] `CityCard.jsx`: `handleFavoriteClick` sem `try/catch` (falha no `PATCH` vira rejeição não tratada)
 - [Fase 08] Rate limiting em `/auth/*` (`AddRateLimiter`, janela fixa por IP) — obrigatório antes do deploy público
 - [Backlog] Provider: resposta 200 incompleta da OpenWeather (lista `weather` vazia, `sys` nulo) vira 500 — lançar `ExternalServiceUnavailableException("resposta incompleta")` e cobrir com WireMock; `sys.country` ausente sai como `null`
 - [Backlog] Gateway: 400 do Provider (`cityName` só com espaços em `/weathers` e `/forecasts`) vira 503 — tratar como 404 ou validar no Gateway
@@ -100,10 +102,12 @@ Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: 
 - [Backlog] Índice único (`userid`, `name`) em `city`: duas buscas simultâneas da mesma cidade nova gravam duplicata
 - [Fase 08] 400 automático expõe mensagens do System.Text.Json em inglês e nomes de tipo .NET em `errors` — desligar `AllowInputFormatterExceptionMessages` ou mapear para "JSON inválido."
 - [Fase 08] Health checks: com Redis travado, o check do Gateway (3 s) pode estourar junto com o do Provider (3 s) e virar Unhealthy, contrariando "Redis fora não derruba o ready do Gateway" — dar ao Gateway um timeout maior que o do Provider; o `client.Timeout` de 5 s do health do Provider ficou inalcançável
-- [Fase 07] Busca de cidades: o `geo/1.0/direct` da OpenWeather casa o nome inteiro, não prefixo ("São Pa" → `[]`, "Lond" → a cidade "Lond") — usar como busca ao confirmar (Enter/botão), não como autocomplete por tecla; se o autocomplete for essencial, avaliar outro provedor de geocoding (ADR). Prefixos também ocupariam o cache `locais:` com `[]` por 24 h
+- [Fase 07b] Busca de cidades: o `geo/1.0/direct` da OpenWeather casa o nome inteiro, não prefixo ("São Pa" → `[]`, "Lond" → a cidade "Lond") — usar como busca ao confirmar (Enter/botão), não como autocomplete por tecla; se o autocomplete for essencial, avaliar outro provedor de geocoding (ADR). Prefixos também ocupariam o cache `locais:` com `[]` por 24 h
 - [Backlog] Previsão: resposta 200 da OpenWeather com `list` vazia ou `weather` vazio em algum ponto vira 500 — mesma correção da resposta incompleta do clima atual
 - [Backlog] Testes de integração (WebApplicationFactory + Testcontainers Postgres/Redis + WireMock), plano em [`integracao-plan.md`](features/04-testes/integracao-plan.md); ao executar, incluir no CI da Fase 05 (Docker no runner)
-- [Fase 07] Previsão devolve `city` como a OpenWeather manda em `data/2.5/forecast` (sem tradução, ex.: "Tokyo"); na tela, usar o nome do clima atual ou da busca
+- [Fase 07b] Previsão devolve `city` como a OpenWeather manda em `data/2.5/forecast` (sem tradução, ex.: "Tokyo"); o clima atual e o histórico também (constatado na 07a: buscar "Tóquio" mostra "Tokyo, JP" e grava "Tokyo") — decidir na 07b se a tela usa o nome digitado/da busca ou se o backend passa a guardar o nome traduzido
 - [Fase 08] `traceparent` vindo do cliente é aceito pelo Gateway (borda pública): o cliente escolhe o TraceId devolvido em `X-Correlation-ID` e pode desligar a amostragem da cadeia com a flag `-00` — avaliar descartar o `traceparent` de entrada no Gateway ou um sampler que ignore o pai remoto
 - [Backlog] Bootstrap logger do Serilog (`CreateBootstrapLogger` + `try/catch`/`Log.CloseAndFlush` no `Program.cs`): falha no `MigrateAsync` ou antes do `Build()` sai como texto no stderr, fora do JSON; exige exceção da BE-30 para o `Program.cs`
 - [Backlog] Teste de integração (junto do [`integracao-plan.md`](features/04-testes/integracao-plan.md)) garantindo que o `traceId` do JSON de erro é o TraceId puro e igual ao `X-Correlation-ID` (hoje só `ProblemDetailsTraceId.Apply` é testado isolado)
+- [Backlog] Testes de componentes do web (render de telas com Testing Library)
+- [Fase 08] Provider fora do ar: o Gateway leva ~30 s (retentativas + timeout total da resiliência) para devolver o 503, e a tela fica no skeleton esse tempo todo — reduzir o timeout total do client do Provider no Gateway

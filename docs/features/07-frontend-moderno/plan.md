@@ -2306,13 +2306,13 @@ git commit -m "Redesenha o detalhe do clima com hero, métricas em cards e estad
 **Arquivos:**
 - Modificar: `docs/architecture/frontend.md`, `docs/architecture/review-checklist.md`, `CLAUDE.md`, `docs/runbook.md`, `.github/workflows/ci.yml`, `docs/project-overview.md`, `docs/features/00-roteiro-portfolio/auditoria-inicial.md`, este `plan.md` (checkboxes + notas)
 
-- [ ] **Passo 1: CI — `.github/workflows/ci.yml`**, no job Web, entre `npm run lint` e `npm run build`:
+- [x] **Passo 1: CI — `.github/workflows/ci.yml`**, no job Web, entre `npm run lint` e `npm run build`:
 
 ```yaml
       - run: npm test
 ```
 
-- [ ] **Passo 2: `CLAUDE.md` — seção Verificação**
+- [x] **Passo 2: `CLAUDE.md` — seção Verificação**
 
 ```bash
 dotnet build Climato.slnx
@@ -2323,11 +2323,11 @@ npm --prefix web run build
 
 (manter a linha de `dotnet test` se já estiver lá; só acrescentar `npm --prefix web test` antes do build do web.)
 
-- [ ] **Passo 3: `docs/runbook.md`**
+- [x] **Passo 3: `docs/runbook.md`**
   - Onde o runbook lista os comandos do web, acrescentar `npm --prefix web test` (Vitest, sem backend).
   - Na seção de CI: “**Web** (lint + testes + build)”.
 
-- [ ] **Passo 4: `docs/architecture/frontend.md`**
+- [x] **Passo 4: `docs/architecture/frontend.md`**
   - **Stack:** acrescentar `Vitest + Testing Library (jsdom)`.
   - **Estrutura de pastas:** substituir a estrutura antiga e o bloco “Alvo (Fase 07)” pela estrutura real:
 
@@ -2352,7 +2352,7 @@ web/src/
   - **Estado:** acrescentar “Carga de tela com `useAsync(fn)` (`{ data, isLoading, error, reload }`); `fn` estável (função de módulo ou `useCallback`). Lista mostra skeleton só sem dados (`isLoading && !data`), para o `reload` não piscar.”
   - **Nova seção Testes:** “Vitest + Testing Library (jsdom), `*.test.js(x)` ao lado do código. Toda lógica em `services/`, `hooks/`, `theme/` e `utils/` nasce com teste; componentes visuais não têm teste por ora.” e o comando `npm --prefix web test` na seção Lint (renomear para “Lint, testes e build”).
 
-- [ ] **Passo 5: `docs/architecture/review-checklist.md`** — duas linhas novas no fim da tabela Frontend:
+- [x] **Passo 5: `docs/architecture/review-checklist.md`** — duas linhas novas no fim da tabela Frontend:
 
 ```markdown
 | FE-12 | 🟡 | 07 | Lógica sem teste | Função ou hook novo/alterado em `services/`, `hooks/`, `theme/` ou `utils/` sem `*.test.js(x)` correspondente | [Testes](frontend.md#testes) |
@@ -2361,9 +2361,9 @@ web/src/
 
 E corrigir as âncoras `#tema-e-estilo-a-partir-da-fase-07` das linhas FE-05 a FE-08 para `#tema-e-estilo`.
 
-- [ ] **Passo 6: `docs/features/00-roteiro-portfolio/auditoria-inicial.md`** — linha A27, coluna Status: `✅ URL na Fase 01 · resto na 07a`.
+- [x] **Passo 6: `docs/features/00-roteiro-portfolio/auditoria-inicial.md`** — linha A27, coluna Status: `✅ URL na Fase 01 · resto na 07a`.
 
-- [ ] **Passo 7: `docs/project-overview.md`**
+- [x] **Passo 7: `docs/project-overview.md`**
   - Fase 07: título sem ✅ (a 07b falta); abaixo, como na Fase 03:
 
 ```markdown
@@ -2376,7 +2376,7 @@ Dividida em dois blocos:
   - **Estado atual:** data e “após a 07a”; acrescentar em Funciona “tema claro/escuro, layout responsivo, testes de lógica no web (Vitest)”; Stack ganha `Vitest · Testing Library`.
   - **Pendências:** remover a `[Fase 07]` do `CityCard.jsx`; manter as de busca e de nome da previsão (são da 07b); acrescentar `[Backlog] Testes de componentes do web (render de telas com Testing Library)`.
 
-- [ ] **Passo 8: Verificação final** (skill `superpowers:verification-before-completion`)
+- [x] **Passo 8: Verificação final** (skill `superpowers:verification-before-completion`)
 
 ```bash
 dotnet build Climato.slnx
@@ -2387,11 +2387,11 @@ npm --prefix web run build
 
 Esperado: build .NET sem erros; lint limpo; todos os testes do web `passed` (~33); build do web `✓ built`. Conferir também `grep -rn "alert(\|confirm(\|#[0-9a-fA-F]\{3,6\}\b" web/src --include=*.jsx --include=*.css` → nenhum resultado fora de `theme/tokens.js`.
 
-- [ ] **Passo 9: Notas de execução** — acrescentar no fim deste plano `## Notas de execução (AAAA-MM-DD)` com desvios e achados; marcar todos os checkboxes.
+- [x] **Passo 9: Notas de execução** — acrescentar no fim deste plano `## Notas de execução (AAAA-MM-DD)` com desvios e achados; marcar todos os checkboxes.
 
-- [ ] **Passo 10: `/revisar-padrao`** no diff da branch inteira; com 🔴, parar. Depois `/requesting-code-review`.
+- [x] **Passo 10: `/revisar-padrao`** no diff da branch inteira; com 🔴, parar. Depois `/requesting-code-review`.
 
-- [ ] **Passo 11: Commit final**
+- [x] **Passo 11: Commit final**
 
 ```bash
 git add CLAUDE.md .github/workflows/ci.yml docs
@@ -2399,3 +2399,13 @@ git commit -m "Documenta a fundação visual do web e fecha a Fase 07a"
 ```
 
 Depois, `/finishing-a-development-branch` → PR `dev/frontend-moderno` → `master` citando **A27** e a pendência do `CityCard`. PR com CI ❌ não é mergeado.
+
+## Notas de execução (2026-11-05)
+
+- Tudo como no plano; nenhum desvio de código. 33 testes Vitest (sessão 5, erros 13, hora 1, tema 7, hooks 7).
+- Conferência manual com Provider e Gateway via `dotnet run` e web em `npm --prefix web run dev` (5173): tela dividida, tema persistido e seguindo o sistema, `--ant-color-primary` resolvido via `cssVar`, cadastro/login/Sair, `GuestRoute`, mensagem de senha errada, cards (favoritar sem piscar skeleton, remover com confirmação), Favoritos em 375 px no escuro, detalhe com hero e métricas, 404 com estado vazio e 503 (Provider parado) com o código do erro igual ao TraceId no log do Gateway.
+- A aba Network mostra duas requisições por tela em dev: é o `StrictMode` duplicando efeitos; o `useAsync` descarta a primeira.
+- Achados registrados no `project-overview.md`:
+  - O clima atual e o histórico também gravam o nome em inglês ("Tóquio" → "Tokyo, JP"), não só a previsão — a pendência da 07b foi ampliada.
+  - Com o Provider fora, o Gateway leva ~30 s para devolver o 503 (resiliência) e a tela fica no skeleton — pendência para a Fase 08.
+  - Testes de componentes do web ficaram em backlog.
