@@ -1,0 +1,21 @@
+import { renderHook, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { getWeatherByCity } from "../services/weather";
+import useWeather from "./useWeather";
+
+vi.mock("../services/weather", () => ({ getWeatherByCity: vi.fn() }));
+
+describe("useWeather", () => {
+  it("refaz a carga quando a cidade muda", async () => {
+    getWeatherByCity.mockImplementation(async (cityName) => ({ city: cityName }));
+    const { result, rerender } = renderHook(({ cityName }) => useWeather(cityName), {
+      initialProps: { cityName: "Lisboa" },
+    });
+    await waitFor(() => expect(result.current.data).toEqual({ city: "Lisboa" }));
+
+    rerender({ cityName: "Recife" });
+
+    await waitFor(() => expect(result.current.data).toEqual({ city: "Recife" }));
+    expect(getWeatherByCity).toHaveBeenLastCalledWith("Recife");
+  });
+});

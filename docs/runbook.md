@@ -115,9 +115,10 @@ Em Development o console sai em texto, com o TraceId em cada linha. O nível vem
 
 ```bash
 dotnet test --solution Climato.slnx
+npm --prefix web test
 ```
 
-Roda os testes unitários de `tests/` (sem banco, Docker ou chaves). O `global.json` usa o runner Microsoft.Testing.Platform; por isso o comando é `dotnet test --solution`/`--project` (o modo VSTest não é suportado pelo xUnit v3 no SDK 10).
+O primeiro roda os testes unitários de `tests/` (sem banco, Docker ou chaves); o segundo, os testes de lógica do web (Vitest, sem backend). O `global.json` usa o runner Microsoft.Testing.Platform; por isso o comando é `dotnet test --solution`/`--project` (o modo VSTest não é suportado pelo xUnit v3 no SDK 10).
 
 ## 6. Problemas comuns
 
@@ -140,4 +141,4 @@ Comandos na seção [Verificação do CLAUDE.md](../CLAUDE.md#verificação).
 
 ## 8. CI e proteção do `master`
 
-O workflow `.github/workflows/ci.yml` roda em todo PR e push no `master`: **Backend (.NET)** (build + testes), **Web** (lint + build) e **Imagens Docker** (`docker compose build`). Para impedir merge com CI ❌ (regra do `CLAUDE.md`), o dono do repositório ativa uma vez no GitHub: *Settings → Branches → Add branch ruleset* (ou *Branch protection rule*) para `master` → *Require status checks to pass* → marcar os três jobs.
+O workflow `.github/workflows/ci.yml` roda em todo PR e push no `master`: **Backend (.NET)** (build + testes), **Web** (lint + testes + build) e **Imagens Docker** (`docker compose build`). Para impedir merge com CI ❌ (regra do `CLAUDE.md`), o dono do repositório ativa uma vez no GitHub: *Settings → Branches → Add branch ruleset* (ou *Branch protection rule*) para `master` → *Require status checks to pass* → marcar os três jobs.

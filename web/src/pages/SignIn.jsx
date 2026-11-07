@@ -1,110 +1,72 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login, getApiErrorMessage } from "../services/api";
-import { hasValidSession, saveSession } from "../services/session";
-import img from "../assets/Climato sem fundo preto.png";
-import "../styles/Containers.css";
-import { Button, Input, Form, Typography, message } from "antd";
+import { useState } from "react";
+import { Button, Form, Input, Typography } from "antd";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../app/AuthContext";
+import useApiFeedback from "../hooks/useApiFeedback";
+import { login } from "../services/auth";
+import styles from "./Auth.module.css";
 
-const { Title } = Typography;
-
-const SignIn = () => {
-  const [form] = Form.useForm();
-  const [isLoading, setIsLoading] = useState(false);
+export default function SignIn() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
+  const notifyError = useApiFeedback();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const auth = await login(values);
-      saveSession(auth);
-      navigate("/p");
+      signIn(await login(values));
+      navigate("/p", { replace: true });
     } catch (err) {
-      message.error(getApiErrorMessage(err, "E-mail ou senha incorretos."));
+      notifyError(err, "E-mail ou senha incorretos.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (hasValidSession()) navigate("/p");
-  }, [navigate]);
-
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <img
-          src={img}
-          alt="Climato Logo"
-          style={{
-            maxWidth: "180px",
-            display: "block",
-            margin: "0 auto 24px",
-          }}
-        />
-        <Title level={3} style={{ textAlign: "center" }}>
-          Acessar conta
-        </Title>
-
-        <Form
-          validateTrigger="onBlur"
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          className="auth-form"
-        >
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Digite seu e-mail" },
-              { type: "email", message: "Digite um e-mail válido" },
-            ]}
-          >
-            <Input style={{ padding: "8px" }} placeholder="Digite seu e-mail" />
-          </Form.Item>
-
-          <Form.Item
-            label="Senha"
-            name="password"
-            rules={[{ required: true, message: "Digite sua senha" }]}
-          >
-            <Input.Password
-              style={{ padding: "8px" }}
-              placeholder="Digite sua senha"
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              style={{ marginTop: "1.5rem" }}
-              type="primary"
-              htmlType="submit"
-              block
-              loading={isLoading}
-            >
-              Entrar
-            </Button>
-          </Form.Item>
-        </Form>
-
-        <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
-          <span>Não tem uma conta? </span>
-          <a
-            onClick={() => navigate("/signup")}
-            style={{
-              color: "#1677ff",
-              textDecoration: "underline",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Criar conta
-          </a>
-        </div>
+    <>
+      <div>
+        <Typography.Title level={3}>Acessar conta</Typography.Title>
+        <Typography.Text type="secondary">
+          Entre para ver o clima das suas cidades.
+        </Typography.Text>
       </div>
-    </div>
-  );
-};
 
-export default SignIn;
+      <Form
+        layout="vertical"
+        validateTrigger="onBlur"
+        requiredMark={false}
+        size="large"
+        onFinish={handleSubmit}
+      >
+        <Form.Item
+          label="E-mail"
+          name="email"
+          rules={[
+            { required: true, message: "Digite seu e-mail" },
+            { type: "email", message: "Digite um e-mail válido" },
+          ]}
+        >
+          <Input autoComplete="email" placeholder="voce@exemplo.com" />
+        </Form.Item>
+
+        <Form.Item
+          label="Senha"
+          name="password"
+          rules={[{ required: true, message: "Digite sua senha" }]}
+        >
+          <Input.Password autoComplete="current-password" placeholder="Digite sua senha" />
+        </Form.Item>
+
+        <Button type="primary" htmlType="submit" block loading={isLoading}>
+          Entrar
+        </Button>
+      </Form>
+
+      <Typography.Text className={styles.switch}>
+        Não tem uma conta? <Link to="/signup">Criar conta</Link>
+      </Typography.Text>
+    </>
+  );
+}

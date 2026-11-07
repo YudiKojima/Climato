@@ -1,0 +1,9 @@
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--ant-margin-xs);
+}
+
+.avatar {
+  background: var(--ant-color-primary);
+}

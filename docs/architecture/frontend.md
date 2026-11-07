@@ -4,7 +4,7 @@ Vale para `web/`. Seções marcadas **(a partir da Fase NN)** descrevem padrões
 
 ## Stack
 
-React 19 · Vite 6 · JavaScript (JSX) · Ant Design 5 + `@ant-design/icons` · React Router 7 · axios · ESLint 9 + Prettier · npm (`package-lock.json` versionado; `npm ci` no CI e na imagem).
+React 19 · Vite 6 · JavaScript (JSX) · Ant Design 5 + `@ant-design/icons` · React Router 7 · axios · Vitest + Testing Library (jsdom) · ESLint 9 + Prettier · npm (`package-lock.json` versionado; `npm ci` no CI e na imagem).
 
 Decisão de manter Ant Design e JavaScript: [ADR 0002](decisions/0002-frontend-ant-design-modernizado.md).
 
@@ -12,27 +12,16 @@ Decisão de manter Ant Design e JavaScript: [ADR 0002](decisions/0002-frontend-a
 
 ```
 web/src/
-├── main.jsx, App.jsx
-├── router/          ← index.jsx (rotas) + ProtectedRoute.jsx
-├── pages/           ← uma página por rota (Home, WeatherDetails, Favorites, SignIn, SignUp, SignOut)
-├── components/      ← componentes reutilizáveis (CityCard, Loading, Footer…)
-├── services/api.js  ← todas as chamadas HTTP
-├── services/session.js ← token no localStorage (único ponto)
-├── styles/          ← CSS por tela
-└── assets/          ← imagens e logo
-```
-
-**Alvo (Fase 07):**
-
-```
-web/src/
-├── app/             ← providers (ConfigProvider/tema, AuthProvider), router
+├── main.jsx         ← AppProviders + AppRouter; importa antd/dist/reset.css
+├── app/             ← AppProviders, AuthProvider/AuthContext, router, ProtectedRoute, GuestRoute
 ├── layouts/         ← AppLayout (header, conteúdo, footer), AuthLayout (tela dividida)
 ├── pages/           ← páginas finas: compõem componentes e chamam hooks
-├── components/      ← reutilizáveis; cada um com seu .module.css quando precisar
-├── hooks/           ← useWeather, useCities, useDebounce…
-├── services/        ← client.js (instância axios) + um arquivo por recurso (auth.js, cities.js, weather.js)
-├── theme/           ← tokens do AntD (claro/escuro)
+├── components/      ← reutilizáveis, cada um com seu .module.css quando precisar
+├── hooks/           ← useAsync, useCities, useFavorites, useWeather, useApiFeedback
+├── services/        ← client.js (axios) + auth.js, cities.js, weather.js, errors.js, session.js
+├── theme/           ← tokens.js (claro/escuro), ThemeProvider/ThemeContext, themeStorage.js
+├── utils/           ← funções puras (formatTime)
+├── test/setup.js    ← jest-dom, matchMedia, limpeza entre testes
 └── assets/
 ```
 
@@ -40,36 +29,39 @@ web/src/
 
 | Rota | Página | Protegida |
 |---|---|---|
-| `/signin`, `/signup`, `/signout` | Auth | Não |
+| `/signin`, `/signup` | SignIn, SignUp | Não |
 | `/p` | Home (busca + histórico) | Sim |
 | `/p/weather/:cityName` | Detalhes do clima | Sim |
 | `/p/favorites` | Favoritos | Sim |
 
-Proteção de rota **só** em `ProtectedRoute`/router — páginas não redirecionam por estado de auth.
+Proteção de rota **só** no router — páginas não redirecionam por estado de auth. As rotas são aninhadas com `<Outlet/>`: `/signin` e `/signup` sob `GuestRoute` (quem tem sessão vai para `/p`) e `AuthLayout`; `/p/*` sob `ProtectedRoute` e `AppLayout`. Sair é o item do menu do usuário (`signOut()` do `AuthProvider`); não há rota `/signout`.
 
 ## Chamadas à API
 
-- Toda chamada passa por `services/`; páginas e componentes nunca usam `axios` direto.
+- Toda chamada passa por `services/`: `client.js` (instância axios) + um arquivo por recurso (`auth.js`, `cities.js`, `weather.js`); páginas e componentes nunca usam `axios` direto.
 - URL base de `import.meta.env.VITE_API_URL`. `web/.env.example` versionado, `web/.env` local ignorado e obrigatório (ver [`runbook.md`](../runbook.md#2-segredos-user-secrets)).
 - Na imagem Docker o `VITE_API_URL` é fixado no build (`--build-arg`), não em runtime; o web é servido por nginx com fallback de SPA (`web/nginx.conf`).
 - Instância única do axios com interceptor de request (`Authorization: Bearer <token>`) e de response (401 → limpa sessão e vai para `/signin`). `userId` nunca é enviado pelo front.
-- Sessão só via `services/session.js` (`saveSession`, `getToken`, `clearSession`, `hasValidSession`); nenhum outro arquivo usa `localStorage` para auth. Mensagem de erro com `getApiErrorMessage(err)`.
+- Sessão só via `services/session.js` (`saveSession`, `getToken`, `clearSession`, `hasValidSession`); nenhum outro arquivo usa `localStorage` para auth. O nome do usuário vem de `getUserName()`, exposto pelo `AuthProvider` (`useAuth()`).
+- Erros: `services/errors.js` — `getApiErrorMessage(err, fallback)`, `getCorrelationId(err)` (header `X-Correlation-ID`) e `isUnexpectedError(err)` (sem resposta ou status ≥ 500). Em ação, `useApiFeedback()` decide: erro de negócio → `message.error` só com a mensagem; erro inesperado → `notification.error` com o código (`CorrelationId`). Em carga de tela, `ErrorState` faz o mesmo.
 - Parâmetros de rota/query com `encodeURIComponent`.
 - Erros da API chegam como `ProblemDetails`: exibir `title`/`detail`, não a mensagem do axios.
-- Previsão (`GET /forecasts/{cidade}`) e busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) já existem no Gateway; o consumo é da Fase 07. A busca casa o nome inteiro (não prefixo): usar ao confirmar, não a cada tecla.
+- Previsão (`GET /forecasts/{cidade}`) e busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) já existem no Gateway; o consumo é da Fase 07b. A busca casa o nome inteiro (não prefixo): usar ao confirmar, não a cada tecla.
 
-## Tema e estilo **(a partir da Fase 07)**
+## Tema e estilo
 
-- Tokens do AntD em `theme/` aplicados via `ConfigProvider` (`token` + `algorithm` `defaultAlgorithm`/`darkAlgorithm`). Cores, fontes, raios e sombras **só** via token — nada de `#hex` solto em componentes.
-- Preferência claro/escuro em `localStorage`, padrão = preferência do sistema.
+- Tokens do AntD em `theme/tokens.js` aplicados via `ConfigProvider` (`token` + `algorithm` `defaultAlgorithm`/`darkAlgorithm`). Cores, fontes, raios e sombras **só** via token — cores literais só em `theme/tokens.js`.
+- `ConfigProvider` com `cssVar: true`: os `.module.css` usam `var(--ant-*)` (ex.: `--ant-color-primary`, `--ant-padding-lg`, `--ant-color-bg-mask`). Para vencer o seletor do AntD em `Typography`, aninhar a classe (`.card .title`), sem `!important`.
+- Preferência claro/escuro em `localStorage` (`climato.theme`, via `theme/themeStorage.js`), gravada só quando o usuário alterna; sem escolha, segue `prefers-color-scheme`. `useThemeMode()` → `{ mode, toggleMode }`.
 - Layout responsivo com `Grid`/`Flex` do AntD e breakpoints do tema; sem larguras fixas em px para containers.
 - Estilo de componente em `.module.css`; `style={{}}` inline só para valor dinâmico (ex.: imagem de fundo).
-- Feedback: `message`/`notification`/`Modal.confirm` do AntD — nunca `alert()`/`confirm()`.
+- Feedback via `App.useApp()` (`message`, `notification`, `modal`) — os estáticos do `antd` não herdam o tema; nunca `alert()`/`confirm()`.
 - Carregamento com `Skeleton` no formato do conteúdo; spinner só para ações curtas.
 
 ## Estado
 
 - Estado de tela fica na página (ou em hook da página).
+- Carga de tela com `useAsync(fn)` → `{ data, isLoading, error, reload }`; `fn` estável (função de módulo ou `useCallback`), e trocar `fn` descarta a resposta da anterior. Lista mostra skeleton só sem dados (`isLoading && !data`), para o `reload` não piscar.
 - Contexto global só para o que é realmente global: sessão (auth) e tema.
 
 ## Componentização
@@ -77,10 +69,15 @@ Proteção de rota **só** em `ProtectedRoute`/router — páginas não redireci
 - JSX repetido em duas páginas → componente em `components/`.
 - Header e footer vêm do layout, não de cada página.
 
-## Lint
+## Testes
+
+Vitest + Testing Library (jsdom), `*.test.js(x)` ao lado do código. Toda lógica em `services/`, `hooks/`, `theme/` e `utils/` nasce com teste; componentes visuais não têm teste por ora. Hooks que só ligam um serviço ao `useAsync` dispensam teste próprio.
+
+## Lint, testes e build
 
 ```bash
 npm --prefix web run lint
+npm --prefix web test
 npm --prefix web run build
 ```
 

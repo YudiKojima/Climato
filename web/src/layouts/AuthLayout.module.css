@@ -1,0 +1,57 @@
+.root,
+.row {
+  min-height: 100vh;
+}
+
+.aside {
+  position: relative;
+  background: url("../assets/background.png") center / cover no-repeat;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--ant-margin);
+  padding: var(--ant-padding-xl);
+  background: linear-gradient(to top, var(--ant-color-bg-mask), transparent 70%);
+}
+
+.asideLogo {
+  width: 10rem;
+}
+
+.overlay .tagline {
+  color: var(--ant-color-white);
+  margin: 0;
+}
+
+.main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ant-padding-xl) var(--ant-padding-lg);
+  background: var(--ant-color-bg-container);
+}
+
+.toggle {
+  position: absolute;
+  top: var(--ant-padding);
+  right: var(--ant-padding);
+}
+
+.form {
+  width: 100%;
+  max-width: 24rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ant-margin);
+}
+
+.logo {
+  width: 8rem;
+  align-self: center;
+}

@@ -55,6 +55,7 @@ Plugin: **`superpowers`** (`superpowers@claude-plugins-official`).
 dotnet build Climato.slnx
 dotnet test --solution Climato.slnx
 npm --prefix web run lint
+npm --prefix web test
 npm --prefix web run build
 docker compose build
 ```

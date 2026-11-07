@@ -54,13 +54,15 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | FE-02 | 🔴 | 02 | URL da API literal | `http(s)://` de API no código em vez de `VITE_API_URL` | [Chamadas à API](frontend.md#chamadas-à-api) |
 | FE-03 | 🔴 | 02 | `userId` enviado pelo front | `userId` em query/corpo de chamada | [Chamadas à API](frontend.md#chamadas-à-api) |
 | FE-04 | 🟡 | 00 | Redirect de auth na página | `navigate("/signin")` por estado de sessão dentro de página | [Rotas](frontend.md#rotas) |
-| FE-05 | 🟡 | 00 | `alert()`/`confirm()` | Uso de diálogos nativos do navegador | [Tema e estilo](frontend.md#tema-e-estilo-a-partir-da-fase-07) |
-| FE-06 | 🟡 | 07 | Cor ou fonte literal | `#hex`, `rgb(`, `font-family` em componente em vez de token do tema | [Tema e estilo](frontend.md#tema-e-estilo-a-partir-da-fase-07) |
-| FE-07 | 🟡 | 07 | Estilo inline estático | `style={{}}` com valores fixos (não dinâmicos) | [Tema e estilo](frontend.md#tema-e-estilo-a-partir-da-fase-07) |
-| FE-08 | 🟡 | 07 | Largura fixa de container | `width: <n>px` em container de página | [Tema e estilo](frontend.md#tema-e-estilo-a-partir-da-fase-07) |
+| FE-05 | 🟡 | 00 | `alert()`/`confirm()` | Uso de diálogos nativos do navegador | [Tema e estilo](frontend.md#tema-e-estilo) |
+| FE-06 | 🟡 | 07 | Cor ou fonte literal | `#hex`, `rgb(`, `font-family` em componente em vez de token do tema | [Tema e estilo](frontend.md#tema-e-estilo) |
+| FE-07 | 🟡 | 07 | Estilo inline estático | `style={{}}` com valores fixos (não dinâmicos) | [Tema e estilo](frontend.md#tema-e-estilo) |
+| FE-08 | 🟡 | 07 | Largura fixa de container | `width: <n>px` em container de página | [Tema e estilo](frontend.md#tema-e-estilo) |
 | FE-09 | 🟡 | 00 | Reutilizável inline | JSX repetido em duas páginas (header, card, estado vazio) | [Componentização](frontend.md#componentização) |
 | FE-10 | 🟡 | 00 | Erro de carga engolido | Fetch de tela sem tratamento de erro (vira loading infinito ou lista vazia silenciosa) | [Chamadas à API](frontend.md#chamadas-à-api) |
 | FE-11 | 🔴 | 02 | Sessão fora de `session.js` | `localStorage` com token/expiração fora de `services/session.js` | [Chamadas à API](frontend.md#chamadas-à-api) |
+| FE-12 | 🟡 | 07 | Lógica sem teste | Função ou hook novo/alterado em `services/`, `hooks/`, `theme/` ou `utils/` sem `*.test.js(x)` correspondente | [Testes](frontend.md#testes) |
+| FE-13 | 🟡 | 07 | Feedback estático | `message.`/`notification.`/`Modal.confirm` importados de `antd` em vez de `App.useApp()` | [Tema e estilo](frontend.md#tema-e-estilo) |
 
 ## Geral
 
