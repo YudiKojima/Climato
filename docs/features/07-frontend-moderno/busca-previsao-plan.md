@@ -39,6 +39,9 @@ npm --prefix web run build
 | Ícone da OpenWeather montado em cada tela | `utils/weatherIconUrl.js` | Usado no detalhe, nos cards e na previsão (FE-09) |
 | Temperatura dentro do `CityCard` | Componente `CityTemperature` | Mantém o card focado em ações; skeleton e erro isolados |
 | — | Na busca, o primeiro Enter busca; com resultados na tela e o mesmo texto, Enter abre o item destacado | O `Input.Search` dispara `onSearch` no Enter; sem isso, setas + Enter buscariam de novo |
+| Recharts no bundle principal (risco do design) | `ForecastSection` carregada com `React.lazy` + `Suspense` (skeleton) no `WeatherDetails` | Medido na execução: o bundle principal iria de 314 para 433 kB gzip; com o lazy fica em 314 kB e o gráfico (119 kB) só carrega no detalhe |
+| Legenda padrão do Recharts | `formatter` com `token.colorTextSecondary` | A legenda herda a cor da série; a barra de chuva (`colorPrimaryBorder`) ficava sem contraste no escuro |
+| Cards da previsão com `minmax(9rem, 1fr)` | `minmax(8rem, 1fr)` | Em 375 px caía para uma coluna |
 
 ---
 
@@ -1440,7 +1443,7 @@ git commit -m "Mostra a temperatura atual nos cards de cidade"
 - Consome: `useForecast`, `formatWeekday`, `weatherIconUrl` (Tarefa 2); `ErrorState` (07a).
 - Produz: `ForecastSection({ cityName })`; `ForecastChart({ days })`; `ForecastDays({ days })`.
 
-- [ ] **Passo 1: Instalar o Recharts**
+- [x] **Passo 1: Instalar o Recharts**
 
 ```bash
 npm --prefix web install recharts@^3.10.1
@@ -1448,7 +1451,7 @@ npm --prefix web install recharts@^3.10.1
 
 Esperado: `recharts` em `dependencies`.
 
-- [ ] **Passo 2: Criar `web/src/components/ForecastChart.jsx`**
+- [x] **Passo 2: Criar `web/src/components/ForecastChart.jsx`**
 
 ```jsx
 import { theme } from "antd";
@@ -1548,7 +1551,7 @@ export default function ForecastChart({ days }) {
 }
 ```
 
-- [ ] **Passo 3: Criar `web/src/components/ForecastDays.jsx` e `.module.css`**
+- [x] **Passo 3: Criar `web/src/components/ForecastDays.jsx` e `.module.css`**
 
 ```jsx
 import { Card, Typography } from "antd";
@@ -1611,7 +1614,7 @@ export default function ForecastDays({ days }) {
 }
 ```
 
-- [ ] **Passo 4: Criar `web/src/components/ForecastSection.jsx` e `.module.css`**
+- [x] **Passo 4: Criar `web/src/components/ForecastSection.jsx` e `.module.css`**
 
 ```jsx
 import { Card, Skeleton, Typography } from "antd";
@@ -1670,21 +1673,21 @@ export default function ForecastSection({ cityName }) {
 }
 ```
 
-- [ ] **Passo 5: `WeatherDetails.jsx`** — `import ForecastSection from "../components/ForecastSection";` e, depois do `<Row>` das métricas, ainda dentro de `<div className={styles.page}>`:
+- [x] **Passo 5: `WeatherDetails.jsx`** — `import ForecastSection from "../components/ForecastSection";` e, depois do `<Row>` das métricas, ainda dentro de `<div className={styles.page}>`:
 
 ```jsx
       <ForecastSection cityName={cityName} />
 ```
 
-- [ ] **Passo 6: Verificação completa.** Conferir o tamanho do bundle no build (`dist/assets/index-*.js`); registrar nas notas.
+- [x] **Passo 6: Verificação completa.** Conferir o tamanho do bundle no build (`dist/assets/index-*.js`); registrar nas notas.
 
-- [ ] **Passo 7: Conferência manual**
+- [x] **Passo 7: Conferência manual**
   - Detalhe de “Tóquio”: seção “Próximos 5 dias” com skeleton, depois gráfico (linhas mín/máx, barras de chuva, tooltip em português) e 5 cards.
   - Tema escuro: eixos, grade e tooltip legíveis (cores do token).
   - 375 px: gráfico ocupa a largura; cards em 2 colunas.
   - Previsão com erro (simular parando o Provider depois de o clima entrar no cache): só a seção mostra `ErrorState`; o clima atual continua.
 
-- [ ] **Passo 8: Commit**
+- [x] **Passo 8: Commit**
 
 ```bash
 git add web/package.json web/package-lock.json web/src
