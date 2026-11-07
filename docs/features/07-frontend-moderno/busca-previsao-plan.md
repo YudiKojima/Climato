@@ -1701,33 +1701,33 @@ git commit -m "Adiciona a previsão de 5 dias com gráfico no detalhe do clima"
 **Arquivos:**
 - Modificar: `docs/architecture/backend.md`, `docs/architecture/frontend.md`, `docs/architecture/review-checklist.md`, `docs/project-overview.md`, este plano (checkboxes + notas)
 
-- [ ] **Passo 1: `backend.md`**
+- [x] **Passo 1: `backend.md`**
   - **Comunicação HTTP**, item de timeouts: trocar “OpenWeather 15 s” por “OpenWeather 2 × 9 s (geocoding + clima)” e “Provider → OpenWeather 5 s/15 s” por “Provider → OpenWeather 4 s/9 s”.
   - Novo item depois do do `IOpenWeatherClient`: “Clima e previsão resolvem a cidade antes (`ICityResolver`/`CityResolver`): primeiro resultado do `geo/1.0/direct`, nome em português (`local_names.pt`, senão o original) e coordenadas; a consulta à OpenWeather é por `lat`/`lon` (formatados com `CultureInfo.InvariantCulture`). `City`/`Country` da resposta vêm do resolvido; a imagem da Pexels usa o nome original.”
   - **Cache**, TTLs: acrescentar “`cidades` 24 h (só cidade encontrada; vazio não é cacheado)”.
   - Árvore do Application: “AppServices (clima, previsão, busca, imagem), `CityResolver` e cache (Services)”.
 
-- [ ] **Passo 2: `frontend.md`**
+- [x] **Passo 2: `frontend.md`**
   - **Chamadas à API**: trocar o item da previsão/busca por: “Busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) é ao confirmar: `CitySearch` + `useCitySearch` mostram até 5 resultados para escolher (setas/Enter/Esc); a escolha navega só pelo nome (homônimos caem na primeira cidade). Previsão (`GET /forecasts/{cidade}`) com `useForecast` em seção própria: falha da previsão não derruba o detalhe.”
   - **Tema e estilo**: “Gráficos com Recharts; cores só de `theme.useToken()` (nada de hex nas props). Todo gráfico tem `role="img"` com `aria-label` e uma leitura em texto ao lado (ex.: cards da previsão).”
   - **Estrutura**: `utils/` passa a citar `formatTime, formatWeekday, weatherIconUrl`; `hooks/` ganha `useForecast, useCitySearch`; `services/` ganha `locations.js`.
 
-- [ ] **Passo 3: `review-checklist.md`**
+- [x] **Passo 3: `review-checklist.md`**
   - BE-28, coluna “Como verificar”: acrescentar “ou URL com `lat`/`lon` montada fora dele”.
   - FE-06, coluna “Como verificar”: acrescentar “(inclui props de cor do Recharts: só `token.*`)”.
 
-- [ ] **Passo 4: `project-overview.md`**
+- [x] **Passo 4: `project-overview.md`**
   - Título: `#### Fase 07 — Frontend moderno ✅ Concluída (AAAA-MM-DD)`; linha da 07b: `- **07b — Busca e previsão** ✅ (AAAA-MM-DD): busca de cidades com lista, previsão de 5 dias com gráfico (Recharts), temperatura nos cards e nome da cidade em português (Provider resolve no geocoding e consulta por coordenadas). [Design](features/07-frontend-moderno/busca-previsao-design.md) · [Plano](features/07-frontend-moderno/busca-previsao-plan.md)`.
   - **Estado atual**: data e “após a Fase 07”; em Funciona, trocar “previsão de 5 dias e busca de cidades na API (ainda sem tela no front)” por “busca de cidades, previsão de 5 dias com gráfico e temperatura nos cards, nomes de cidade em português”; Stack ganha `Recharts`.
   - **Pendências**: remover as duas `[Fase 07b]` (busca e nome); acrescentar `- [Backlog] Homônimos ("Springfield"): a busca mostra estado/país, mas clima e previsão usam a primeira cidade do geocoding — identificar por coordenadas exige mudar contrato, URL e entidade City`.
 
-- [ ] **Passo 5: Verificação final** (skill `superpowers:verification-before-completion`) — os comandos da seção Verificação do `CLAUDE.md`, incluindo `docker compose build` (com `.env` local; sem `.env`, criar um temporário só com valores de build e apagar depois).
+- [x] **Passo 5: Verificação final** (skill `superpowers:verification-before-completion`) — os comandos da seção Verificação do `CLAUDE.md`, incluindo `docker compose build` (com `.env` local; sem `.env`, criar um temporário só com valores de build e apagar depois).
 
-- [ ] **Passo 6: Notas de execução** — `## Notas de execução (AAAA-MM-DD)` no fim deste plano; marcar os checkboxes.
+- [x] **Passo 6: Notas de execução** — `## Notas de execução (AAAA-MM-DD)` no fim deste plano; marcar os checkboxes.
 
-- [ ] **Passo 7: `/revisar-padrao`** na branch inteira; com 🔴, parar. Depois `/requesting-code-review`.
+- [x] **Passo 7: `/revisar-padrao`** na branch inteira; com 🔴, parar. Depois `/requesting-code-review`.
 
-- [ ] **Passo 8: Commit final**
+- [x] **Passo 8: Commit final**
 
 ```bash
 git add docs
@@ -1735,3 +1735,18 @@ git commit -m "Documenta busca e previsão e fecha a Fase 07"
 ```
 
 Depois, `/finishing-a-development-branch` → PR `dev/busca-previsao` → `master`. PR com CI ❌ não é mergeado.
+
+## Notas de execução (2026-11-06)
+
+- Tudo como no plano, com os três ajustes registrados na tabela (lazy do `ForecastSection`, cor da legenda do Recharts, `minmax(8rem)`). 102 testes .NET e 45 Vitest; o formato do `formatWeekday` no ICU do Node bateu com o esperado (`"sex., 06/11"`).
+- Provider conferido contra a OpenWeather real: `Tóquio` → `"city": "Tóquio", "country": "JP"` com foto; `Londres` na previsão; `sao paulo` → "São Paulo"; `Xyzabc` → 404.
+- Conferido no navegador (APIs em `dotnet run`, web na 5173): busca com lista (Springfield com 5 estados, setas, Enter abre o destacado, Esc limpa, "a" não dispara requisição, termo inexistente mostra estado vazio), temperatura nos cards sem recarregar ao favoritar, detalhe "Tóquio, JP" com gráfico e 5 cards no claro, escuro e 375 px, falha só da previsão isolada na seção (requisição desviada no navegador) e Provider parado → cards com "—" sem notificação.
+- Bundle: principal 314 kB gzip (igual à 07a); `ForecastSection` + Recharts 119 kB gzip, só no detalhe.
+- Como previsto, o histórico antigo "Tokyo" convive com o novo "Tóquio" (pendência de backlog registrada).
+
+### Ajustes do code review (2026-11-06)
+
+- `CitySearch`: `aria-autocomplete="list"`; `aria-controls` só com a lista aberta; editar o texto depois de uma busca fecha a lista antiga (estado e setas consistentes).
+- `ErrorBoundary` em volta do `ForecastSection` lazy: falha ao baixar o chunk mostra o `ErrorState` da previsão sem derrubar o detalhe.
+- `CityTemperature`: “—” como `role="img"` com `aria-label`.
+- Registrados como pendência da Fase 08 (não corrigidos aqui, exigem mudar o Gateway ou o contrato): o efeito colateral do `GET /weathers` disparado pelos cards (cria histórico quando o nome resolvido muda) e o custo de uma chamada por card na cota da OpenWeather.

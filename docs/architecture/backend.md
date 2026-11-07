@@ -31,7 +31,7 @@ src/Gateway/
 └── Climato.Gateway.Infrastructure/  ← Data (ClimatoDbContext, Configurations, Migrations, Repositories), Http (clients, ProviderHealthCheck), Auth (JwtTokenService), DependencyInjection.cs
 src/Provider/
 ├── Climato.Provider.Api/            ← Program.cs, DependencyInjection.cs, Controllers, Errors, Observability
-├── Climato.Provider.Application/    ← OpenWeatherClient, AppServices (clima, previsão, busca, imagem) e cache (Services), Contracts, Model (DTOs da OpenWeather/Pexels), Exceptions, Options, DependencyInjection.cs
+├── Climato.Provider.Application/    ← OpenWeatherClient, AppServices (clima, previsão, busca, imagem), `CityResolver` e cache (Services), Contracts, Model (DTOs da OpenWeather/Pexels), Exceptions, Options, DependencyInjection.cs
 └── Climato.Provider.Domain/         ← Weathers (Weather, Forecast — contratos devolvidos ao Gateway), Locations
 ```
 
@@ -98,9 +98,10 @@ API ──▶ Application ──▶ Domain
 - Parâmetros de query sempre com `Uri.EscapeDataString`.
 - DTOs tipados por API externa (`OpenWeatherCurrentResponse`, `PexelsSearchResponse`) em `Application/Model/<Api>/`, lidos com `ReadFromJsonAsync<T>`. Nada de `Dictionary<string, object>`, `JObject` ou Newtonsoft.
 - `using` em todo `HttpResponseMessage` (e `HttpRequestMessage`, quando criado à mão). Headers fixos (ex.: `Authorization` do Pexels) vão em `DefaultRequestHeaders` no registro do client.
-- Resiliência com `AddStandardResilienceHandler()` em todo typed client. Timeouts escalonados: a tentativa de quem chama é maior que a soma dos timeouts totais das dependências que o chamado consulta em sequência (Gateway → Provider 25 s/30 s > OpenWeather 15 s + Pexels 5 s + folga do cache; Provider → OpenWeather 5 s/15 s; Provider → Pexels 2 s/5 s). `CircuitBreaker.SamplingDuration` ≥ 2× o timeout por tentativa. O Gateway só re-tenta falha de transporte (`Retry.ShouldHandle` com `HttpRequestException`); 5xx do Provider não é re-tentado.
+- Resiliência com `AddStandardResilienceHandler()` em todo typed client. Timeouts escalonados: a tentativa de quem chama é maior que a soma dos timeouts totais das dependências que o chamado consulta em sequência (Gateway → Provider 25 s/30 s > OpenWeather 2 × 9 s (geocoding + clima) + Pexels 5 s + folga do cache; Provider → OpenWeather 4 s/9 s; Provider → Pexels 2 s/5 s). `CircuitBreaker.SamplingDuration` ≥ 2× o timeout por tentativa. O Gateway só re-tenta falha de transporte (`Retry.ShouldHandle` com `HttpRequestException`); 5xx do Provider não é re-tentado.
 - Client traduz a resposta: 404 → `null`; outro status de erro, `HttpRequestException`, `ExecutionRejectedException` (Polly) ou `JsonException` → exceção tipada de indisponibilidade (`ExternalServiceUnavailableException` no Provider, `ProviderUnavailableException` no Gateway).
 - Provider: toda chamada à OpenWeather passa pelo typed client `IOpenWeatherClient` (`OpenWeatherClient`), que concentra a tradução de erros num `GetAsync<T>` privado; AppServices não recebem `HttpClient` da OpenWeather. No Gateway, o `WeatherProviderClient` faz o mesmo para o Provider.
+- Clima e previsão resolvem a cidade antes (`ICityResolver`/`CityResolver`): primeiro resultado do `geo/1.0/direct`, nome em português (`local_names.pt`, senão o original) e coordenadas; a consulta à OpenWeather é por `lat`/`lon` (formatados com `CultureInfo.InvariantCulture`). `City`/`Country` da resposta vêm do resolvido; a imagem da Pexels usa o nome original.
 
 ### Erros
 - Respostas de erro em `ProblemDetails` (`AddProblemDetails` + `UseStatusCodePages` + `GlobalExceptionHandler`). `DomainException` → 409 com a mensagem; validação → 400 `ValidationProblemDetails`; resto → 500 "Erro interno." sem detalhes. Erros esperados no controller com `Problem(statusCode, title)` ou `NotFound()`.
@@ -113,7 +114,7 @@ API ──▶ Application ──▶ Domain
 
 ### Cache (Provider)
 - `IDistributedCache` atrás de `IProviderCache` (`Services/ProviderCache`), genérico: `GetAsync<T>(prefixo, texto)` / `SetAsync<T>(prefixo, texto, valor, duração)`. Redis se `ConnectionStrings:Redis` estiver preenchida; senão `AddDistributedMemoryCache`.
-- Chave `{prefixo}:{texto-normalizado}` (trim, espaços colapsados, minúsculas, sem acentos); valor em JSON; TTL absoluto por uso: `clima` 10 min, `previsao` 30 min, `locais` 24 h (lista vazia também é cacheada).
+- Chave `{prefixo}:{texto-normalizado}` (trim, espaços colapsados, minúsculas, sem acentos); valor em JSON; TTL absoluto por uso: `clima` 10 min, `previsao` 30 min, `locais` 24 h (lista vazia também é cacheada), `cidades` 24 h (só cidade encontrada; vazio não é cacheado).
 - Só resposta de sucesso entra no cache (404 e falhas não). Erro do cache → `Warning` e segue sem cache.
 
 ### Health checks
