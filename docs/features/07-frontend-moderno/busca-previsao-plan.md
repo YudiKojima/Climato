@@ -1107,7 +1107,7 @@ git commit -m "Adiciona busca de cidades, previsão e utilitários de data e íc
 - Consome: `useCitySearch` (Tarefa 2); `EmptyState` (07a).
 - Produz: `CitySearch` (sem props) — escolha navega para `/p/weather/:nome`.
 
-- [ ] **Passo 1: Criar `web/src/components/CitySearch.jsx`**
+- [x] **Passo 1: Criar `web/src/components/CitySearch.jsx`**
 
 ```jsx
 import { useState } from "react";
@@ -1220,7 +1220,7 @@ export default function CitySearch() {
 }
 ```
 
-- [ ] **Passo 2: Criar `web/src/components/CitySearch.module.css`**
+- [x] **Passo 2: Criar `web/src/components/CitySearch.module.css`**
 
 ```css
 .root {
@@ -1264,7 +1264,7 @@ export default function CitySearch() {
 }
 ```
 
-- [ ] **Passo 3: `Home.jsx` usa o `CitySearch`**
+- [x] **Passo 3: `Home.jsx` usa o `CitySearch`**
 
 ```jsx
 import { Typography } from "antd";
@@ -1303,16 +1303,16 @@ export default function Home() {
 
 E remover a regra `.search` de `Home.module.css` (a largura agora é do `CitySearch`).
 
-- [ ] **Passo 4: Verificação completa.**
+- [x] **Passo 4: Verificação completa.**
 
-- [ ] **Passo 5: Conferência manual**
+- [x] **Passo 5: Conferência manual**
   - “Tóquio” + Enter → lista com “Tóquio · JP”; Enter de novo → detalhe com “Tóquio, JP”.
   - “Springfield” → até 5 itens com estado; setas mudam o destaque; clique abre.
   - “Xyzabc” → estado vazio com o termo; Esc limpa; “a” → nada acontece.
   - Gateway parado → `notification`/`message` de erro (sem travar o campo).
   - 375 px e tema escuro legíveis.
 
-- [ ] **Passo 6: Commit**
+- [x] **Passo 6: Commit**
 
 ```bash
 git add web/src

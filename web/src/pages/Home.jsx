@@ -1,36 +1,20 @@
-import { Input, Typography } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Typography } from "antd";
 import CityGrid from "../components/CityGrid";
+import CitySearch from "../components/CitySearch";
 import useCities from "../hooks/useCities";
 import styles from "./Home.module.css";
 
 export default function Home() {
-  const navigate = useNavigate();
   const { data, isLoading, error, reload } = useCities();
-
-  const handleSearch = (value) => {
-    const name = value.trim();
-
-    if (name) {
-      navigate(`/p/weather/${encodeURIComponent(name)}`);
-    }
-  };
 
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
         <Typography.Title level={2}>Como está o tempo hoje?</Typography.Title>
         <Typography.Paragraph type="secondary">
-          Pesquise uma cidade para ver o clima agora.
+          Pesquise uma cidade e escolha na lista para ver o clima agora.
         </Typography.Paragraph>
-        <Input.Search
-          className={styles.search}
-          placeholder="Buscar cidade..."
-          enterButton="Buscar"
-          size="large"
-          allowClear
-          onSearch={handleSearch}
-        />
+        <CitySearch />
       </section>
 
       <section>
