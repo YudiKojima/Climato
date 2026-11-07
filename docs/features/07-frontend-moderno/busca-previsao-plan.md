@@ -55,7 +55,7 @@ npm --prefix web run build
   - `ICityResolver.ResolveAsync(string cityName, CancellationToken) → Task<ResolvedCity?>`; cache `cidades`, 24 h, vazio não cacheado.
   - `OpenWeatherFakes.Location(string name, string? portugueseName = null, string country = "XX", string? state = null, double lat = 0, double lon = 0)`.
 
-- [ ] **Passo 1: Fake de geocoding em `tests/Climato.Provider.UnitTests/OpenWeatherFakes.cs`** — novo método no fim da classe:
+- [x] **Passo 1: Fake de geocoding em `tests/Climato.Provider.UnitTests/OpenWeatherFakes.cs`** — novo método no fim da classe:
 
 ```csharp
     public static OpenWeatherLocationResponse Location(
@@ -74,7 +74,7 @@ npm --prefix web run build
     }
 ```
 
-- [ ] **Passo 2: Escrever `tests/Climato.Provider.UnitTests/Application/Services/CityResolverTests.cs`**
+- [x] **Passo 2: Escrever `tests/Climato.Provider.UnitTests/Application/Services/CityResolverTests.cs`**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -172,12 +172,12 @@ public class CityResolverTests
 }
 ```
 
-- [ ] **Passo 3: Rodar e ver falhar**
+- [x] **Passo 3: Rodar e ver falhar**
 
 Run: `dotnet test --solution Climato.slnx`
 Esperado: erro de compilação — `CityResolver`, `ResolvedCity` não existem e `OpenWeatherLocationResponse` não tem 6 parâmetros.
 
-- [ ] **Passo 4: `OpenWeatherLocationResponse.cs`**
+- [x] **Passo 4: `OpenWeatherLocationResponse.cs`**
 
 ```csharp
 namespace Climato.Provider.Application.Model.OpenWeather;
@@ -196,7 +196,7 @@ public sealed record OpenWeatherLocationResponse(
 }
 ```
 
-- [ ] **Passo 5: `Model/Cities/ResolvedCity.cs`**
+- [x] **Passo 5: `Model/Cities/ResolvedCity.cs`**
 
 ```csharp
 namespace Climato.Provider.Application.Model.Cities;
@@ -204,7 +204,7 @@ namespace Climato.Provider.Application.Model.Cities;
 public sealed record ResolvedCity(string Name, string OriginalName, string Country, double Lat, double Lon);
 ```
 
-- [ ] **Passo 6: `Contracts/ICityResolver.cs`**
+- [x] **Passo 6: `Contracts/ICityResolver.cs`**
 
 ```csharp
 using Climato.Provider.Application.Model.Cities;
@@ -217,7 +217,7 @@ public interface ICityResolver
 }
 ```
 
-- [ ] **Passo 7: `Services/CityResolver.cs`**
+- [x] **Passo 7: `Services/CityResolver.cs`**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -265,7 +265,7 @@ public sealed class CityResolver : ICityResolver
 }
 ```
 
-- [ ] **Passo 8: `LocationAppService.cs` usa a regra compartilhada** — remover a constante `PortugueseLanguageCode` e trocar o `ToLocation`:
+- [x] **Passo 8: `LocationAppService.cs` usa a regra compartilhada** — remover a constante `PortugueseLanguageCode` e trocar o `ToLocation`:
 
 ```csharp
     private static Location ToLocation(OpenWeatherLocationResponse location)
@@ -279,7 +279,7 @@ public sealed class CityResolver : ICityResolver
     }
 ```
 
-- [ ] **Passo 9: `LocationAppServiceTests.cs` usa o fake novo** — trocar as duas construções diretas:
+- [x] **Passo 9: `LocationAppServiceTests.cs` usa o fake novo** — trocar as duas construções diretas:
 
 ```csharp
         ReturnsLocations("Londres", Location("London", "Londres", "GB", "England"));
@@ -293,18 +293,18 @@ e, no teste `SearchAsync_SemNomeEmPortugues_UsaName`, manter o `[Theory]` constr
 
 Acrescentar `using static Climato.Provider.UnitTests.OpenWeatherFakes;` no topo.
 
-- [ ] **Passo 10: Registrar no DI** — em `src/Provider/Climato.Provider.Application/DependencyInjection.cs`, antes de `services.AddScoped<IWeatherAppService, WeatherAppService>();`:
+- [x] **Passo 10: Registrar no DI** — em `src/Provider/Climato.Provider.Application/DependencyInjection.cs`, antes de `services.AddScoped<IWeatherAppService, WeatherAppService>();`:
 
 ```csharp
         services.AddScoped<ICityResolver, CityResolver>();
 ```
 
-- [ ] **Passo 11: Rodar e ver passar**
+- [x] **Passo 11: Rodar e ver passar**
 
 Run: `dotnet test --solution Climato.slnx`
 Esperado: todos aprovados (91 + 6 do resolver = 97).
 
-- [ ] **Passo 12: Verificação completa** e **commit**
+- [x] **Passo 12: Verificação completa** e **commit**
 
 ```bash
 git add src/Provider tests/Climato.Provider.UnitTests

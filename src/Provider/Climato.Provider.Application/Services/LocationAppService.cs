@@ -7,7 +7,6 @@ namespace Climato.Provider.Application.Services;
 public sealed class LocationAppService : ILocationAppService
 {
     private const string CachePrefix = "locais";
-    private const string PortugueseLanguageCode = "pt";
 
     private static readonly TimeSpan cacheDuration = TimeSpan.FromHours(24);
 
@@ -38,11 +37,9 @@ public sealed class LocationAppService : ILocationAppService
 
     private static Location ToLocation(OpenWeatherLocationResponse location)
     {
-        var name = location.LocalNames?.GetValueOrDefault(PortugueseLanguageCode) ?? location.Name;
-
         return new Location
         {
-            Name = name,
+            Name = location.PortugueseName,
             State = location.State,
             Country = location.Country
         };

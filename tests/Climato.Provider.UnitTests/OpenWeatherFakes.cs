@@ -46,4 +46,19 @@ internal static class OpenWeatherFakes
     {
         return new OpenWeatherForecastResponse(items, new OpenWeatherForecastCity("Cidade", "XX", (int)offset.TotalSeconds));
     }
+
+    public static OpenWeatherLocationResponse Location(
+        string name,
+        string? portugueseName = null,
+        string country = "XX",
+        string? state = null,
+        double lat = 0,
+        double lon = 0)
+    {
+        var localNames = portugueseName == null
+            ? null
+            : new Dictionary<string, string> { ["pt"] = portugueseName, ["en"] = name };
+
+        return new OpenWeatherLocationResponse(name, localNames, country, state, lat, lon);
+    }
 }

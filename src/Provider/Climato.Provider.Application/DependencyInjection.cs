@@ -46,6 +46,7 @@ public static class DependencyInjection
                 options.Retry.MaxRetryAttempts = 2;
             });
 
+        services.AddScoped<ICityResolver, CityResolver>();
         services.AddScoped<IWeatherAppService, WeatherAppService>();
         services.AddScoped<IForecastAppService, ForecastAppService>();
         services.AddScoped<ILocationAppService, LocationAppService>();
