@@ -4,4 +4,11 @@ public sealed record OpenWeatherLocationResponse(
     string Name,
     IReadOnlyDictionary<string, string>? LocalNames,
     string Country,
-    string? State);
+    string? State,
+    double Lat,
+    double Lon)
+{
+    private const string PortugueseLanguageCode = "pt";
+
+    public string PortugueseName => LocalNames?.GetValueOrDefault(PortugueseLanguageCode) ?? Name;
+}

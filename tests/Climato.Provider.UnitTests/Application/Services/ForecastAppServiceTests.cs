@@ -1,4 +1,5 @@
 using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Model.Cities;
 using Climato.Provider.Application.Model.OpenWeather;
 using Climato.Provider.Application.Services;
 using Climato.Provider.Domain.Weathers;
@@ -8,14 +9,17 @@ namespace Climato.Provider.UnitTests.Application.Services;
 
 public class ForecastAppServiceTests
 {
+    private static readonly ResolvedCity saoPaulo = new("São Paulo", "Sao Paulo", "BR", -23.55, -46.63);
+
     private readonly IOpenWeatherClient openWeatherClient = Substitute.For<IOpenWeatherClient>();
+    private readonly ICityResolver cityResolver = Substitute.For<ICityResolver>();
     private readonly IProviderCache cache = Substitute.For<IProviderCache>();
     private readonly ForecastAppService appService;
     private readonly CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
     public ForecastAppServiceTests()
     {
-        appService = new ForecastAppService(openWeatherClient, cache);
+        appService = new ForecastAppService(openWeatherClient, cityResolver, cache);
     }
 
     [Fact]
@@ -105,18 +109,32 @@ public class ForecastAppServiceTests
         var forecast = await appService.GetByCityAsync("São Paulo", cancellationToken);
 
         forecast.ShouldBeSameAs(cached);
-        await openWeatherClient.DidNotReceiveWithAnyArgs().GetForecastAsync(default!, cancellationToken);
+        await cityResolver.DidNotReceiveWithAnyArgs().ResolveAsync(default!, cancellationToken);
+        await openWeatherClient.DidNotReceiveWithAnyArgs().GetForecastAsync(default, default, cancellationToken);
     }
 
     [Fact]
-    public async Task GetByCityAsync_CidadeInexistente_DevolveNullSemGravarNoCache()
+    public async Task GetByCityAsync_CidadeNaoResolvida_DevolveNullSemGravarNoCache()
     {
-        openWeatherClient.GetForecastAsync("Atlântida", Arg.Any<CancellationToken>()).Returns((OpenWeatherForecastResponse?)null);
+        cityResolver.ResolveAsync("Atlântida", Arg.Any<CancellationToken>()).Returns((ResolvedCity?)null);
 
         var forecast = await appService.GetByCityAsync("Atlântida", cancellationToken);
 
         forecast.ShouldBeNull();
+        await openWeatherClient.DidNotReceiveWithAnyArgs().GetForecastAsync(default, default, cancellationToken);
         await cache.DidNotReceiveWithAnyArgs().SetAsync<Forecast>(default!, default!, default!, default, cancellationToken);
+    }
+
+    [Fact]
+    public async Task GetByCityAsync_CidadeResolvida_UsaNomeEPaisDoGeocoding()
+    {
+        ReturnsForecast(Forecast(TimeSpan.Zero, Item(Utc(2026, 10, 26, 12))));
+
+        var forecast = await appService.GetByCityAsync("São Paulo", cancellationToken);
+
+        forecast.ShouldNotBeNull();
+        forecast.City.ShouldBe("São Paulo");
+        forecast.Country.ShouldBe("BR");
     }
 
     [Fact]
@@ -131,6 +149,7 @@ public class ForecastAppServiceTests
 
     private void ReturnsForecast(OpenWeatherForecastResponse response)
     {
-        openWeatherClient.GetForecastAsync("São Paulo", Arg.Any<CancellationToken>()).Returns(response);
+        cityResolver.ResolveAsync("São Paulo", Arg.Any<CancellationToken>()).Returns(saoPaulo);
+        openWeatherClient.GetForecastAsync(-23.55, -46.63, Arg.Any<CancellationToken>()).Returns(response);
     }
 }

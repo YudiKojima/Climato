@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Button, Card, Col, Row, Skeleton, Space, Statistic, Typography } from "antd";
 import {
   ArrowDownOutlined,
@@ -13,10 +14,14 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
+import ErrorBoundary from "../components/ErrorBoundary";
 import ErrorState from "../components/ErrorState";
 import useWeather from "../hooks/useWeather";
 import { formatTime } from "../utils/formatTime";
+import { weatherIconUrl } from "../utils/weatherIconUrl";
 import styles from "./WeatherDetails.module.css";
+
+const ForecastSection = lazy(() => import("../components/ForecastSection"));
 
 const METRIC_COLS = { xs: 12, md: 8 };
 
@@ -95,7 +100,7 @@ export default function WeatherDetails() {
           <div>
             <div className={styles.summary}>
               <img
-                src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                src={weatherIconUrl(weather.icon)}
                 alt=""
                 className={styles.icon}
               />
@@ -132,6 +137,20 @@ export default function WeatherDetails() {
           </Col>
         ))}
       </Row>
+
+      <ErrorBoundary
+        fallback={<ErrorState error={null} fallback="Não foi possível carregar a previsão agora." />}
+      >
+        <Suspense
+          fallback={
+            <Card>
+              <Skeleton active paragraph={{ rows: 6 }} />
+            </Card>
+          }
+        >
+          <ForecastSection cityName={cityName} />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }

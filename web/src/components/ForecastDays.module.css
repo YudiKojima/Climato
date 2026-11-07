@@ -1,0 +1,29 @@
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--ant-margin-sm);
+}
+
+.day {
+  height: 100%;
+  text-align: center;
+}
+
+.day :global(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ant-margin-xxs);
+}
+
+.icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.description {
+  text-transform: capitalize;
+}

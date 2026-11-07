@@ -41,11 +41,12 @@ public static class DependencyInjection
             })
             .AddStandardResilienceHandler(options =>
             {
-                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(5);
-                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(15);
+                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(4);
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(9);
                 options.Retry.MaxRetryAttempts = 2;
             });
 
+        services.AddScoped<ICityResolver, CityResolver>();
         services.AddScoped<IWeatherAppService, WeatherAppService>();
         services.AddScoped<IForecastAppService, ForecastAppService>();
         services.AddScoped<ILocationAppService, LocationAppService>();

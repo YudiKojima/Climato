@@ -2,6 +2,7 @@ using Climato.Provider.Application.Contracts;
 using Climato.Provider.Application.Model.OpenWeather;
 using Climato.Provider.Application.Services;
 using Climato.Provider.Domain.Locations;
+using static Climato.Provider.UnitTests.OpenWeatherFakes;
 
 namespace Climato.Provider.UnitTests.Application.Services;
 
@@ -20,7 +21,7 @@ public class LocationAppServiceTests
     [Fact]
     public async Task SearchAsync_ComNomeEmPortugues_UsaLocalNamesPt()
     {
-        ReturnsLocations("Londres", new OpenWeatherLocationResponse("London", new Dictionary<string, string> { ["pt"] = "Londres", ["en"] = "London" }, "GB", "England"));
+        ReturnsLocations("Londres", Location("London", "Londres", "GB", "England"));
 
         var locations = await appService.SearchAsync("Londres", cancellationToken);
 
@@ -36,7 +37,7 @@ public class LocationAppServiceTests
     public async Task SearchAsync_SemNomeEmPortugues_UsaName(bool hasLocalNames)
     {
         var localNames = hasLocalNames ? new Dictionary<string, string> { ["en"] = "Lima" } : null;
-        ReturnsLocations("Lima", new OpenWeatherLocationResponse("Lima", localNames, "PE", null));
+        ReturnsLocations("Lima", new OpenWeatherLocationResponse("Lima", localNames, "PE", null, -12.04, -77.03));
 
         var locations = await appService.SearchAsync("Lima", cancellationToken);
 

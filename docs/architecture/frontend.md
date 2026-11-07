@@ -17,10 +17,10 @@ web/src/
 ├── layouts/         ← AppLayout (header, conteúdo, footer), AuthLayout (tela dividida)
 ├── pages/           ← páginas finas: compõem componentes e chamam hooks
 ├── components/      ← reutilizáveis, cada um com seu .module.css quando precisar
-├── hooks/           ← useAsync, useCities, useFavorites, useWeather, useApiFeedback
-├── services/        ← client.js (axios) + auth.js, cities.js, weather.js, errors.js, session.js
+├── hooks/           ← useAsync, useCities, useFavorites, useWeather, useForecast, useCitySearch, useApiFeedback
+├── services/        ← client.js (axios) + auth.js, cities.js, weather.js, locations.js, errors.js, session.js
 ├── theme/           ← tokens.js (claro/escuro), ThemeProvider/ThemeContext, themeStorage.js
-├── utils/           ← funções puras (formatTime)
+├── utils/           ← funções puras (formatTime, formatWeekday, weatherIconUrl)
 ├── test/setup.js    ← jest-dom, matchMedia, limpeza entre testes
 └── assets/
 ```
@@ -46,7 +46,8 @@ Proteção de rota **só** no router — páginas não redirecionam por estado d
 - Erros: `services/errors.js` — `getApiErrorMessage(err, fallback)`, `getCorrelationId(err)` (header `X-Correlation-ID`) e `isUnexpectedError(err)` (sem resposta ou status ≥ 500). Em ação, `useApiFeedback()` decide: erro de negócio → `message.error` só com a mensagem; erro inesperado → `notification.error` com o código (`CorrelationId`). Em carga de tela, `ErrorState` faz o mesmo.
 - Parâmetros de rota/query com `encodeURIComponent`.
 - Erros da API chegam como `ProblemDetails`: exibir `title`/`detail`, não a mensagem do axios.
-- Previsão (`GET /forecasts/{cidade}`) e busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) já existem no Gateway; o consumo é da Fase 07b. A busca casa o nome inteiro (não prefixo): usar ao confirmar, não a cada tecla.
+- Busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) é ao confirmar — o geocoding casa o nome inteiro, não prefixo: `CitySearch` + `useCitySearch` mostram até 5 resultados para escolher (setas/Enter/Esc); a escolha navega só pelo nome (homônimos caem na primeira cidade).
+- Previsão (`GET /forecasts/{cidade}`) com `useForecast` em seção própria (`ForecastSection`, carregada com `React.lazy`): falha da previsão não derruba o detalhe.
 
 ## Tema e estilo
 
@@ -57,6 +58,7 @@ Proteção de rota **só** no router — páginas não redirecionam por estado d
 - Estilo de componente em `.module.css`; `style={{}}` inline só para valor dinâmico (ex.: imagem de fundo).
 - Feedback via `App.useApp()` (`message`, `notification`, `modal`) — os estáticos do `antd` não herdam o tema; nunca `alert()`/`confirm()`.
 - Carregamento com `Skeleton` no formato do conteúdo; spinner só para ações curtas.
+- Gráficos com Recharts; cores só de `theme.useToken()` (nada de hex nas props). Todo gráfico tem `role="img"` com `aria-label` e uma leitura em texto ao lado (ex.: cards da previsão). Dependência pesada de uma tela só entra com `React.lazy`, dentro de `Suspense` (skeleton) e de `ErrorBoundary` (`components/ErrorBoundary.jsx`) com um `ErrorState` — falha ao baixar o chunk não derruba a página.
 
 ## Estado
 

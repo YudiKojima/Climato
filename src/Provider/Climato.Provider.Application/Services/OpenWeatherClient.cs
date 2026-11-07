@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -28,15 +29,15 @@ public sealed class OpenWeatherClient : IOpenWeatherClient
         apiKey = options.Value.ApiKey;
     }
 
-    public Task<OpenWeatherCurrentResponse?> GetCurrentAsync(string cityName, CancellationToken cancellationToken)
+    public Task<OpenWeatherCurrentResponse?> GetCurrentAsync(double lat, double lon, CancellationToken cancellationToken)
     {
-        var url = $"data/2.5/weather?q={Uri.EscapeDataString(cityName)}&appid={apiKey}&units=metric&lang=pt_br";
+        var url = $"data/2.5/weather?{Coordinates(lat, lon)}&appid={apiKey}&units=metric&lang=pt_br";
         return GetAsync<OpenWeatherCurrentResponse>(url, cancellationToken);
     }
 
-    public Task<OpenWeatherForecastResponse?> GetForecastAsync(string cityName, CancellationToken cancellationToken)
+    public Task<OpenWeatherForecastResponse?> GetForecastAsync(double lat, double lon, CancellationToken cancellationToken)
     {
-        var url = $"data/2.5/forecast?q={Uri.EscapeDataString(cityName)}&appid={apiKey}&units=metric&lang=pt_br";
+        var url = $"data/2.5/forecast?{Coordinates(lat, lon)}&appid={apiKey}&units=metric&lang=pt_br";
         return GetAsync<OpenWeatherForecastResponse>(url, cancellationToken);
     }
 
@@ -44,6 +45,11 @@ public sealed class OpenWeatherClient : IOpenWeatherClient
     {
         var url = $"geo/1.0/direct?q={Uri.EscapeDataString(query)}&limit=5&appid={apiKey}";
         return await GetAsync<List<OpenWeatherLocationResponse>>(url, cancellationToken) ?? [];
+    }
+
+    private static string Coordinates(double lat, double lon)
+    {
+        return string.Create(CultureInfo.InvariantCulture, $"lat={lat}&lon={lon}");
     }
 
     private async Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken) where T : class

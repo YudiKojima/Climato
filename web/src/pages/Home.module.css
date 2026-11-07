@@ -11,8 +11,3 @@
   text-align: center;
   padding: var(--ant-padding-lg) 0;
 }
-
-.search {
-  width: 100%;
-  max-width: 40rem;
-}
