@@ -16,6 +16,7 @@ import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/ErrorState";
 import useWeather from "../hooks/useWeather";
 import { formatTime } from "../utils/formatTime";
+import { weatherIconUrl } from "../utils/weatherIconUrl";
 import styles from "./WeatherDetails.module.css";
 
 const METRIC_COLS = { xs: 12, md: 8 };
@@ -95,7 +96,7 @@ export default function WeatherDetails() {
           <div>
             <div className={styles.summary}>
               <img
-                src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                src={weatherIconUrl(weather.icon)}
                 alt=""
                 className={styles.icon}
               />

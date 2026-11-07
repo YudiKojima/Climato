@@ -804,7 +804,7 @@ git commit -m "Consulta clima e previsão por coordenadas da cidade resolvida, c
   - `useForecast(cityName) → { data, isLoading, error, reload }`.
   - `useCitySearch() → { query, results, isSearching, search(value), clear() }` (`query` = último termo buscado; `""` sem busca).
 
-- [ ] **Passo 1: Testes de serviço e utilitários**
+- [x] **Passo 1: Testes de serviço e utilitários**
 
 `web/src/services/locations.test.js`:
 
@@ -857,7 +857,7 @@ describe("weatherIconUrl", () => {
 });
 ```
 
-- [ ] **Passo 2: Testes de hooks**
+- [x] **Passo 2: Testes de hooks**
 
 `web/src/hooks/useForecast.test.js`:
 
@@ -963,12 +963,12 @@ describe("useCitySearch", () => {
 });
 ```
 
-- [ ] **Passo 3: Rodar e ver falhar**
+- [x] **Passo 3: Rodar e ver falhar**
 
 Run: `npm --prefix web test`
 Esperado: FAIL — módulos `./locations`, `./formatWeekday`, `./weatherIconUrl`, `./useForecast`, `./useCitySearch` não encontrados.
 
-- [ ] **Passo 4: Implementar serviços e utilitários**
+- [x] **Passo 4: Implementar serviços e utilitários**
 
 `web/src/services/locations.js`:
 
@@ -1011,7 +1011,7 @@ Se o ICU do Node formatar diferente de `"sex., 06/11"` (ex.: sem vírgula), ajus
 export const weatherIconUrl = (icon) => `https://openweathermap.org/img/wn/${icon}@2x.png`;
 ```
 
-- [ ] **Passo 5: Implementar os hooks**
+- [x] **Passo 5: Implementar os hooks**
 
 `web/src/hooks/useForecast.js`:
 
@@ -1077,18 +1077,18 @@ export default function useCitySearch() {
 }
 ```
 
-- [ ] **Passo 6: `WeatherDetails.jsx` usa `weatherIconUrl`** — `import { weatherIconUrl } from "../utils/weatherIconUrl";` e no `<img>` do hero:
+- [x] **Passo 6: `WeatherDetails.jsx` usa `weatherIconUrl`** — `import { weatherIconUrl } from "../utils/weatherIconUrl";` e no `<img>` do hero:
 
 ```jsx
                 src={weatherIconUrl(weather.icon)}
 ```
 
-- [ ] **Passo 7: Rodar e ver passar**
+- [x] **Passo 7: Rodar e ver passar**
 
 Run: `npm --prefix web test`
 Esperado: todos `passed` (35 + 10 = 45).
 
-- [ ] **Passo 8: Verificação completa** e **commit**
+- [x] **Passo 8: Verificação completa** e **commit**
 
 ```bash
 git add web/src
