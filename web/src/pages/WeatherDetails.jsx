@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
+import ErrorBoundary from "../components/ErrorBoundary";
 import ErrorState from "../components/ErrorState";
 import useWeather from "../hooks/useWeather";
 import { formatTime } from "../utils/formatTime";
@@ -137,15 +138,19 @@ export default function WeatherDetails() {
         ))}
       </Row>
 
-      <Suspense
-        fallback={
-          <Card>
-            <Skeleton active paragraph={{ rows: 6 }} />
-          </Card>
-        }
+      <ErrorBoundary
+        fallback={<ErrorState error={null} fallback="Não foi possível carregar a previsão agora." />}
       >
-        <ForecastSection cityName={cityName} />
-      </Suspense>
+        <Suspense
+          fallback={
+            <Card>
+              <Skeleton active paragraph={{ rows: 6 }} />
+            </Card>
+          }
+        >
+          <ForecastSection cityName={cityName} />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }

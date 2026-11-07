@@ -13,8 +13,10 @@ export default function CityTemperature({ cityName }) {
   if (error) {
     return (
       <Tooltip title="Clima indisponível">
-        <Typography.Text type="secondary" aria-label="Clima indisponível">
-          —
+        <Typography.Text type="secondary">
+          <span role="img" aria-label="Clima indisponível">
+            —
+          </span>
         </Typography.Text>
       </Tooltip>
     );

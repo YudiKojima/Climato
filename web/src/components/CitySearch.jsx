@@ -46,7 +46,7 @@ export default function CitySearch() {
   };
 
   const handleChange = (e) => {
-    if (e.target.value === "") {
+    if (query && e.target.value.trim() !== query) {
       clear();
     }
   };
@@ -60,8 +60,9 @@ export default function CitySearch() {
         allowClear
         loading={isSearching}
         role="combobox"
+        aria-autocomplete="list"
         aria-expanded={results.length > 0}
-        aria-controls={LIST_ID}
+        aria-controls={results.length > 0 ? LIST_ID : undefined}
         aria-activedescendant={results.length > 0 ? optionId(activeIndex) : undefined}
         onSearch={handleSearch}
         onKeyDown={handleKeyDown}
