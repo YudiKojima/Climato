@@ -1,4 +1,5 @@
 using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Model.Cities;
 using Climato.Provider.Application.Model.OpenWeather;
 using Climato.Provider.Application.Services;
 using Climato.Provider.Domain.Weathers;
@@ -8,7 +9,11 @@ namespace Climato.Provider.UnitTests.Application.Services;
 
 public class WeatherAppServiceTests
 {
+    private static readonly ResolvedCity saoPaulo = new("São Paulo", "Sao Paulo", "BR", -23.55, -46.63);
+    private static readonly ResolvedCity lima = new("Lima", "Lima", "PE", -12.04, -77.03);
+
     private readonly IOpenWeatherClient openWeatherClient = Substitute.For<IOpenWeatherClient>();
+    private readonly ICityResolver cityResolver = Substitute.For<ICityResolver>();
     private readonly ICityImageAppService cityImageAppService = Substitute.For<ICityImageAppService>();
     private readonly IProviderCache cache = Substitute.For<IProviderCache>();
     private readonly WeatherAppService appService;
@@ -16,15 +21,16 @@ public class WeatherAppServiceTests
 
     public WeatherAppServiceTests()
     {
-        appService = new WeatherAppService(openWeatherClient, cityImageAppService, cache);
+        appService = new WeatherAppService(openWeatherClient, cityResolver, cityImageAppService, cache);
     }
 
     [Fact]
     public async Task GetByCityAsync_RespostaDaOpenWeather_ConverteParaOContrato()
     {
-        openWeatherClient.GetCurrentAsync("sao paulo", Arg.Any<CancellationToken>())
-            .Returns(Current("São Paulo", TimeSpan.FromHours(-3), Utc(2026, 10, 26, 8, 45), Utc(2026, 10, 26, 21, 30), windSpeed: 5.0));
-        cityImageAppService.GetImageUrlAsync("São Paulo", Arg.Any<CancellationToken>()).Returns("https://images.pexels.com/sp.jpg");
+        Resolves("sao paulo", saoPaulo);
+        openWeatherClient.GetCurrentAsync(-23.55, -46.63, Arg.Any<CancellationToken>())
+            .Returns(Current("Sé", TimeSpan.FromHours(-3), Utc(2026, 10, 26, 8, 45), Utc(2026, 10, 26, 21, 30), windSpeed: 5.0));
+        cityImageAppService.GetImageUrlAsync("Sao Paulo", Arg.Any<CancellationToken>()).Returns("https://images.pexels.com/sp.jpg");
 
         var weather = await appService.GetByCityAsync("sao paulo", cancellationToken);
 
@@ -40,9 +46,24 @@ public class WeatherAppServiceTests
     }
 
     [Fact]
+    public async Task GetByCityAsync_CidadeResolvida_UsaNomeEPaisDoGeocoding()
+    {
+        Resolves("Lima", lima);
+        openWeatherClient.GetCurrentAsync(-12.04, -77.03, Arg.Any<CancellationToken>())
+            .Returns(Current("Miraflores", TimeSpan.FromHours(-5), Utc(2026, 10, 26, 10), Utc(2026, 10, 26, 23)));
+
+        var weather = await appService.GetByCityAsync("Lima", cancellationToken);
+
+        weather.ShouldNotBeNull();
+        weather.City.ShouldBe("Lima");
+        weather.Country.ShouldBe("PE");
+    }
+
+    [Fact]
     public async Task GetByCityAsync_PexelsSemImagem_DevolveClimaSemImagem()
     {
-        openWeatherClient.GetCurrentAsync("Lima", Arg.Any<CancellationToken>())
+        Resolves("Lima", lima);
+        openWeatherClient.GetCurrentAsync(-12.04, -77.03, Arg.Any<CancellationToken>())
             .Returns(Current("Lima", TimeSpan.FromHours(-5), Utc(2026, 10, 26, 10), Utc(2026, 10, 26, 23)));
         cityImageAppService.GetImageUrlAsync("Lima", Arg.Any<CancellationToken>()).Returns((string?)null);
 
@@ -53,7 +74,7 @@ public class WeatherAppServiceTests
     }
 
     [Fact]
-    public async Task GetByCityAsync_ClimaNoCache_NaoChamaAOpenWeather()
+    public async Task GetByCityAsync_ClimaNoCache_NaoResolveNemChamaAOpenWeather()
     {
         var cached = new Weather
         {
@@ -67,15 +88,29 @@ public class WeatherAppServiceTests
         var weather = await appService.GetByCityAsync("Lima", cancellationToken);
 
         weather.ShouldBeSameAs(cached);
-        await openWeatherClient.DidNotReceiveWithAnyArgs().GetCurrentAsync(default!, cancellationToken);
+        await cityResolver.DidNotReceiveWithAnyArgs().ResolveAsync(default!, cancellationToken);
+        await openWeatherClient.DidNotReceiveWithAnyArgs().GetCurrentAsync(default, default, cancellationToken);
     }
 
     [Fact]
-    public async Task GetByCityAsync_CidadeInexistente_DevolveNullSemImagemESemCache()
+    public async Task GetByCityAsync_CidadeNaoResolvida_DevolveNullSemConsultarClimaNemGravarCache()
     {
-        openWeatherClient.GetCurrentAsync("Atlântida", Arg.Any<CancellationToken>()).Returns((OpenWeatherCurrentResponse?)null);
+        cityResolver.ResolveAsync("Atlântida", Arg.Any<CancellationToken>()).Returns((ResolvedCity?)null);
 
         var weather = await appService.GetByCityAsync("Atlântida", cancellationToken);
+
+        weather.ShouldBeNull();
+        await openWeatherClient.DidNotReceiveWithAnyArgs().GetCurrentAsync(default, default, cancellationToken);
+        await cache.DidNotReceiveWithAnyArgs().SetAsync<Weather>(default!, default!, default!, default, cancellationToken);
+    }
+
+    [Fact]
+    public async Task GetByCityAsync_ClimaNaoEncontrado_DevolveNullSemImagemESemCache()
+    {
+        Resolves("Lima", lima);
+        openWeatherClient.GetCurrentAsync(-12.04, -77.03, Arg.Any<CancellationToken>()).Returns((OpenWeatherCurrentResponse?)null);
+
+        var weather = await appService.GetByCityAsync("Lima", cancellationToken);
 
         weather.ShouldBeNull();
         await cityImageAppService.DidNotReceiveWithAnyArgs().GetImageUrlAsync(default!, cancellationToken);
@@ -85,11 +120,17 @@ public class WeatherAppServiceTests
     [Fact]
     public async Task GetByCityAsync_Sucesso_GravaNoCacheDeClimaPorDezMinutosComOTextoPesquisado()
     {
-        openWeatherClient.GetCurrentAsync("sao paulo", Arg.Any<CancellationToken>())
-            .Returns(Current("São Paulo", TimeSpan.FromHours(-3), Utc(2026, 10, 26, 8, 45), Utc(2026, 10, 26, 21, 30)));
+        Resolves("sao paulo", saoPaulo);
+        openWeatherClient.GetCurrentAsync(-23.55, -46.63, Arg.Any<CancellationToken>())
+            .Returns(Current("Sé", TimeSpan.FromHours(-3), Utc(2026, 10, 26, 8, 45), Utc(2026, 10, 26, 21, 30)));
 
         await appService.GetByCityAsync("sao paulo", cancellationToken);
 
         await cache.Received(1).SetAsync("clima", "sao paulo", Arg.Any<Weather>(), TimeSpan.FromMinutes(10), Arg.Any<CancellationToken>());
+    }
+
+    private void Resolves(string cityName, ResolvedCity city)
+    {
+        cityResolver.ResolveAsync(cityName, Arg.Any<CancellationToken>()).Returns(city);
     }
 }

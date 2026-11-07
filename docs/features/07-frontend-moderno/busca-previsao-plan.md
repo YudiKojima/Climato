@@ -323,7 +323,7 @@ git commit -m "Adiciona o CityResolver no Provider com nome em português e coor
 - Consome: `ICityResolver`, `ResolvedCity` (Tarefa 0).
 - Produz: `IOpenWeatherClient.GetCurrentAsync(double lat, double lon, CancellationToken)` e `GetForecastAsync(double lat, double lon, CancellationToken)`; `WeatherAppService(IOpenWeatherClient, ICityResolver, ICityImageAppService, IProviderCache)`; `ForecastAppService(IOpenWeatherClient, ICityResolver, IProviderCache)`.
 
-- [ ] **Passo 1: Reescrever `WeatherAppServiceTests.cs`**
+- [x] **Passo 1: Reescrever `WeatherAppServiceTests.cs`**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -464,7 +464,7 @@ public class WeatherAppServiceTests
 }
 ```
 
-- [ ] **Passo 2: Ajustar `ForecastAppServiceTests.cs`**
+- [x] **Passo 2: Ajustar `ForecastAppServiceTests.cs`**
   - Campos e construtor:
 
 ```csharp
@@ -528,7 +528,7 @@ public class WeatherAppServiceTests
     }
 ```
 
-- [ ] **Passo 3: Escrever `OpenWeatherClientTests.cs`**
+- [x] **Passo 3: Escrever `OpenWeatherClientTests.cs`**
 
 ```csharp
 using System.Globalization;
@@ -600,12 +600,12 @@ public class OpenWeatherClientTests
 
 O 404 faz o client devolver `null`, então o teste não precisa de JSON.
 
-- [ ] **Passo 4: Rodar e ver falhar**
+- [x] **Passo 4: Rodar e ver falhar**
 
 Run: `dotnet test --solution Climato.slnx`
 Esperado: erro de compilação — `GetCurrentAsync(double, double, …)` e os construtores novos não existem.
 
-- [ ] **Passo 5: `IOpenWeatherClient.cs`**
+- [x] **Passo 5: `IOpenWeatherClient.cs`**
 
 ```csharp
 using Climato.Provider.Application.Model.OpenWeather;
@@ -620,7 +620,7 @@ public interface IOpenWeatherClient
 }
 ```
 
-- [ ] **Passo 6: `OpenWeatherClient.cs`** — `using System.Globalization;` e os dois métodos:
+- [x] **Passo 6: `OpenWeatherClient.cs`** — `using System.Globalization;` e os dois métodos:
 
 ```csharp
     public Task<OpenWeatherCurrentResponse?> GetCurrentAsync(double lat, double lon, CancellationToken cancellationToken)
@@ -645,7 +645,7 @@ e o helper privado, junto do `GetAsync<T>`:
     }
 ```
 
-- [ ] **Passo 7: `WeatherAppService.cs`**
+- [x] **Passo 7: `WeatherAppService.cs`**
 
 ```csharp
 using Climato.Provider.Application.Contracts;
@@ -735,7 +735,7 @@ public sealed class WeatherAppService : IWeatherAppService
 }
 ```
 
-- [ ] **Passo 8: `ForecastAppService.cs`**
+- [x] **Passo 8: `ForecastAppService.cs`**
   - `using Climato.Provider.Application.Model.Cities;`; campo `private readonly ICityResolver cityResolver;`; construtor `ForecastAppService(IOpenWeatherClient openWeatherClient, ICityResolver cityResolver, IProviderCache cache)` atribuindo os três.
   - `GetByCityAsync`, depois do bloco do cache:
 
@@ -759,7 +759,7 @@ public sealed class WeatherAppService : IWeatherAppService
 
   - `ToForecast(ResolvedCity city, OpenWeatherForecastResponse response)` com `City = city.Name, Country = city.Country` (o resto igual).
 
-- [ ] **Passo 9: Timeouts da OpenWeather** — em `DependencyInjection.cs` do Provider, no `AddHttpClient<IOpenWeatherClient, OpenWeatherClient>`:
+- [x] **Passo 9: Timeouts da OpenWeather** — em `DependencyInjection.cs` do Provider, no `AddHttpClient<IOpenWeatherClient, OpenWeatherClient>`:
 
 ```csharp
             .AddStandardResilienceHandler(options =>
@@ -770,18 +770,18 @@ public sealed class WeatherAppService : IWeatherAppService
             });
 ```
 
-- [ ] **Passo 10: Rodar e ver passar**
+- [x] **Passo 10: Rodar e ver passar**
 
 Run: `dotnet test --solution Climato.slnx`
 Esperado: todos aprovados (97 + 2 do client + 2 de clima + 1 de previsão = 102).
 
-- [ ] **Passo 11: Conferência manual** (Provider em `dotnet run`, Scalar em `https://localhost:7002/scalar` ou `curl -k`)
+- [x] **Passo 11: Conferência manual** (Provider em `dotnet run`, Scalar em `https://localhost:7002/scalar` ou `curl -k`)
   - `GET /weathers?cityName=Tóquio` → `"city": "Tóquio"`, `"country": "JP"`, foto de Tóquio.
   - `GET /forecasts?cityName=Londres` → `"city": "Londres"`.
   - `GET /weathers?cityName=Xyzabc` → 404.
   - Conferir os nomes de rota/parâmetro reais no Scalar antes (o Provider usa query `cityName`).
 
-- [ ] **Passo 12: Verificação completa** e **commit**
+- [x] **Passo 12: Verificação completa** e **commit**
 
 ```bash
 git add src/Provider tests/Climato.Provider.UnitTests

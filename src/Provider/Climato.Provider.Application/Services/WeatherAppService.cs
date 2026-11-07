@@ -1,4 +1,5 @@
 ﻿using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Model.Cities;
 using Climato.Provider.Application.Model.OpenWeather;
 using Climato.Provider.Domain.Weathers;
 
@@ -11,12 +12,18 @@ public sealed class WeatherAppService : IWeatherAppService
     private static readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(10);
 
     private readonly IOpenWeatherClient openWeatherClient;
+    private readonly ICityResolver cityResolver;
     private readonly ICityImageAppService cityImageAppService;
     private readonly IProviderCache cache;
 
-    public WeatherAppService(IOpenWeatherClient openWeatherClient, ICityImageAppService cityImageAppService, IProviderCache cache)
+    public WeatherAppService(
+        IOpenWeatherClient openWeatherClient,
+        ICityResolver cityResolver,
+        ICityImageAppService cityImageAppService,
+        IProviderCache cache)
     {
         this.openWeatherClient = openWeatherClient;
+        this.cityResolver = cityResolver;
         this.cityImageAppService = cityImageAppService;
         this.cache = cache;
     }
@@ -30,29 +37,36 @@ public sealed class WeatherAppService : IWeatherAppService
             return cached;
         }
 
-        var current = await openWeatherClient.GetCurrentAsync(cityName, cancellationToken);
+        var city = await cityResolver.ResolveAsync(cityName, cancellationToken);
+
+        if (city == null)
+        {
+            return null;
+        }
+
+        var current = await openWeatherClient.GetCurrentAsync(city.Lat, city.Lon, cancellationToken);
 
         if (current == null)
         {
             return null;
         }
 
-        var imageUrl = await cityImageAppService.GetImageUrlAsync(current.Name, cancellationToken);
-        var weather = ToWeather(current, imageUrl);
+        var imageUrl = await cityImageAppService.GetImageUrlAsync(city.OriginalName, cancellationToken);
+        var weather = ToWeather(city, current, imageUrl);
 
         await cache.SetAsync(CachePrefix, cityName, weather, cacheDuration, cancellationToken);
         return weather;
     }
 
-    private static Weather ToWeather(OpenWeatherCurrentResponse current, string? imageUrl)
+    private static Weather ToWeather(ResolvedCity city, OpenWeatherCurrentResponse current, string? imageUrl)
     {
         var offset = TimeSpan.FromSeconds(current.Timezone);
         var condition = current.Weather[0];
 
         return new Weather
         {
-            City = current.Name,
-            Country = current.Sys.Country,
+            City = city.Name,
+            Country = city.Country,
             Description = condition.Description,
             Icon = condition.Icon,
             Temperature = current.Main.Temp,

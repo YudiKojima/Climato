@@ -1,4 +1,5 @@
 using Climato.Provider.Application.Contracts;
+using Climato.Provider.Application.Model.Cities;
 using Climato.Provider.Application.Model.OpenWeather;
 using Climato.Provider.Domain.Weathers;
 
@@ -13,11 +14,13 @@ public sealed class ForecastAppService : IForecastAppService
     private static readonly TimeSpan midday = TimeSpan.FromHours(12);
 
     private readonly IOpenWeatherClient openWeatherClient;
+    private readonly ICityResolver cityResolver;
     private readonly IProviderCache cache;
 
-    public ForecastAppService(IOpenWeatherClient openWeatherClient, IProviderCache cache)
+    public ForecastAppService(IOpenWeatherClient openWeatherClient, ICityResolver cityResolver, IProviderCache cache)
     {
         this.openWeatherClient = openWeatherClient;
+        this.cityResolver = cityResolver;
         this.cache = cache;
     }
 
@@ -30,20 +33,27 @@ public sealed class ForecastAppService : IForecastAppService
             return cached;
         }
 
-        var response = await openWeatherClient.GetForecastAsync(cityName, cancellationToken);
+        var city = await cityResolver.ResolveAsync(cityName, cancellationToken);
+
+        if (city == null)
+        {
+            return null;
+        }
+
+        var response = await openWeatherClient.GetForecastAsync(city.Lat, city.Lon, cancellationToken);
 
         if (response == null)
         {
             return null;
         }
 
-        var forecast = ToForecast(response);
+        var forecast = ToForecast(city, response);
 
         await cache.SetAsync(CachePrefix, cityName, forecast, cacheDuration, cancellationToken);
         return forecast;
     }
 
-    private static Forecast ToForecast(OpenWeatherForecastResponse response)
+    private static Forecast ToForecast(ResolvedCity city, OpenWeatherForecastResponse response)
     {
         var offset = TimeSpan.FromSeconds(response.City.Timezone);
 
@@ -57,8 +67,8 @@ public sealed class ForecastAppService : IForecastAppService
 
         return new Forecast
         {
-            City = response.City.Name,
-            Country = response.City.Country,
+            City = city.Name,
+            Country = city.Country,
             Days = days
         };
     }
