@@ -33,7 +33,11 @@
   margin: 0;
 }
 
-.favorite {
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ant-margin-xs);
   margin-top: var(--ant-margin);
 }
 

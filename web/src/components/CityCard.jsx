@@ -4,6 +4,7 @@ import { DeleteOutlined, StarFilled, StarOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import useApiFeedback from "../hooks/useApiFeedback";
 import { deleteCity, toggleFavorite } from "../services/cities";
+import CityTemperature from "./CityTemperature";
 import styles from "./CityCard.module.css";
 
 export default function CityCard({ city, onChange }) {
@@ -75,16 +76,18 @@ export default function CityCard({ city, onChange }) {
           </Tooltip>
         )}
       </div>
-      <Button
-        className={styles.favorite}
-        size="small"
-        type={city.isFavorite ? "default" : "primary"}
-        icon={city.isFavorite ? <StarFilled /> : <StarOutlined />}
-        loading={isSaving}
-        onClick={handleFavorite}
-      >
-        {city.isFavorite ? "Favorita" : "Favoritar"}
-      </Button>
+      <div className={styles.footer}>
+        <Button
+          size="small"
+          type={city.isFavorite ? "default" : "primary"}
+          icon={city.isFavorite ? <StarFilled /> : <StarOutlined />}
+          loading={isSaving}
+          onClick={handleFavorite}
+        >
+          {city.isFavorite ? "Favorita" : "Favoritar"}
+        </Button>
+        <CityTemperature cityName={city.name} />
+      </div>
     </Card>
   );
 }

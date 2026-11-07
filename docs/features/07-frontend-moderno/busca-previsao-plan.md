@@ -1331,7 +1331,7 @@ git commit -m "Adiciona a busca de cidades com lista de resultados na Home"
 - Consome: `useWeather` (07a), `weatherIconUrl` (Tarefa 2).
 - Produz: `CityTemperature({ cityName })`.
 
-- [ ] **Passo 1: Criar `web/src/components/CityTemperature.jsx`**
+- [x] **Passo 1: Criar `web/src/components/CityTemperature.jsx`**
 
 ```jsx
 import { Skeleton, Tooltip, Typography } from "antd";
@@ -1367,7 +1367,7 @@ export default function CityTemperature({ cityName }) {
 }
 ```
 
-- [ ] **Passo 2: Criar `web/src/components/CityTemperature.module.css`**
+- [x] **Passo 2: Criar `web/src/components/CityTemperature.module.css`**
 
 ```css
 .root {
@@ -1385,7 +1385,7 @@ export default function CityTemperature({ cityName }) {
 }
 ```
 
-- [ ] **Passo 3: `CityCard.jsx`** — `import CityTemperature from "./CityTemperature";` e trocar o botão de favorito solto por um rodapé:
+- [x] **Passo 3: `CityCard.jsx`** — `import CityTemperature from "./CityTemperature";` e trocar o botão de favorito solto por um rodapé:
 
 ```jsx
       <div className={styles.footer}>
@@ -1402,7 +1402,7 @@ export default function CityTemperature({ cityName }) {
       </div>
 ```
 
-- [ ] **Passo 4: `CityCard.module.css`** — trocar a regra `.favorite` por:
+- [x] **Passo 4: `CityCard.module.css`** — trocar a regra `.favorite` por:
 
 ```css
 .footer {
@@ -1414,14 +1414,14 @@ export default function CityTemperature({ cityName }) {
 }
 ```
 
-- [ ] **Passo 5: Verificação completa.**
+- [x] **Passo 5: Verificação completa.**
 
-- [ ] **Passo 6: Conferência manual**
+- [x] **Passo 6: Conferência manual**
   - Home com 2+ cidades: cada card mostra skeleton e depois ícone + temperatura; favoritar não refaz a carga da temperatura (Network).
   - Provider parado e cache vazio: cards mostram “—” com tooltip, sem enxurrada de notificações.
   - **Histórico antigo em inglês** (“Tokyo”): o card resolve como “Tóquio” e o Gateway grava uma linha nova “Tóquio” — esperado (design §1, só dados de desenvolvimento); registrar nas notas.
 
-- [ ] **Passo 7: Commit**
+- [x] **Passo 7: Commit**
 
 ```bash
 git add web/src
