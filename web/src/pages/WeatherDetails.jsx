@@ -69,7 +69,7 @@ export default function WeatherDetails() {
       return;
     }
 
-    addCity({ name: weather.city, country: weather.country }).catch((err) =>
+    addCity(weather.city).catch((err) =>
       notifyError(err, "Não foi possível salvar a cidade no histórico.")
     );
   }, [weather, notifyError]);

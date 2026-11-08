@@ -19,7 +19,7 @@ export const deleteCity = async (id) => {
   await client.delete(`/cities/${id}`);
 };
 
-export const addCity = async ({ name, country }) => {
-  const response = await client.post("/cities", { name, country });
+export const addCity = async (name) => {
+  const response = await client.post("/cities", { name });
   return response.data;
 };

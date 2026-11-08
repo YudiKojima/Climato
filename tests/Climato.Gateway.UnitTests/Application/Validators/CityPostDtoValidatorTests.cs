@@ -10,24 +10,22 @@ public class CityPostDtoValidatorTests
     [Fact]
     public void Validate_DadosValidos_NaoTemErros()
     {
-        validator.Validate(new CityPostDto { Name = "Lima", Country = "PE" }).IsValid.ShouldBeTrue();
-    }
-
-    [Theory]
-    [InlineData("", "PE", "Name", "Informe o nome da cidade.")]
-    [InlineData("Lima", "", "Country", "Informe o país.")]
-    public void Validate_CampoVazio_DevolveMensagem(string name, string country, string property, string message)
-    {
-        var result = validator.Validate(new CityPostDto { Name = name, Country = country });
-
-        result.Errors.ShouldContain(error => error.PropertyName == property && error.ErrorMessage == message);
+        validator.Validate(new CityPostDto { Name = "Lima" }).IsValid.ShouldBeTrue();
     }
 
     [Fact]
-    public void Validate_NomeMaiorQue255_DevolveMensagem()
+    public void Validate_NomeVazio_DevolveMensagem()
     {
-        var result = validator.Validate(new CityPostDto { Name = new string('a', 256), Country = "PE" });
+        var result = validator.Validate(new CityPostDto { Name = "" });
 
-        result.Errors.ShouldContain(error => error.ErrorMessage == "O nome da cidade deve ter no máximo 255 caracteres.");
+        result.Errors.ShouldContain(error => error.PropertyName == "Name" && error.ErrorMessage == "Informe o nome da cidade.");
+    }
+
+    [Fact]
+    public void Validate_NomeMaiorQue100_DevolveMensagem()
+    {
+        var result = validator.Validate(new CityPostDto { Name = new string('a', 101) });
+
+        result.Errors.ShouldContain(error => error.ErrorMessage == "O nome da cidade deve ter no máximo 100 caracteres.");
     }
 }

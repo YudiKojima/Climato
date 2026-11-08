@@ -5,12 +5,12 @@ import { addCity } from "./cities";
 vi.mock("./client", () => ({ default: { post: vi.fn() } }));
 
 describe("addCity", () => {
-  it("envia nome e país para /cities", async () => {
+  it("envia o nome para /cities", async () => {
     client.post.mockResolvedValue({ data: { id: "1", name: "Lima", country: "PE" } });
 
-    const result = await addCity({ name: "Lima", country: "PE" });
+    const result = await addCity("Lima");
 
-    expect(client.post).toHaveBeenCalledWith("/cities", { name: "Lima", country: "PE" });
+    expect(client.post).toHaveBeenCalledWith("/cities", { name: "Lima" });
     expect(result).toEqual({ id: "1", name: "Lima", country: "PE" });
   });
 });
