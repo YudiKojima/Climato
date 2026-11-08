@@ -33,6 +33,20 @@ public class AuthAppServiceTests
         appService = new AuthAppService(repository, cityRepository, passwordHasher, tokenService, TestMapper.Create(), Options.Create(demo));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RegisterAsync_EmailDaDemo_DevolveNullSemCriar(bool demoEnabled)
+    {
+        demo.Enabled = demoEnabled;
+        repository.AllowCreateAsync("demo@climato.dev", Arg.Any<CancellationToken>()).Returns(true);
+
+        var auth = await appService.RegisterAsync(new RegisterPostDto { Email = " Demo@Climato.dev", Name = "Intruso", Password = Password }, cancellationToken);
+
+        auth.ShouldBeNull();
+        await repository.DidNotReceiveWithAnyArgs().CreateAsync(default!, cancellationToken);
+    }
+
     [Fact]
     public async Task RegisterAsync_EmailJaUsado_DevolveNullSemCriar()
     {

@@ -39,6 +39,12 @@ public class AuthAppService : IAuthAppService
     public async Task<AuthDto?> RegisterAsync(RegisterPostDto dto, CancellationToken cancellationToken)
     {
         var email = User.NormalizeEmail(dto.Email);
+
+        if (email == User.NormalizeEmail(demoOptions.Value.Email))
+        {
+            return null;
+        }
+
         var allowCreate = await userRepository.AllowCreateAsync(email, cancellationToken);
 
         if (!allowCreate)
