@@ -20,6 +20,7 @@ public class WeatherController : ControllerBase
 
     /// <summary>Retorna os dados climáticos da cidade informada.</summary>
     /// <param name="cityName">Nome da cidade, exemplo: Cuiabá</param>
+    /// <param name="image">false omite a foto da cidade (usado pelos cards)</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     /// <response code="200">Clima atual, com vento em km/h e horários no fuso da cidade.</response>
     /// <response code="404">Cidade não encontrada.</response>
@@ -28,9 +29,9 @@ public class WeatherController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-    public async Task<ActionResult<WeatherDto>> GetWeather(string cityName, CancellationToken cancellationToken)
+    public async Task<ActionResult<WeatherDto>> GetWeather(string cityName, [FromQuery] bool image = true, CancellationToken cancellationToken = default)
     {
-        var weather = await appService.GetByCityAsync(cityName, cancellationToken);
+        var weather = await appService.GetByCityAsync(cityName, image, cancellationToken);
 
         if (weather == null)
         {

@@ -12,9 +12,9 @@ public class WeatherAppService : IWeatherAppService
         weatherProviderClient = providerClient;
     }
 
-    public Task<WeatherDto?> GetByCityAsync(string cityName, CancellationToken cancellationToken)
+    public Task<WeatherDto?> GetByCityAsync(string cityName, bool includeImage, CancellationToken cancellationToken)
     {
-        return weatherProviderClient.GetWeatherAsync(cityName, cancellationToken);
+        return weatherProviderClient.GetWeatherAsync(cityName, includeImage, cancellationToken);
     }
 
     public Task<ForecastDto?> GetForecastAsync(string cityName, CancellationToken cancellationToken)

@@ -4,7 +4,7 @@ import { weatherIconUrl } from "../utils/weatherIconUrl";
 import styles from "./CityTemperature.module.css";
 
 export default function CityTemperature({ cityName }) {
-  const { data, isLoading, error } = useWeather(cityName);
+  const { data, isLoading, error } = useWeather(cityName, { image: false });
 
   if (isLoading) {
     return <Skeleton.Button active size="small" />;

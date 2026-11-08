@@ -18,9 +18,10 @@ public class WeatherProviderClient : IWeatherProviderClient
         client = httpClient;
     }
 
-    public Task<WeatherDto?> GetWeatherAsync(string cityName, CancellationToken cancellationToken)
+    public Task<WeatherDto?> GetWeatherAsync(string cityName, bool includeImage, CancellationToken cancellationToken)
     {
-        return GetAsync<WeatherDto>($"weathers?cityName={Uri.EscapeDataString(cityName)}", cancellationToken);
+        var url = $"weathers?cityName={Uri.EscapeDataString(cityName)}";
+        return GetAsync<WeatherDto>(includeImage ? url : $"{url}&image=false", cancellationToken);
     }
 
     public Task<ForecastDto?> GetForecastAsync(string cityName, CancellationToken cancellationToken)

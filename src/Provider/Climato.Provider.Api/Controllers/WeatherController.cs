@@ -17,6 +17,7 @@ public class WeatherController : ControllerBase
 
     /// <summary>Retorna o clima atual e a imagem da cidade informada.</summary>
     /// <param name="cityName">Nome da cidade, exemplo: Cuiabá</param>
+    /// <param name="image">false omite a foto da Pexels (usado pelos cards)</param>
     /// <param name="cancellationToken">Token de cancelamento da requisição</param>
     /// <response code="200">Clima atual, com vento em km/h e horários no fuso da cidade.</response>
     /// <response code="400">Parâmetro 'cityName' ausente.</response>
@@ -27,14 +28,14 @@ public class WeatherController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-    public async Task<ActionResult<Weather>> Get([FromQuery] string cityName, CancellationToken cancellationToken)
+    public async Task<ActionResult<Weather>> Get([FromQuery] string cityName, [FromQuery] bool image = true, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(cityName))
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Parâmetro 'cityName' é obrigatório.");
         }
 
-        var weather = await appService.GetByCityAsync(cityName, cancellationToken);
+        var weather = await appService.GetByCityAsync(cityName, image, cancellationToken);
 
         if (weather == null)
         {

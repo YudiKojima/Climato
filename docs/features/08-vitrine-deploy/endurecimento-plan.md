@@ -351,7 +351,7 @@ git commit -m "Separa a consulta de clima do registro no histórico"
 **Interfaces:**
 - Produces: Provider `IWeatherAppService.GetByCityAsync(string cityName, bool includeImage, CancellationToken)`; Gateway `IWeatherProviderClient.GetWeatherAsync(string cityName, bool includeImage, CancellationToken)` e `IWeatherAppService.GetByCityAsync(string cityName, bool includeImage, CancellationToken)`; web `getWeatherByCity(cityName, { image = true } = {})`, `useWeather(cityName, { image = true } = {})`.
 
-- [ ] **Step 1: Testes vermelhos do Provider**
+- [x] **Step 1: Testes vermelhos do Provider**
 
 Atualizar as chamadas existentes para `GetByCityAsync(x, includeImage: true, cancellationToken)` e acrescentar:
 
@@ -386,9 +386,9 @@ public async Task GetByCityAsync_SemImagemNoCache_LeDoCacheSemImagem()
 
 (Ajustar o inicializador de `Weather` aos membros obrigatórios do tipo, como no teste `GetByCityAsync_ClimaNoCache_...` existente.)
 
-- [ ] **Step 2: Rodar e ver falhar** — `dotnet test --solution Climato.slnx` → erro de compilação.
+- [x] **Step 2: Rodar e ver falhar** — `dotnet test --solution Climato.slnx` → erro de compilação.
 
-- [ ] **Step 3: Implementação do Provider**
+- [x] **Step 3: Implementação do Provider**
 
 ```csharp
 private const string CachePrefix = "clima";
@@ -412,7 +412,7 @@ public async Task<Weather?> GetByCityAsync(string cityName, bool includeImage, C
 
 `WeatherController` (Provider): `Get([FromQuery] string cityName, [FromQuery] bool image = true, ...)` → `appService.GetByCityAsync(cityName, image, cancellationToken)`; documentar o parâmetro (`<param name="image">false omite a foto da Pexels (cards)</param>`).
 
-- [ ] **Step 4: Testes vermelhos do Gateway**
+- [x] **Step 4: Testes vermelhos do Gateway**
 
 Em `WeatherAppServiceTests` (Gateway), trocar as chamadas para `GetByCityAsync("lima", includeImage: true, ...)` e os stubs para `GetWeatherAsync("lima", true, ...)`; acrescentar:
 
@@ -470,9 +470,9 @@ public class WeatherProviderClientTests
 }
 ```
 
-- [ ] **Step 5: Rodar e ver falhar** — erro de compilação.
+- [x] **Step 5: Rodar e ver falhar** — erro de compilação.
 
-- [ ] **Step 6: Implementação do Gateway**
+- [x] **Step 6: Implementação do Gateway**
 
 `IWeatherProviderClient.GetWeatherAsync(string cityName, bool includeImage, CancellationToken)`; em `WeatherProviderClient`:
 
@@ -488,7 +488,7 @@ public Task<WeatherDto?> GetWeatherAsync(string cityName, bool includeImage, Can
 
 Run: `dotnet test --solution Climato.slnx` → verdes.
 
-- [ ] **Step 7: Web — testes vermelhos**
+- [x] **Step 7: Web — testes vermelhos**
 
 `web/src/services/weather.test.js`:
 
@@ -532,7 +532,7 @@ it("repassa image false ao serviço", async () => {
 
 Run: `npm --prefix web test` → FAIL.
 
-- [ ] **Step 8: Web — implementação**
+- [x] **Step 8: Web — implementação**
 
 ```js
 export const getWeatherByCity = async (cityName, { image = true } = {}) => {
@@ -554,9 +554,9 @@ export default function useWeather(cityName, { image = true } = {}) {
 
 Run: `npm --prefix web test`, `npm --prefix web run lint` → verdes.
 
-- [ ] **Step 9: Conferência manual** — Home com cards: no log do Provider só aparecem chamadas à OpenWeather; abrir o detalhe → foto aparece.
+- [x] **Step 9: Conferência manual** — Home com cards: no log do Provider só aparecem chamadas à OpenWeather; abrir o detalhe → foto aparece.
 
-- [ ] **Step 10: `/revisar-padrao` e commit**
+- [x] **Step 10: `/revisar-padrao` e commit**
 
 ```bash
 git add src tests web/src

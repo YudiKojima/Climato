@@ -18,9 +18,9 @@ public class WeatherAppServiceTests
     [Fact]
     public async Task GetByCityAsync_ProviderNaoEncontra_DevolveNull()
     {
-        providerClient.GetWeatherAsync("Atlantida", Arg.Any<CancellationToken>()).Returns((WeatherDto?)null);
+        providerClient.GetWeatherAsync("Atlantida", true, Arg.Any<CancellationToken>()).Returns((WeatherDto?)null);
 
-        var weather = await appService.GetByCityAsync("Atlantida", cancellationToken);
+        var weather = await appService.GetByCityAsync("Atlantida", includeImage: true, cancellationToken);
 
         weather.ShouldBeNull();
     }
@@ -29,9 +29,20 @@ public class WeatherAppServiceTests
     public async Task GetByCityAsync_CidadeEncontrada_DevolveOClimaSemGravarNoHistorico()
     {
         var expected = TestData.Weather("Lima");
-        providerClient.GetWeatherAsync("lima", Arg.Any<CancellationToken>()).Returns(expected);
+        providerClient.GetWeatherAsync("lima", true, Arg.Any<CancellationToken>()).Returns(expected);
 
-        var weather = await appService.GetByCityAsync("lima", cancellationToken);
+        var weather = await appService.GetByCityAsync("lima", includeImage: true, cancellationToken);
+
+        weather.ShouldBeSameAs(expected);
+    }
+
+    [Fact]
+    public async Task GetByCityAsync_SemImagem_RepassaAoProvider()
+    {
+        var expected = TestData.Weather("Lima");
+        providerClient.GetWeatherAsync("Lima", false, Arg.Any<CancellationToken>()).Returns(expected);
+
+        var weather = await appService.GetByCityAsync("Lima", includeImage: false, cancellationToken);
 
         weather.ShouldBeSameAs(expected);
     }

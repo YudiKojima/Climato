@@ -5,7 +5,7 @@ namespace Climato.Gateway.Application.Contracts;
 
 public interface IWeatherProviderClient
 {
-    Task<WeatherDto?> GetWeatherAsync(string cityName, CancellationToken cancellationToken);
+    Task<WeatherDto?> GetWeatherAsync(string cityName, bool includeImage, CancellationToken cancellationToken);
     Task<ForecastDto?> GetForecastAsync(string cityName, CancellationToken cancellationToken);
     Task<IReadOnlyList<LocationDto>> SearchLocationsAsync(string query, CancellationToken cancellationToken);
 }

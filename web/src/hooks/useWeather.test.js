@@ -16,6 +16,14 @@ describe("useWeather", () => {
     rerender({ cityName: "Recife" });
 
     await waitFor(() => expect(result.current.data).toEqual({ city: "Recife" }));
-    expect(getWeatherByCity).toHaveBeenLastCalledWith("Recife");
+    expect(getWeatherByCity).toHaveBeenLastCalledWith("Recife", { image: true });
+  });
+
+  it("repassa image false ao serviço", async () => {
+    getWeatherByCity.mockResolvedValue({ city: "Lima" });
+    const { result } = renderHook(() => useWeather("Lima", { image: false }));
+
+    await waitFor(() => expect(result.current.data).toEqual({ city: "Lima" }));
+    expect(getWeatherByCity).toHaveBeenLastCalledWith("Lima", { image: false });
   });
 });
