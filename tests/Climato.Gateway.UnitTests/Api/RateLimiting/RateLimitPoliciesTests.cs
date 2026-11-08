@@ -12,6 +12,8 @@ namespace Climato.Gateway.UnitTests.Api.RateLimiting;
 
 public class RateLimitPoliciesTests
 {
+    private const string DemoEmail = "demo@climato.dev";
+
     private readonly CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
     [Fact]
@@ -22,7 +24,21 @@ public class RateLimitPoliciesTests
             User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtRegisteredClaimNames.Sub, "abc")], "Bearer"))
         };
 
-        RateLimitPolicies.PartitionKey(context).ShouldBe("user:abc");
+        RateLimitPolicies.PartitionKey(context, DemoEmail).ShouldBe("user:abc");
+    }
+
+    [Fact]
+    public void PartitionKey_UsuarioDemo_SeparaPorIp()
+    {
+        var context = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                [new Claim(JwtRegisteredClaimNames.Sub, "demo-id"), new Claim(JwtRegisteredClaimNames.Email, DemoEmail)],
+                "Bearer"))
+        };
+        context.Connection.RemoteIpAddress = IPAddress.Parse("203.0.113.7");
+
+        RateLimitPolicies.PartitionKey(context, " Demo@Climato.dev").ShouldBe("user:demo-id:ip:203.0.113.7");
     }
 
     [Fact]
@@ -31,7 +47,7 @@ public class RateLimitPoliciesTests
         var context = new DefaultHttpContext();
         context.Connection.RemoteIpAddress = IPAddress.Parse("203.0.113.7");
 
-        RateLimitPolicies.PartitionKey(context).ShouldBe("ip:203.0.113.7");
+        RateLimitPolicies.PartitionKey(context, DemoEmail).ShouldBe("ip:203.0.113.7");
     }
 
     [Fact]

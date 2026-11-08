@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Climato.Gateway.Application.Options;
 using Microsoft.Extensions.Options;
 
 namespace Climato.Gateway.Api.RateLimiting;
@@ -18,7 +19,7 @@ public static class RateLimitingExtensions
             limiter.AddPolicy(RateLimitPolicies.Auth, context =>
                 FixedWindow(RateLimitPolicies.IpPartitionKey(context), Options(context).AuthPermitLimit, Options(context)));
             limiter.AddPolicy(RateLimitPolicies.Api, context =>
-                FixedWindow(RateLimitPolicies.PartitionKey(context), Options(context).ApiPermitLimit, Options(context)));
+                FixedWindow(RateLimitPolicies.PartitionKey(context, DemoEmail(context)), Options(context).ApiPermitLimit, Options(context)));
         });
 
         return services;
@@ -27,6 +28,11 @@ public static class RateLimitingExtensions
     private static RateLimitingOptions Options(HttpContext context)
     {
         return context.RequestServices.GetRequiredService<IOptions<RateLimitingOptions>>().Value;
+    }
+
+    private static string DemoEmail(HttpContext context)
+    {
+        return context.RequestServices.GetRequiredService<IOptions<DemoOptions>>().Value.Email;
     }
 
     private static RateLimitPartition<string> FixedWindow(string key, int permitLimit, RateLimitingOptions options)

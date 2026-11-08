@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+using Climato.Gateway.Domain.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -12,11 +13,19 @@ public static class RateLimitPolicies
     public const string Auth = "auth";
     public const string Api = "api";
 
-    public static string PartitionKey(HttpContext context)
+    public static string PartitionKey(HttpContext context, string demoEmail)
     {
         var userId = context.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
-        return userId != null ? $"user:{userId}" : IpPartitionKey(context);
+        if (userId == null)
+        {
+            return IpPartitionKey(context);
+        }
+
+        var email = context.User.FindFirstValue(JwtRegisteredClaimNames.Email);
+        var isDemo = email != null && User.NormalizeEmail(email) == User.NormalizeEmail(demoEmail);
+
+        return isDemo ? $"user:{userId}:{IpPartitionKey(context)}" : $"user:{userId}";
     }
 
     public static string IpPartitionKey(HttpContext context)
