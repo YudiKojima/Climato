@@ -3,6 +3,7 @@ using Climato.Gateway.Api.Errors;
 using Climato.Gateway.Api.Filters;
 using Climato.Gateway.Api.Observability;
 using Climato.Gateway.Api.OpenApi;
+using Climato.Gateway.Api.RateLimiting;
 using Climato.Gateway.Application.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -67,6 +68,7 @@ public static class DependencyInjection
             });
 
         services.AddAuthorization();
+        services.AddGatewayRateLimiting();
 
         return services;
     }

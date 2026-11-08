@@ -578,7 +578,7 @@ git commit -m "Tira a foto da Pexels do clima dos cards"
 **Interfaces:**
 - Produces: `RateLimitPolicies.Auth = "auth"`, `RateLimitPolicies.Api = "api"`, `RateLimitPolicies.PartitionKey(HttpContext) → string`, `RateLimitPolicies.OnRejectedAsync(OnRejectedContext, CancellationToken) → ValueTask`.
 
-- [ ] **Step 1: Testes vermelhos**
+- [x] **Step 1: Testes vermelhos**
 
 ```csharp
 using System.Security.Claims;
@@ -647,9 +647,9 @@ public class RateLimitPoliciesTests
 }
 ```
 
-- [ ] **Step 2: Rodar e ver falhar** — erro de compilação.
+- [x] **Step 2: Rodar e ver falhar** — erro de compilação.
 
-- [ ] **Step 3: Implementação**
+- [x] **Step 3: Implementação**
 
 `RateLimitingOptions.cs`:
 
@@ -755,9 +755,9 @@ public static class RateLimitingExtensions
 `appsettings.json`: `"RateLimiting": { "AuthPermitLimit": 10, "ApiPermitLimit": 60, "WindowSeconds": 60 }`.
 Controllers: `[EnableRateLimiting(RateLimitPolicies.Auth)]` no `AuthController`; `[EnableRateLimiting(RateLimitPolicies.Api)]` em `CityController`, `WeatherController`, `ForecastController`, `LocationController`, `UserController`. Health checks ficam sem política.
 
-- [ ] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
+- [x] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
 
-- [ ] **Step 5: Conferência manual**
+- [x] **Step 5: Conferência manual**
 
 ```bash
 for i in $(seq 1 11); do curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:5001/auth/login -H "Content-Type: application/json" -d '{"email":"x@x.dev","password":"x"}'; done
@@ -765,7 +765,7 @@ for i in $(seq 1 11); do curl -s -o /dev/null -w "%{http_code}\n" -X POST http:/
 
 Expected: 10 × `401`, depois `429` com `Retry-After`.
 
-- [ ] **Step 6: `/revisar-padrao` e commit**
+- [x] **Step 6: `/revisar-padrao` e commit**
 
 ```bash
 git add src/Gateway tests/Climato.Gateway.UnitTests

@@ -1,12 +1,15 @@
 using Climato.Gateway.Api.Extensions;
+using Climato.Gateway.Api.RateLimiting;
 using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Application.Model.Cities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Climato.Gateway.Api.Controllers;
 
 [ApiController]
+[EnableRateLimiting(RateLimitPolicies.Api)]
 [Route("cities")]
 [Authorize]
 public class CityController : ControllerBase

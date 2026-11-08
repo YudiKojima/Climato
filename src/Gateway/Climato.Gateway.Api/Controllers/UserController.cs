@@ -1,11 +1,14 @@
 using Climato.Gateway.Api.Extensions;
+using Climato.Gateway.Api.RateLimiting;
 using Climato.Gateway.Application.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Climato.Gateway.Api.Controllers;
 
 [ApiController]
+[EnableRateLimiting(RateLimitPolicies.Api)]
 [Route("users")]
 [Authorize]
 public class UserController : ControllerBase
