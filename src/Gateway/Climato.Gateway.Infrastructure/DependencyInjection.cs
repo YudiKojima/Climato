@@ -41,6 +41,11 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<DemoOptions>()
+            .BindConfiguration(DemoOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddSingleton<ITokenService, JwtTokenService>();
 
         services.AddHttpClient<IWeatherProviderClient, WeatherProviderClient>(ConfigureProviderClient)

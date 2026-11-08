@@ -26,7 +26,7 @@ Deixar o Climato pronto para ficar exposto na internet: proteger as cotas da Ope
 | Histórico | `GET /weathers/{nome}` **só lê**; registro via `POST /cities` explícito e idempotente, chamado pelo detalhe com o nome resolvido | `?record=false` nos cards (GET com efeito colateral continua); endpoint agregado (detalhe continua gravando via GET) |
 | Custo dos cards | Cards pedem `GET /weathers/{nome}?image=false`: só OpenWeather, sem Pexels | Limitar cards com temperatura; endpoint agregado (mesmo nº de chamadas na OpenWeather); só rate limit |
 | Rate limiting | `/auth/*`: 10 req/min por IP (janela fixa). Rotas autenticadas: 60 req/min por usuário (`sub`) | Limite global único (um visitante esgota a demo de todos) |
-| Usuário demo | `Demo:Enabled` cria o usuário no startup com senha aleatória e cidades iniciais; `POST /auth/demo` devolve o token; botão no login | Credenciais públicas no README; sem usuário demo |
+| Usuário demo | `Demo:Enabled` liga a demo; o usuário é criado no primeiro `POST /auth/demo` (e recriado se for excluído) com senha aleatória e cidades iniciais; `POST /auth/demo` devolve o token; botão no login | Credenciais públicas no README; sem usuário demo |
 | `traceparent` | Gateway ignora o `traceparent` de entrada e sempre inicia trace novo; propagação Gateway → Provider igual | Sampler que ignora o pai remoto (o cliente ainda escolhe o TraceId) |
 
 ## Componentes
@@ -48,7 +48,7 @@ Deixar o Climato pronto para ficar exposto na internet: proteger as cotas da Ope
 - Web: 429 é erro de negócio (status < 500) → `message.error` com o `title`, já coberto pelo `useApiFeedback`.
 
 ### 4. Usuário de demonstração
-- **Gateway:** `Demo:Enabled` (padrão `false`; compose liga), `Demo:Email`, `Demo:Name`, `Demo:Cities` (lista inicial). Seeder no startup, depois das migrations: cria o usuário se não existir, com senha aleatória descartada (ninguém faz login por senha), e as cidades iniciais só quando o usuário é criado.
+- **Gateway:** `Demo:Enabled` (padrão `false`; compose liga), `Demo:Email`, `Demo:Name`, `Demo:Cities` (lista inicial). Sem seeder: o `POST /auth/demo` cria o usuário se não existir (inclusive depois de um `DELETE /users/me`), com senha aleatória descartada (ninguém faz login por senha), e as cidades iniciais só quando o usuário é criado.
 - `POST /auth/demo` (`[AllowAnonymous]`, política `auth`): demo ligada → mesmo contrato do login `{ token, expiresAt, user }`; desligada → `404`.
 - **Web:** `VITE_DEMO_ENABLED=true` mostra o botão "Entrar como demonstração" no `SignIn`; usa o mesmo fluxo de sessão do login. Variável no `.env.example` e no build arg da imagem.
 - Dados do demo são compartilhados entre visitantes — aceito; o README da 08b avisa.
@@ -77,7 +77,7 @@ Deixar o Climato pronto para ficar exposto na internet: proteger as cotas da Ope
 
 ## Testes (TDD)
 
-- **Gateway (unit):** `WeatherAppService` não chama o repositório; `CityAppService.AddAsync` idempotente (cria / devolve existente); validador do `POST /cities`; `DemoAppService` (desligado → nulo; ligado → token do usuário demo); seeder (cria uma vez, cidades só na criação); fábrica do 400 sem mensagem em inglês; `image=false` repassado na URL do Provider.
+- **Gateway (unit):** `WeatherAppService` não chama o repositório; `CityAppService.AddAsync` idempotente (cria / devolve existente); validador do `POST /cities`; `AuthAppService.LoginAsDemoAsync` (desligado → nulo; existente → token sem criar; ausente → cria com cidades iniciais); fábrica do 400 sem mensagem em inglês; `image=false` repassado na URL do Provider.
 - **Provider (unit):** `includeImage=false` não chama a Pexels e usa outra chave de cache.
 - **Web (Vitest):** `addCity`, `getWeatherByCity` com `image=false`, sessão via `/auth/demo`.
 - **Manual (compose):** 11ª chamada de login em 1 min → 429; Home abre sem criar histórico; detalhe cria; botão demo; `curl` com `traceparent` próprio devolve outro `X-Correlation-ID`; Provider parado → 503 rápido; Redis travado → Gateway `Healthy`.

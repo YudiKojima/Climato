@@ -54,6 +54,7 @@ services:
       Provider__BaseUrl: http://provider:8080/
       Cors__AllowedOrigins__0: http://localhost:8080
       Database__MigrateOnStartup: "true"
+      Demo__Enabled: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     ports:
       - "5001:8080"
@@ -68,6 +69,7 @@ services:
       context: web
       args:
         VITE_API_URL: http://localhost:5001
+        VITE_DEMO_ENABLED: "true"
     ports:
       - "8080:80"
     depends_on:

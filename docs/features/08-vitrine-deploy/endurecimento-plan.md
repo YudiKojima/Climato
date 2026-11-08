@@ -790,7 +790,7 @@ git commit -m "Adiciona rate limiting por IP no auth e por usuário na API"
 **Interfaces:**
 - Produces: `IAuthAppService.LoginAsDemoAsync(CancellationToken) → Task<AuthDto?>` (null = demo desligada); `DemoOptions { bool Enabled; string Email; string Name; List<DemoCity> Cities }`, `DemoCity { string Name; string Country }`; web `loginAsDemo()`.
 
-- [ ] **Step 1: Testes vermelhos**
+- [x] **Step 1: Testes vermelhos**
 
 Em `AuthAppServiceTests`, acrescentar `private readonly ICityRepository cityRepository = Substitute.For<ICityRepository>();` e um `DemoOptions` mutável:
 
@@ -850,9 +850,9 @@ public async Task LoginAsDemoAsync_UsuarioDemoAusente_CriaComSenhaAleatoriaECida
 
 (`DemoOptions` com `set` em `Enabled` para o teste desligar; as demais propriedades `init`.)
 
-- [ ] **Step 2: Rodar e ver falhar** — erro de compilação.
+- [x] **Step 2: Rodar e ver falhar** — erro de compilação.
 
-- [ ] **Step 3: Implementação**
+- [x] **Step 3: Implementação**
 
 `DemoOptions.cs`:
 
@@ -971,7 +971,7 @@ public async Task<ActionResult<AuthDto>> Demo(CancellationToken cancellationToke
 
 Run: `dotnet test --solution Climato.slnx` → verdes.
 
-- [ ] **Step 4: Web — teste vermelho**
+- [x] **Step 4: Web — teste vermelho**
 
 `web/src/services/auth.test.js`:
 
@@ -997,7 +997,7 @@ describe("loginAsDemo", () => {
 
 Run: `npm --prefix web test` → FAIL.
 
-- [ ] **Step 5: Web — implementação**
+- [x] **Step 5: Web — implementação**
 
 `auth.js`:
 
@@ -1038,9 +1038,9 @@ Depois do botão "Entrar", dentro do `Form`:
 
 Run: `npm --prefix web test`, `npm --prefix web run lint` → verdes.
 
-- [ ] **Step 6: Conferência manual** — `Demo__Enabled=true` no Gateway local e `VITE_DEMO_ENABLED=true` no `web/.env`: botão entra e mostra as 4 cidades; excluir a conta pelo menu e clicar de novo → recriado. Com `Demo__Enabled=false`: `POST /auth/demo` → 404.
+- [x] **Step 6: Conferência manual** — `Demo__Enabled=true` no Gateway local e `VITE_DEMO_ENABLED=true` no `web/.env`: botão entra e mostra as 4 cidades; excluir a conta pelo menu e clicar de novo → recriado. Com `Demo__Enabled=false`: `POST /auth/demo` → 404.
 
-- [ ] **Step 7: `/revisar-padrao` e commit**
+- [x] **Step 7: `/revisar-padrao` e commit**
 
 ```bash
 git add src/Gateway tests/Climato.Gateway.UnitTests web docker-compose.yml

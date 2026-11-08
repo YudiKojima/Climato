@@ -59,4 +59,22 @@ public class AuthController : ControllerBase
 
         return Ok(auth);
     }
+
+    /// <summary>Entra com o usuário de demonstração (quando habilitado).</summary>
+    /// <response code="200">Autenticado como demonstração.</response>
+    /// <response code="404">Demonstração desativada.</response>
+    [HttpPost("demo")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AuthDto>> Demo(CancellationToken cancellationToken)
+    {
+        var auth = await appService.LoginAsDemoAsync(cancellationToken);
+
+        if (auth == null)
+        {
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Demonstração desativada.");
+        }
+
+        return Ok(auth);
+    }
 }
