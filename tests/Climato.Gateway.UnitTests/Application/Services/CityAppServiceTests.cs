@@ -1,3 +1,6 @@
+using Climato.Gateway.Application.Contracts;
+using Climato.Gateway.Application.Model.Cities;
+using Climato.Gateway.Application.Model.Weathers;
 using Climato.Gateway.Application.Services;
 using Climato.Gateway.Domain.Cities;
 using Climato.Gateway.Domain.Exceptions;
@@ -7,13 +10,14 @@ namespace Climato.Gateway.UnitTests.Application.Services;
 public class CityAppServiceTests
 {
     private readonly ICityRepository repository = Substitute.For<ICityRepository>();
+    private readonly IWeatherProviderClient providerClient = Substitute.For<IWeatherProviderClient>();
     private readonly CityAppService appService;
     private readonly Guid userId = Guid.NewGuid();
     private readonly CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
     public CityAppServiceTests()
     {
-        appService = new CityAppService(repository, TestMapper.Create());
+        appService = new CityAppService(repository, providerClient, TestMapper.Create());
     }
 
     [Fact]
@@ -87,5 +91,49 @@ public class CityAppServiceTests
         var cities = await appService.GetAllAsync(userId, cancellationToken);
 
         cities.Select(city => city.Name).ShouldBe(new[] { "Lima", "Quito" });
+    }
+    [Fact]
+    public async Task AddAsync_CidadeNova_GravaComONomeEOPaisResolvidosPeloProvider()
+    {
+        providerClient.GetWeatherAsync("lima", false, Arg.Any<CancellationToken>()).Returns(TestData.Weather("Lima", "PE"));
+        repository.GetByNameAsync("Lima", userId, Arg.Any<CancellationToken>()).Returns((City?)null);
+
+        var result = await appService.AddAsync(new CityPostDto { Name = " lima " }, userId, cancellationToken);
+
+        result.HasValue.ShouldBeTrue();
+        result.Value.Created.ShouldBeTrue();
+        result.Value.City.Name.ShouldBe("Lima");
+        result.Value.City.Country.ShouldBe("PE");
+        await repository.Received(1).CreateAsync(
+            Arg.Is<City>(c => c.Name == "Lima" && c.Country == "PE" && c.UserId == userId && !c.IsFavorite),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AddAsync_CidadeJaNoHistorico_DevolveAExistenteSemCriar()
+    {
+        var existing = new City("Lima", "PE", userId);
+        existing.ToggleFavorite();
+        providerClient.GetWeatherAsync("Lima", false, Arg.Any<CancellationToken>()).Returns(TestData.Weather("Lima", "PE"));
+        repository.GetByNameAsync("Lima", userId, Arg.Any<CancellationToken>()).Returns(existing);
+
+        var result = await appService.AddAsync(new CityPostDto { Name = "Lima" }, userId, cancellationToken);
+
+        result.HasValue.ShouldBeTrue();
+        result.Value.Created.ShouldBeFalse();
+        result.Value.City.Id.ShouldBe(existing.Id);
+        result.Value.City.IsFavorite.ShouldBeTrue();
+        await repository.DidNotReceiveWithAnyArgs().CreateAsync(default!, cancellationToken);
+    }
+
+    [Fact]
+    public async Task AddAsync_CidadeInexistenteNoProvider_DevolveNullSemGravar()
+    {
+        providerClient.GetWeatherAsync("Cidade Inventada", false, Arg.Any<CancellationToken>()).Returns((WeatherDto?)null);
+
+        var result = await appService.AddAsync(new CityPostDto { Name = "Cidade Inventada" }, userId, cancellationToken);
+
+        result.HasValue.ShouldBeFalse();
+        repository.ReceivedCalls().ShouldBeEmpty();
     }
 }

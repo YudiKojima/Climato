@@ -48,6 +48,10 @@ Proteção de rota **só** no router — páginas não redirecionam por estado d
 - Erros da API chegam como `ProblemDetails`: exibir `title`/`detail`, não a mensagem do axios.
 - Busca de cidades (`GET /locations?query=`, mínimo 2 caracteres) é ao confirmar — o geocoding casa o nome inteiro, não prefixo: `CitySearch` + `useCitySearch` mostram até 5 resultados para escolher (setas/Enter/Esc); a escolha navega só pelo nome (homônimos caem na primeira cidade).
 - Previsão (`GET /forecasts/{cidade}`) com `useForecast` em seção própria (`ForecastSection`, carregada com `React.lazy`): falha da previsão não derruba o detalhe.
+- Histórico: consultar o clima não grava nada. O detalhe (`WeatherDetails`) registra a cidade com `addCity(weather.city)` (`POST /cities`) quando o clima carrega; falha no registro só avisa por `useApiFeedback`, sem derrubar a tela.
+- Cards da Home pedem o clima sem foto: `useWeather(nome, { image: false })` → `GET /weathers/{nome}?image=false` (poupa a cota da Pexels). Só o detalhe usa a foto.
+- Usuário de demonstração: com `VITE_DEMO_ENABLED=true` o `SignIn` mostra "Entrar como demonstração" (`loginAsDemo()` → `POST /auth/demo`, mesmo fluxo de sessão do login). Na imagem Docker vem por `--build-arg`, como o `VITE_API_URL`.
+- 429 (limite de requisições) é erro de negócio: `useApiFeedback` mostra o `title` em `message.error`.
 
 ## Tema e estilo
 

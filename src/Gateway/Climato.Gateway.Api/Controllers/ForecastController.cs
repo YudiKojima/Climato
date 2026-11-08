@@ -1,11 +1,14 @@
+using Climato.Gateway.Api.RateLimiting;
 using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Application.Model.Weathers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Climato.Gateway.Api.Controllers;
 
 [ApiController]
+[EnableRateLimiting(RateLimitPolicies.Api)]
 [Route("forecasts")]
 [Authorize]
 public class ForecastController : ControllerBase

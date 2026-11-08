@@ -1,11 +1,14 @@
+using Climato.Gateway.Api.RateLimiting;
 using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Application.Model.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Climato.Gateway.Api.Controllers;
 
 [ApiController]
+[EnableRateLimiting(RateLimitPolicies.Auth)]
 [Route("auth")]
 [AllowAnonymous]
 public class AuthController : ControllerBase
@@ -52,6 +55,24 @@ public class AuthController : ControllerBase
         if (auth == null)
         {
             return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "E-mail ou senha inválidos.");
+        }
+
+        return Ok(auth);
+    }
+
+    /// <summary>Entra com o usuário de demonstração (quando habilitado).</summary>
+    /// <response code="200">Autenticado como demonstração.</response>
+    /// <response code="404">Demonstração desativada.</response>
+    [HttpPost("demo")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AuthDto>> Demo(CancellationToken cancellationToken)
+    {
+        var auth = await appService.LoginAsDemoAsync(cancellationToken);
+
+        if (auth == null)
+        {
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Demonstração desativada.");
         }
 
         return Ok(auth);

@@ -45,6 +45,8 @@ Fonte das regras aplicadas pela skill `/revisar-padrao`. Cobre o que exige **jul
 | BE-28 | 🟡 | 03 | Chamada à OpenWeather fora do client | `HttpClient` da OpenWeather injetado em AppService ou URL `data/2.5`/`geo/1.0` (ou com `lat`/`lon`) montada fora do `OpenWeatherClient` | [Comunicação HTTP](backend.md#comunicação-http) |
 | BE-29 | 🟡 | 06 | Log com interpolação | `logger.Log*($"...")` ou concatenação com dado da requisição em vez de placeholder `{Nome}` | [Observabilidade](backend.md#observabilidade) |
 | BE-30 | 🟡 | 06 | Log fora do `ILogger<T>` | `Console.WriteLine`, `Debug.WriteLine` ou `Log.Logger` estático em código de aplicação | [Observabilidade](backend.md#observabilidade) |
+| BE-31 | 🔴 | 08 | GET com efeito colateral | Action `[HttpGet]` (ou AppService chamado só por ela) que cria, altera ou remove dado | [Controllers](backend.md#controllers) |
+| BE-32 | 🔴 | 08 | Rota sem rate limit | Controller do Gateway sem `[EnableRateLimiting]` (health checks ficam fora) | [Rate limiting](backend.md#rate-limiting-gateway) |
 
 ## Frontend
 

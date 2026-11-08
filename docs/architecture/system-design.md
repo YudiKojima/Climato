@@ -59,10 +59,23 @@ flowchart LR
 
 ### Consulta de clima
 
-1. `GET /weathers/{cidade}` no Gateway com `Authorization: Bearer`.
-2. Gateway chama `GET /weathers?cityName=` no Provider (retry/timeout/circuit breaker).
-3. Provider consulta o cache (`clima:{cidade-normalizada}`, TTL 10 min; Redis ou memória); em miss, chama OpenWeather e, de forma opcional, Pexels; grava no cache.
-4. Gateway registra a cidade no histórico do usuário (se ainda não existir) e devolve o clima.
+1. `GET /weathers/{cidade}` no Gateway com `Authorization: Bearer` (`?image=false` nos cards da Home).
+2. Gateway chama `GET /weathers?cityName=` no Provider, repassando `image=false` (retry/timeout/circuit breaker; conexão limitada a 2 s).
+3. Provider consulta o cache (`clima:{cidade-normalizada}` ou `clima-sem-imagem:...`, TTL 10 min; Redis ou memória); em miss, chama OpenWeather e, só com imagem, Pexels (opcional); grava no cache.
+4. Gateway devolve o clima **sem** gravar nada.
+
+### Registro no histórico
+
+1. Ao carregar o clima, a tela de detalhe chama `POST /cities` com `{ name }`.
+2. Gateway resolve o nome no Provider (clima sem imagem, com cache): cidade inexistente → 404; senão procura o nome e o país resolvidos no histórico do usuário (claim `sub`): existe → 200 com a cidade; não existe → cria e devolve 201. Texto livre não entra no histórico.
+
+### Usuário de demonstração
+
+Com `Demo:Enabled`, `POST /auth/demo` devolve o mesmo contrato do login para o usuário `Demo:Email`, criado no primeiro acesso (senha aleatória, cidades de `Demo:Cities`) e recriado se for excluído. Desligado → 404.
+
+### Rate limiting
+
+O Gateway limita `/auth/*` por IP (10/min) e as rotas autenticadas por usuário (120/min; o usuário de demonstração por usuário + IP), em janela fixa; excesso → 429 com `Retry-After`. Health checks ficam fora.
 
 ### Previsão de 5 dias
 
@@ -84,7 +97,9 @@ flowchart LR
 | Cidade não existe na OpenWeather (clima ou previsão) | 404 | 404 (não entra no histórico) |
 | OpenWeather fora / timeout / circuito aberto / 401 de chave / 429 | 503 | 503 |
 | Pexels falha | 200 sem `imageUrl` | 200 |
-| Provider fora ou circuito aberto | — | 503 |
+| Provider fora ou circuito aberto | — | 503 (≤ 5 s) |
+| Limite de requisições excedido | — | 429 + `Retry-After` |
+| JSON malformado ou de tipo errado | — | 400 `body: ["JSON inválido."]` |
 | Cliente abortou a requisição | 499 | 499 |
 | Busca com `query` < 2 ou > 100 caracteres | 400 | 400 |
 | Busca sem resultado | 200 `[]` | 200 `[]` |
@@ -96,11 +111,11 @@ Todas as respostas de erro em `application/problem+json`.
 | Serviço | `/health/live` | `/health/ready` |
 |---|---|---|
 | Provider | processo vivo | Redis (se configurado; falha = `Degraded`, 200) |
-| Gateway | processo vivo | Postgres + `/health/ready` do Provider |
+| Gateway | processo vivo | Postgres (3 s) + `/health/ready` do Provider (5 s) |
 
 ### Observabilidade
 
-O TraceId W3C do Gateway é o correlation ID: web → Gateway (resposta com `X-Correlation-ID` e `traceId` no `ProblemDetails`) → Provider (`traceparent` propagado pelo `HttpClient`) → OpenWeather/Pexels. Os dois serviços logam em JSON (Serilog) com o mesmo `@tr`; com `docker compose --profile observability`, os traces vão via OTLP para o Jaeger (`localhost:16686`).
+O TraceId W3C do Gateway é o correlation ID (o Gateway ignora `traceparent` vindo do cliente e sempre abre trace novo): web → Gateway (resposta com `X-Correlation-ID` e `traceId` no `ProblemDetails`) → Provider (`traceparent` propagado pelo `HttpClient`) → OpenWeather/Pexels. Os dois serviços logam em JSON (Serilog) com o mesmo `@tr`; com `docker compose --profile observability`, os traces vão via OTLP para o Jaeger (`localhost:16686`).
 
 ## Dados
 

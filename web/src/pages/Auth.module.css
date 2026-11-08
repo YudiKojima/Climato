@@ -2,3 +2,7 @@
   display: block;
   text-align: center;
 }
+
+.demo {
+  margin-top: var(--ant-margin-sm);
+}

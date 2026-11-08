@@ -6,4 +6,5 @@ public interface IAuthAppService
 {
     Task<AuthDto?> RegisterAsync(RegisterPostDto dto, CancellationToken cancellationToken);
     Task<AuthDto?> LoginAsync(LoginPostDto dto, CancellationToken cancellationToken);
+    Task<AuthDto?> LoginAsDemoAsync(CancellationToken cancellationToken);
 }

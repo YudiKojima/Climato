@@ -1,8 +1,11 @@
 using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Application.Model.Auth;
+using Climato.Gateway.Application.Options;
 using Climato.Gateway.Application.Services;
+using Climato.Gateway.Domain.Cities;
 using Climato.Gateway.Domain.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Climato.Gateway.UnitTests.Application.Services;
 
@@ -11,15 +14,37 @@ public class AuthAppServiceTests
     private const string Password = "senha-de-teste-123";
 
     private readonly IUserRepository repository = Substitute.For<IUserRepository>();
+    private readonly ICityRepository cityRepository = Substitute.For<ICityRepository>();
     private readonly IPasswordHasher<User> passwordHasher = Substitute.For<IPasswordHasher<User>>();
     private readonly ITokenService tokenService = Substitute.For<ITokenService>();
+    private readonly DemoOptions demo = new()
+    {
+        Enabled = true,
+        Email = "demo@climato.dev",
+        Name = "Visitante",
+        Cities = [new DemoCity { Name = "Lisboa", Country = "PT" }, new DemoCity { Name = "Tóquio", Country = "JP" }]
+    };
     private readonly AuthAppService appService;
     private readonly CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
     public AuthAppServiceTests()
     {
         tokenService.Create(Arg.Any<User>()).Returns(new AuthToken("jwt-de-teste", DateTimeOffset.UtcNow.AddHours(1)));
-        appService = new AuthAppService(repository, passwordHasher, tokenService, TestMapper.Create());
+        appService = new AuthAppService(repository, cityRepository, passwordHasher, tokenService, TestMapper.Create(), Options.Create(demo));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RegisterAsync_EmailDaDemo_DevolveNullSemCriar(bool demoEnabled)
+    {
+        demo.Enabled = demoEnabled;
+        repository.AllowCreateAsync("demo@climato.dev", Arg.Any<CancellationToken>()).Returns(true);
+
+        var auth = await appService.RegisterAsync(new RegisterPostDto { Email = " Demo@Climato.dev", Name = "Intruso", Password = Password }, cancellationToken);
+
+        auth.ShouldBeNull();
+        await repository.DidNotReceiveWithAnyArgs().CreateAsync(default!, cancellationToken);
     }
 
     [Fact]
@@ -96,6 +121,47 @@ public class AuthAppServiceTests
         auth.ShouldNotBeNull();
         auth.Token.ShouldBe("jwt-de-teste");
         await repository.DidNotReceiveWithAnyArgs().UpdateAsync(default!, cancellationToken);
+    }
+
+    [Fact]
+    public async Task LoginAsDemoAsync_DemoDesligada_DevolveNullSemTocarNoBanco()
+    {
+        demo.Enabled = false;
+
+        var auth = await appService.LoginAsDemoAsync(cancellationToken);
+
+        auth.ShouldBeNull();
+        repository.ReceivedCalls().ShouldBeEmpty();
+        cityRepository.ReceivedCalls().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task LoginAsDemoAsync_UsuarioDemoExiste_DevolveTokenSemCriar()
+    {
+        repository.GetAsync("demo@climato.dev", Arg.Any<CancellationToken>()).Returns(new User("demo@climato.dev", "Visitante"));
+
+        var auth = await appService.LoginAsDemoAsync(cancellationToken);
+
+        auth.ShouldNotBeNull();
+        auth.Token.ShouldBe("jwt-de-teste");
+        await repository.DidNotReceiveWithAnyArgs().CreateAsync(default!, cancellationToken);
+        await cityRepository.DidNotReceiveWithAnyArgs().CreateAsync(default!, cancellationToken);
+    }
+
+    [Fact]
+    public async Task LoginAsDemoAsync_UsuarioDemoAusente_CriaComSenhaAleatoriaECidadesIniciais()
+    {
+        repository.GetAsync("demo@climato.dev", Arg.Any<CancellationToken>()).Returns((User?)null);
+        passwordHasher.HashPassword(Arg.Any<User>(), Arg.Any<string>()).Returns("hash-aleatorio");
+
+        var auth = await appService.LoginAsDemoAsync(cancellationToken);
+
+        auth.ShouldNotBeNull();
+        auth.User.Email.ShouldBe("demo@climato.dev");
+        passwordHasher.Received(1).HashPassword(Arg.Any<User>(), Arg.Is<string>(password => password.Length >= 32));
+        await repository.Received(1).CreateAsync(Arg.Is<User>(user => user.PasswordHash == "hash-aleatorio"), Arg.Any<CancellationToken>());
+        await cityRepository.Received(1).CreateAsync(Arg.Is<City>(city => city.Name == "Lisboa" && city.Country == "PT"), Arg.Any<CancellationToken>());
+        await cityRepository.Received(1).CreateAsync(Arg.Is<City>(city => city.Name == "Tóquio" && city.Country == "JP"), Arg.Any<CancellationToken>());
     }
 
     private User UserWithHash(string hash)

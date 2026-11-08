@@ -3,14 +3,17 @@ import { Button, Form, Input, Typography } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/AuthContext";
 import useApiFeedback from "../hooks/useApiFeedback";
-import { login } from "../services/auth";
+import { login, loginAsDemo } from "../services/auth";
 import styles from "./Auth.module.css";
+
+const isDemoEnabled = import.meta.env.VITE_DEMO_ENABLED === "true";
 
 export default function SignIn() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const notifyError = useApiFeedback();
   const [isLoading, setIsLoading] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   const handleSubmit = async (values) => {
     setIsLoading(true);
@@ -21,6 +24,18 @@ export default function SignIn() {
       notifyError(err, "E-mail ou senha incorretos.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDemo = async () => {
+    setIsDemoLoading(true);
+    try {
+      signIn(await loginAsDemo());
+      navigate("/p", { replace: true });
+    } catch (err) {
+      notifyError(err, "Não foi possível entrar como demonstração.");
+    } finally {
+      setIsDemoLoading(false);
     }
   };
 
@@ -62,6 +77,12 @@ export default function SignIn() {
         <Button type="primary" htmlType="submit" block loading={isLoading}>
           Entrar
         </Button>
+
+        {isDemoEnabled && (
+          <Button block onClick={handleDemo} loading={isDemoLoading} className={styles.demo}>
+            Entrar como demonstração
+          </Button>
+        )}
       </Form>
 
       <Typography.Text className={styles.switch}>

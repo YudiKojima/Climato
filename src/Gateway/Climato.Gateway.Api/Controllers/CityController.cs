@@ -1,12 +1,15 @@
 using Climato.Gateway.Api.Extensions;
+using Climato.Gateway.Api.RateLimiting;
 using Climato.Gateway.Application.Contracts;
 using Climato.Gateway.Application.Model.Cities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Climato.Gateway.Api.Controllers;
 
 [ApiController]
+[EnableRateLimiting(RateLimitPolicies.Api)]
 [Route("cities")]
 [Authorize]
 public class CityController : ControllerBase
@@ -32,6 +35,34 @@ public class CityController : ControllerBase
     {
         var result = await appService.GetAllFavoritesAsync(User.GetUserId(), cancellationToken);
         return Ok(result);
+    }
+
+    /// <summary>Registra a cidade no histórico do usuário autenticado (idempotente), com o nome e o país resolvidos pelo serviço de clima.</summary>
+    /// <param name="dto">Nome da cidade</param>
+    /// <param name="cancellationToken">Token de cancelamento da requisição</param>
+    /// <response code="200">Cidade já estava no histórico.</response>
+    /// <response code="201">Cidade adicionada ao histórico.</response>
+    /// <response code="400">Dados inválidos.</response>
+    /// <response code="404">Cidade não encontrada.</response>
+    /// <response code="503">Serviço de clima indisponível.</response>
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<CityDto>> Add(CityPostDto dto, CancellationToken cancellationToken)
+    {
+        var result = await appService.AddAsync(dto, User.GetUserId(), cancellationToken);
+
+        if (result == null)
+        {
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Cidade não encontrada.");
+        }
+
+        var (city, created) = result.Value;
+
+        return created ? StatusCode(StatusCodes.Status201Created, city) : Ok(city);
     }
 
     /// <summary>Favorita/Desfavorita a cidade informada.</summary>

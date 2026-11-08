@@ -8,6 +8,7 @@ namespace Climato.Provider.Application.Services;
 public sealed class WeatherAppService : IWeatherAppService
 {
     private const string CachePrefix = "clima";
+    private const string CachePrefixWithoutImage = "clima-sem-imagem";
 
     private static readonly TimeSpan cacheDuration = TimeSpan.FromMinutes(10);
 
@@ -28,9 +29,10 @@ public sealed class WeatherAppService : IWeatherAppService
         this.cache = cache;
     }
 
-    public async Task<Weather?> GetByCityAsync(string cityName, CancellationToken cancellationToken)
+    public async Task<Weather?> GetByCityAsync(string cityName, bool includeImage, CancellationToken cancellationToken)
     {
-        var cached = await cache.GetAsync<Weather>(CachePrefix, cityName, cancellationToken);
+        var cachePrefix = includeImage ? CachePrefix : CachePrefixWithoutImage;
+        var cached = await cache.GetAsync<Weather>(cachePrefix, cityName, cancellationToken);
 
         if (cached != null)
         {
@@ -51,10 +53,12 @@ public sealed class WeatherAppService : IWeatherAppService
             return null;
         }
 
-        var imageUrl = await cityImageAppService.GetImageUrlAsync(city.OriginalName, cancellationToken);
+        var imageUrl = includeImage
+            ? await cityImageAppService.GetImageUrlAsync(city.OriginalName, cancellationToken)
+            : null;
         var weather = ToWeather(city, current, imageUrl);
 
-        await cache.SetAsync(CachePrefix, cityName, weather, cacheDuration, cancellationToken);
+        await cache.SetAsync(cachePrefix, cityName, weather, cacheDuration, cancellationToken);
         return weather;
     }
 

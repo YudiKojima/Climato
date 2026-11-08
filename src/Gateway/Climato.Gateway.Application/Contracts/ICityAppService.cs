@@ -7,5 +7,6 @@ public interface ICityAppService
     Task<List<CityDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken);
     Task<List<CityDto>> GetAllFavoritesAsync(Guid userId, CancellationToken cancellationToken);
     Task<CityDto?> ToggleFavoriteAsync(Guid id, Guid userId, CancellationToken cancellationToken);
+    Task<(CityDto City, bool Created)?> AddAsync(CityPostDto dto, Guid userId, CancellationToken cancellationToken);
     Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken);
 }

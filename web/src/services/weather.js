@@ -1,7 +1,9 @@
 import client from "./client";
 
-export const getWeatherByCity = async (cityName) => {
-  const response = await client.get(`/weathers/${encodeURIComponent(cityName)}`);
+export const getWeatherByCity = async (cityName, { image = true } = {}) => {
+  const response = await client.get(`/weathers/${encodeURIComponent(cityName)}`, {
+    params: image ? {} : { image: false },
+  });
   return response.data;
 };
 
