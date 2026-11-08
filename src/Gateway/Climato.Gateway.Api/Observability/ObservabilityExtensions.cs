@@ -1,4 +1,7 @@
+using System.Diagnostics;
 using Npgsql;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
@@ -34,6 +37,9 @@ public static class ObservabilityExtensions
                 logger.WriteTo.Console(new CompactJsonFormatter());
             }
         });
+
+        builder.Services.AddSingleton<DistributedContextPropagator, IncomingTraceContextBlocker>();
+        Sdk.SetDefaultTextMapPropagator(new TraceContextPropagator());
 
         builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(ServiceName))

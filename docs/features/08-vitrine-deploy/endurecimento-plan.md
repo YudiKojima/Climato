@@ -1189,7 +1189,7 @@ Expected: `400` com `errors: { "body": ["JSON inválido."] }`, sem texto em ingl
 **Interfaces:**
 - Produces: `IncomingTraceContextBlocker : DistributedContextPropagator` (extrai nada; injeta como o padrão).
 
-- [ ] **Step 1: Testes vermelhos**
+- [x] **Step 1: Testes vermelhos**
 
 ```csharp
 using System.Diagnostics;
@@ -1231,9 +1231,9 @@ public class IncomingTraceContextBlockerTests
 }
 ```
 
-- [ ] **Step 2: Rodar e ver falhar** — erro de compilação.
+- [x] **Step 2: Rodar e ver falhar** — erro de compilação.
 
-- [ ] **Step 3: Implementação**
+- [x] **Step 3: Implementação**
 
 ```csharp
 using System.Diagnostics;
@@ -1273,9 +1273,9 @@ Sdk.SetDefaultTextMapPropagator(new TraceContextPropagator());
 
 O primeiro faz o hosting do ASP.NET Core criar sempre um trace raiz. O segundo impede a instrumentação do OpenTelemetry de reextrair o `traceparent` (ela só reextrai quando o propagador padrão **não** é `TraceContextPropagator`; o padrão do SDK é composto com Baggage). A injeção no `HttpClient` usa `DistributedContextPropagator.Current` (estático), que não muda. Usings: `System.Diagnostics`, `OpenTelemetry`, `OpenTelemetry.Context.Propagation`.
 
-- [ ] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
+- [x] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
 
-- [ ] **Step 5: Conferência manual**
+- [x] **Step 5: Conferência manual**
 
 ```bash
 curl -s -o /dev/null -D - http://localhost:5001/cities -H "traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-00" | grep -i x-correlation-id
@@ -1283,7 +1283,7 @@ curl -s -o /dev/null -D - http://localhost:5001/cities -H "traceparent: 00-0af76
 
 Expected: `X-Correlation-ID` diferente de `0af7651916cd43dd8448eb211c80319c`. Com um token válido em `/weathers/Lima`, o log do Provider mostra o mesmo TraceId do Gateway (propagação interna mantida).
 
-- [ ] **Step 6: `/revisar-padrao` e commit** — `git commit -m "Ignora o traceparent recebido do cliente no Gateway"`.
+- [x] **Step 6: `/revisar-padrao` e commit** — `git commit -m "Ignora o traceparent recebido do cliente no Gateway"`.
 
 ---
 
