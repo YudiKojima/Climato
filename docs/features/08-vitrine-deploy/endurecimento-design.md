@@ -33,7 +33,7 @@ Deixar o Climato pronto para ficar exposto na internet: proteger as cotas da Ope
 
 ### 1. Histórico sem efeito colateral
 - **Gateway:** `WeatherAppService.GetByCityAsync` deixa de receber `userId` e de gravar. `WeatherController` atualiza o `<summary>`.
-- **Gateway:** `POST /cities` com `{ name, country }` (FluentValidation: `name` e `country` obrigatórios, ≤ 255, como as colunas de `city`). Cidade já no histórico do usuário → `200` com a existente; nova → `201` com `Location`. Usuário das claims.
+- **Gateway:** `POST /cities` com `{ name, country }` (FluentValidation: `name` e `country` obrigatórios, ≤ 255, como as colunas de `city`). Cidade já no histórico do usuário → `200` com a existente; nova → `201` com a cidade no corpo (não há `GET /cities/{id}` para o `Location`). Usuário das claims.
 - **Web:** `services/cities.js` ganha `addCity({ name, country })`; `WeatherDetails` chama ao carregar o clima (efeito sobre `weather.city`/`weather.country`). Falha no registro não derruba a tela: só `useApiFeedback` (erro inesperado).
 - Sem migration. Concorrência (duas abas) continua no backlog do índice único.
 
