@@ -52,7 +52,7 @@ Medido com um `HttpClient` isolado nesta máquina (Windows):
 **Interfaces:**
 - Produces: `IWeatherAppService.GetByCityAsync(string cityName, bool includeImage, CancellationToken)` (o `includeImage` entra na Task 2; nesta task a assinatura fica `GetByCityAsync(string cityName, CancellationToken)`); `ICityAppService.AddAsync(CityPostDto dto, Guid userId, CancellationToken) → Task<(CityDto City, bool Created)>`; web `addCity({ name, country })`.
 
-- [ ] **Step 1: Testes vermelhos do Gateway**
+- [x] **Step 1: Testes vermelhos do Gateway**
 
 Em `WeatherAppServiceTests`, substituir os três testes de histórico por:
 
@@ -153,12 +153,12 @@ public class CityPostDtoValidatorTests
 }
 ```
 
-- [ ] **Step 2: Rodar e ver falhar**
+- [x] **Step 2: Rodar e ver falhar**
 
 Run: `dotnet test --solution Climato.slnx`
 Expected: falha de compilação (`CityPostDto`, `AddAsync`, construtor de `WeatherAppService`).
 
-- [ ] **Step 3: Implementação do Gateway**
+- [x] **Step 3: Implementação do Gateway**
 
 `CityPostDto.cs`:
 
@@ -264,12 +264,12 @@ public async Task<ActionResult<CityDto>> Add(CityPostDto dto, CancellationToken 
 }
 ```
 
-- [ ] **Step 4: Rodar e ver passar**
+- [x] **Step 4: Rodar e ver passar**
 
 Run: `dotnet test --solution Climato.slnx`
 Expected: todos verdes.
 
-- [ ] **Step 5: Web — teste vermelho de `addCity`**
+- [x] **Step 5: Web — teste vermelho de `addCity`**
 
 `web/src/services/cities.test.js`:
 
@@ -294,7 +294,7 @@ describe("addCity", () => {
 
 Run: `npm --prefix web test` → FAIL (`addCity` não exportado).
 
-- [ ] **Step 6: Web — implementação**
+- [x] **Step 6: Web — implementação**
 
 `cities.js`:
 
@@ -323,11 +323,11 @@ useEffect(() => {
 
 Run: `npm --prefix web test` e `npm --prefix web run lint` → verdes.
 
-- [ ] **Step 7: Conferência manual**
+- [x] **Step 7: Conferência manual**
 
 Gateway + Provider locais (runbook) e `npm --prefix web run dev`: abrir a Home com histórico → nenhuma linha nova em `city`; buscar e abrir uma cidade nova → aparece na Home ao voltar.
 
-- [ ] **Step 8: `/revisar-padrao` e commit**
+- [x] **Step 8: `/revisar-padrao` e commit**
 
 ```bash
 git add src/Gateway tests/Climato.Gateway.UnitTests web/src/services/cities.js web/src/services/cities.test.js web/src/pages/WeatherDetails.jsx

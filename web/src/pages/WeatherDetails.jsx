@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Button, Card, Col, Row, Skeleton, Space, Statistic, Typography } from "antd";
 import {
   ArrowDownOutlined,
@@ -16,7 +16,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import ErrorBoundary from "../components/ErrorBoundary";
 import ErrorState from "../components/ErrorState";
+import useApiFeedback from "../hooks/useApiFeedback";
 import useWeather from "../hooks/useWeather";
+import { addCity } from "../services/cities";
 import { formatTime } from "../utils/formatTime";
 import { weatherIconUrl } from "../utils/weatherIconUrl";
 import styles from "./WeatherDetails.module.css";
@@ -60,6 +62,17 @@ export default function WeatherDetails() {
   const { cityName } = useParams();
   const navigate = useNavigate();
   const { data: weather, isLoading, error, reload } = useWeather(cityName);
+  const notifyError = useApiFeedback();
+
+  useEffect(() => {
+    if (!weather) {
+      return;
+    }
+
+    addCity({ name: weather.city, country: weather.country }).catch((err) =>
+      notifyError(err, "Não foi possível salvar a cidade no histórico.")
+    );
+  }, [weather, notifyError]);
 
   const backButton = (
     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/p")}>

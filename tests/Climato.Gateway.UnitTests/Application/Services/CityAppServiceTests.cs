@@ -1,3 +1,4 @@
+using Climato.Gateway.Application.Model.Cities;
 using Climato.Gateway.Application.Services;
 using Climato.Gateway.Domain.Cities;
 using Climato.Gateway.Domain.Exceptions;
@@ -87,5 +88,35 @@ public class CityAppServiceTests
         var cities = await appService.GetAllAsync(userId, cancellationToken);
 
         cities.Select(city => city.Name).ShouldBe(new[] { "Lima", "Quito" });
+    }
+
+    [Fact]
+    public async Task AddAsync_CidadeNova_CriaNoHistoricoDoUsuario()
+    {
+        repository.GetByNameAsync("Lima", userId, Arg.Any<CancellationToken>()).Returns((City?)null);
+
+        var (city, created) = await appService.AddAsync(new CityPostDto { Name = " Lima ", Country = "PE" }, userId, cancellationToken);
+
+        created.ShouldBeTrue();
+        city.Name.ShouldBe("Lima");
+        city.Country.ShouldBe("PE");
+        await repository.Received(1).CreateAsync(
+            Arg.Is<City>(c => c.Name == "Lima" && c.Country == "PE" && c.UserId == userId && !c.IsFavorite),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task AddAsync_CidadeJaNoHistorico_DevolveAExistenteSemCriar()
+    {
+        var existing = new City("Lima", "PE", userId);
+        existing.ToggleFavorite();
+        repository.GetByNameAsync("Lima", userId, Arg.Any<CancellationToken>()).Returns(existing);
+
+        var (city, created) = await appService.AddAsync(new CityPostDto { Name = "Lima", Country = "PE" }, userId, cancellationToken);
+
+        created.ShouldBeFalse();
+        city.Id.ShouldBe(existing.Id);
+        city.IsFavorite.ShouldBeTrue();
+        await repository.DidNotReceiveWithAnyArgs().CreateAsync(default!, cancellationToken);
     }
 }

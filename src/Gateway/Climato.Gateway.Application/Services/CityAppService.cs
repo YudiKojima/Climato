@@ -16,6 +16,22 @@ public class CityAppService : ICityAppService
         this.mapper = mapper;
     }
 
+    public async Task<(CityDto City, bool Created)> AddAsync(CityPostDto dto, Guid userId, CancellationToken cancellationToken)
+    {
+        var name = dto.Name.Trim();
+        var existing = await cityRepository.GetByNameAsync(name, userId, cancellationToken);
+
+        if (existing != null)
+        {
+            return (mapper.Map<CityDto>(existing), false);
+        }
+
+        var city = new City(name, dto.Country.Trim(), userId);
+        await cityRepository.CreateAsync(city, cancellationToken);
+
+        return (mapper.Map<CityDto>(city), true);
+    }
+
     public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
         var city = await cityRepository.GetAsync(id, userId, cancellationToken);
