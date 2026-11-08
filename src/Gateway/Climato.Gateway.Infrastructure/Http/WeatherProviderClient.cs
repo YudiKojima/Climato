@@ -53,7 +53,8 @@ public class WeatherProviderClient : IWeatherProviderClient
             return await response.Content.ReadFromJsonAsync<T>(cancellationToken)
                 ?? throw new ProviderUnavailableException("O Provider respondeu sem corpo.");
         }
-        catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException or JsonException)
+        catch (Exception exception) when (exception is HttpRequestException or ExecutionRejectedException or JsonException
+            || (exception is OperationCanceledException && !cancellationToken.IsCancellationRequested))
         {
             throw new ProviderUnavailableException("Falha ao chamar o Provider.", exception);
         }

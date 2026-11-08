@@ -1,4 +1,5 @@
 using System.Net;
+using Climato.Gateway.Application.Exceptions;
 using Climato.Gateway.Infrastructure.Http;
 
 namespace Climato.Gateway.UnitTests.Infrastructure.Http;
@@ -18,6 +19,36 @@ public class WeatherProviderClientTests
         await client.GetWeatherAsync("São Paulo", includeImage, cancellationToken);
 
         handler.Request!.RequestUri!.PathAndQuery.ShouldBe(expectedPathAndQuery);
+    }
+
+    [Fact]
+    public async Task GetWeatherAsync_TimeoutDeConexao_LancaProviderUnavailable()
+    {
+        var handler = new ThrowingHandler(new TaskCanceledException("connect", new TimeoutException()));
+        var client = new WeatherProviderClient(new HttpClient(handler) { BaseAddress = new Uri("http://provider/") });
+
+        await Should.ThrowAsync<ProviderUnavailableException>(() => client.GetWeatherAsync("Lima", true, cancellationToken));
+    }
+
+    [Fact]
+    public async Task GetWeatherAsync_RequisicaoCanceladaPeloCliente_PropagaOCancelamento()
+    {
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+        var handler = new ThrowingHandler(new TaskCanceledException("abortada", null, cts.Token));
+        var client = new WeatherProviderClient(new HttpClient(handler) { BaseAddress = new Uri("http://provider/") });
+
+        var exception = await Should.ThrowAsync<OperationCanceledException>(() => client.GetWeatherAsync("Lima", true, cts.Token));
+
+        exception.ShouldNotBeOfType<ProviderUnavailableException>();
+    }
+
+    private sealed class ThrowingHandler(Exception exception) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromException<HttpResponseMessage>(exception);
+        }
     }
 
     private sealed class CapturingHandler : HttpMessageHandler

@@ -17,6 +17,8 @@ namespace Climato.Gateway.Infrastructure;
 public static class DependencyInjection
 {
     private static readonly TimeSpan healthCheckTimeout = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan providerHealthCheckTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan providerConnectTimeout = TimeSpan.FromSeconds(2);
 
     public static IServiceCollection AddGatewayInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -49,20 +51,23 @@ public static class DependencyInjection
         services.AddSingleton<ITokenService, JwtTokenService>();
 
         services.AddHttpClient<IWeatherProviderClient, WeatherProviderClient>(ConfigureProviderClient)
+            .ConfigurePrimaryHttpMessageHandler(CreateProviderHandler)
             .AddStandardResilienceHandler(options =>
             {
                 options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(25);
                 options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
                 options.Retry.MaxRetryAttempts = 1;
-                options.Retry.ShouldHandle = args => ValueTask.FromResult(args.Outcome.Exception is HttpRequestException);
+                options.Retry.Delay = TimeSpan.FromMilliseconds(500);
+                options.Retry.ShouldHandle = args => ValueTask.FromResult(IsTransportFailure(args.Outcome.Exception, args.Context.CancellationToken));
                 options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
             });
 
         services.AddHttpClient(ProviderHealthCheck.HttpClientName, (serviceProvider, client) =>
         {
             ConfigureProviderClient(serviceProvider, client);
-            client.Timeout = TimeSpan.FromSeconds(5);
-        });
+            client.Timeout = TimeSpan.FromSeconds(4);
+        })
+            .ConfigurePrimaryHttpMessageHandler(CreateProviderHandler);
 
         services.AddHealthChecks()
             .AddDbContextCheck<ClimatoDbContext>("postgres", tags: ["ready"])
@@ -72,11 +77,22 @@ public static class DependencyInjection
         {
             foreach (var registration in options.Registrations)
             {
-                registration.Timeout = healthCheckTimeout;
+                registration.Timeout = registration.Name == "provider" ? providerHealthCheckTimeout : healthCheckTimeout;
             }
         });
 
         return services;
+    }
+
+    private static SocketsHttpHandler CreateProviderHandler()
+    {
+        return new SocketsHttpHandler { ConnectTimeout = providerConnectTimeout };
+    }
+
+    private static bool IsTransportFailure(Exception? exception, CancellationToken cancellationToken)
+    {
+        return exception is HttpRequestException
+            || (exception is TaskCanceledException { InnerException: TimeoutException } && !cancellationToken.IsCancellationRequested);
     }
 
     private static void ConfigureProviderClient(IServiceProvider serviceProvider, HttpClient client)

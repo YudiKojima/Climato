@@ -1297,7 +1297,7 @@ Expected: `X-Correlation-ID` diferente de `0af7651916cd43dd8448eb211c80319c`. Co
 **Interfaces:**
 - Consumes: `WeatherProviderClient` e o teste da Task 2.
 
-- [ ] **Step 1: Teste vermelho** (timeout de conexão vira `ProviderUnavailableException`)
+- [x] **Step 1: Teste vermelho** (timeout de conexão vira `ProviderUnavailableException`)
 
 Em `WeatherProviderClientTests`:
 
@@ -1333,9 +1333,9 @@ private sealed class ThrowingHandler(Exception exception) : HttpMessageHandler
 
 (Usings: `Climato.Gateway.Application.Exceptions`.)
 
-- [ ] **Step 2: Rodar e ver falhar** — o primeiro teste falha (`TaskCanceledException` escapa).
+- [x] **Step 2: Rodar e ver falhar** — o primeiro teste falha (`TaskCanceledException` escapa).
 
-- [ ] **Step 3: Implementação**
+- [x] **Step 3: Implementação**
 
 `WeatherProviderClient.GetAsync`, o `catch` passa a incluir o timeout de conexão (cancelamento que não veio de quem chamou):
 
@@ -1395,14 +1395,14 @@ foreach (var registration in options.Registrations)
 }
 ```
 
-- [ ] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
+- [x] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
 
-- [ ] **Step 5: Conferência manual**
+- [x] **Step 5: Conferência manual**
   - Gateway local com o Provider parado: `curl -w "%{time_total}\n"` em `/weathers/Lima` (com token) → 503 em ≤ 5 s.
   - `Provider__BaseUrl=http://10.255.255.1:8080/` → 503 em ≤ 5 s.
   - Compose sem o `web` (`docker compose up -d gateway`) com `docker compose pause redis` → `curl localhost:5001/health/ready` 200 `Healthy`; `docker compose unpause redis`.
 
-- [ ] **Step 6: `/revisar-padrao` e commit** — `git commit -m "Limita a conexão com o Provider e ajusta o health check dele no Gateway"`.
+- [x] **Step 6: `/revisar-padrao` e commit** — `git commit -m "Limita a conexão com o Provider e ajusta o health check dele no Gateway"`.
 
 ---
 
