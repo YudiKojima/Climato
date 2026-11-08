@@ -1059,7 +1059,7 @@ git commit -m "Adiciona o usuário de demonstração com entrada pelo login"
 **Interfaces:**
 - Produces: `InvalidRequest.Sanitize(ModelStateDictionary modelState, IReadOnlyCollection<string> bodyParameterNames) → ModelStateDictionary`.
 
-- [ ] **Step 1: Testes vermelhos**
+- [x] **Step 1: Testes vermelhos**
 
 ```csharp
 using Climato.Gateway.Api.Errors;
@@ -1095,9 +1095,9 @@ public class InvalidRequestTests
 }
 ```
 
-- [ ] **Step 2: Rodar e ver falhar** — erro de compilação.
+- [x] **Step 2: Rodar e ver falhar** — erro de compilação.
 
-- [ ] **Step 3: Implementação**
+- [x] **Step 3: Implementação**
 
 ```csharp
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -1119,7 +1119,7 @@ public static class InvalidRequest
                 continue;
             }
 
-            if (key.StartsWith('$') || bodyParameterNames.Contains(key))
+            if (key.Length == 0 || key.StartsWith('$') || bodyParameterNames.Contains(key))
             {
                 if (!result.ContainsKey(BodyKey))
                 {
@@ -1164,9 +1164,9 @@ services.AddControllers(options => options.Filters.Add<ValidationFilter>())
 
 (Com `[ApiController]`, parâmetros complexos têm `BindingSource.Body` inferido já no `ActionDescriptor`; se a conferência manual mostrar a chave `dto` sem sanitizar, ler a origem em `ControllerParameterDescriptor` e ajustar.)
 
-- [ ] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
+- [x] **Step 4: Rodar e ver passar** — `dotnet test --solution Climato.slnx`.
 
-- [ ] **Step 5: Conferência manual**
+- [x] **Step 5: Conferência manual**
 
 ```bash
 curl -s -X POST http://localhost:5001/auth/login -H "Content-Type: application/json" -d '{"email": 1'
@@ -1175,7 +1175,7 @@ curl -s -X POST http://localhost:5001/auth/login -H "Content-Type: application/j
 
 Expected: `400` com `errors: { "body": ["JSON inválido."] }`, sem texto em inglês nem nome de tipo.
 
-- [ ] **Step 6: `/revisar-padrao` e commit** — `git commit -m "Troca as mensagens do 400 automático por textos em português"`.
+- [x] **Step 6: `/revisar-padrao` e commit** — `git commit -m "Troca as mensagens do 400 automático por textos em português"`.
 
 ---
 

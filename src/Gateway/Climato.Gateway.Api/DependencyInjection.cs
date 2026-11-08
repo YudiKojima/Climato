@@ -8,6 +8,7 @@ using Climato.Gateway.Application.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -19,14 +20,19 @@ public static class DependencyInjection
     public static IServiceCollection AddGatewayApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers(options => options.Filters.Add<ValidationFilter>())
+            .AddJsonOptions(options => options.AllowInputFormatterExceptionMessages = false)
             .ConfigureApiBehaviorOptions(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>
                 {
+                    var bodyParameters = context.ActionDescriptor.Parameters
+                        .Where(parameter => parameter.BindingInfo?.BindingSource == BindingSource.Body)
+                        .Select(parameter => parameter.Name)
+                        .ToList();
                     var factory = context.HttpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
                     var problem = factory.CreateValidationProblemDetails(
                         context.HttpContext,
-                        context.ModelState,
+                        InvalidRequest.Sanitize(context.ModelState, bodyParameters),
                         StatusCodes.Status400BadRequest,
                         "Dados inválidos.");
 
