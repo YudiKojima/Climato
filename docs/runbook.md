@@ -25,6 +25,7 @@ Provider, Postgres e Redis ficam só na rede interna do compose. As APIs rodam e
 - A URL do Gateway fica fixada no build do web: mudou a porta 5001, troque também o `VITE_API_URL` no `docker-compose.yml` e rode `docker compose build web`.
 - **Logs e traces:** `docker compose logs -f gateway provider` mostra uma linha JSON por evento; `@tr` é o TraceId, o mesmo do header `X-Correlation-ID` da resposta do Gateway e do `traceId` dos erros. Para ver os traces, descomente `OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317` no `.env` e rode `docker compose --profile observability up --build`; busque o TraceId em `http://localhost:16686`.
 - Porta 8080 ocupada: troque o mapeamento do `web` no `docker-compose.yml` e a origem em `Cors__AllowedOrigins__0`.
+- **Demonstração:** o compose liga `Demo__Enabled` no Gateway e o build arg `VITE_DEMO_ENABLED` do web; o botão "Entrar como demonstração" aparece no login. Para desligar, troque os dois para `"false"` e rode `docker compose build web`.
 
 ## Pré-requisitos (`dotnet run`)
 
@@ -109,6 +110,10 @@ npm --prefix web install && npm --prefix web run dev
 
 Visual Studio / Rider: abrir `Climato.slnx` e usar o perfil `https` de cada Api.
 
+**Demonstração no `dotnet run`:** a demo vem desligada. Para testar, suba o Gateway com `Demo__Enabled=true` (variável de ambiente ou `appsettings.Development.json`) e acrescente `VITE_DEMO_ENABLED=true` no `web/.env` (reiniciar o `npm run dev`).
+
+**Rate limiting:** `/auth/*` aceita 10 requisições por minuto por IP e a API, 120 por minuto por usuário (a demonstração, por usuário + IP) (429 depois). Testes manuais repetidos de login batem no limite; para aumentar localmente, `RateLimiting__AuthPermitLimit=100` / `RateLimiting__ApiPermitLimit=600` (ou a seção `RateLimiting` no `appsettings.Development.json`).
+
 Em Development o console sai em texto, com o TraceId em cada linha. O nível vem de `Serilog:MinimumLevel`: uma seção `Logging` num `appsettings.Development.json` local não tem mais efeito.
 
 ## 5. Testes
@@ -127,6 +132,8 @@ O primeiro roda os testes unitários de `tests/` (sem banco, Docker ou chaves); 
 | `OptionsValidationException: OpenWeather:ApiKey não configurada` | Faltou o user-secret do Provider (seção 2) |
 | `ConnectionStrings:Climato não configurada` | Faltou o user-secret do Gateway |
 | `OptionsValidationException: Jwt:SecretKey não configurada` | Faltou o user-secret do JWT (seção 2) |
+| "Muitas requisições. Tente novamente em instantes." (429) | Limite do rate limiting atingido — esperar o `Retry-After` ou aumentar `RateLimiting:*` localmente (seção 4) |
+| Botão de demonstração não aparece no login | `VITE_DEMO_ENABLED` diferente de `true` no `web/.env` (ou no build arg da imagem) |
 | Front volta para o login logo após entrar | Token expirado ou chave do JWT trocada — entrar de novo |
 | Erro de CORS no console do navegador | Origem do web fora de `Cors:AllowedOrigins` no `appsettings.json` do Gateway |
 | Busca mostra "Serviço de clima indisponível" | Provider fora do ar, chave da OpenWeather inválida ou cota estourada — ver o log do Provider e `https://localhost:7001/health/ready` |

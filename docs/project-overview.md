@@ -28,11 +28,11 @@ Definido no [`CLAUDE.md`](../CLAUDE.md): brainstorming → `design.md` → `plan
 
 ---
 
-## Estado Atual (2026-11-06, após a Fase 07)
+## Estado Atual (2026-11-08, após a Fase 08a)
 
-**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, busca de cidades com lista de resultados, previsão de 5 dias com gráfico, temperatura nos cards e nomes de cidade em português, testes unitários nos dois serviços, `docker compose up` com os cinco serviços e CI em todo PR, logs JSON com correlation ID (TraceId) e traces OpenTelemetry no Jaeger (profile `observability`), web com tema próprio claro/escuro, layout responsivo, skeletons, estados vazio/erro com o código do erro e testes de lógica (Vitest).
+**Funciona:** cadastro e login com senha em hash e JWT, cada usuário vê só os próprios dados, erros em ProblemDetails, busca de clima atual com imagem da cidade, histórico de cidades por usuário, favoritar/desfavoritar, remover cidade, erros distintos para cidade inexistente (404) e serviço indisponível (503), cache de clima e health checks, busca de cidades com lista de resultados, previsão de 5 dias com gráfico, temperatura nos cards e nomes de cidade em português, testes unitários nos dois serviços, `docker compose up` com os cinco serviços e CI em todo PR, logs JSON com correlation ID (TraceId) e traces OpenTelemetry no Jaeger (profile `observability`), web com tema próprio claro/escuro, layout responsivo, skeletons, estados vazio/erro com o código do erro e testes de lógica (Vitest), rate limiting no Gateway (auth por IP, API por usuário), usuário de demonstração com botão no login, consulta de clima sem efeito colateral (histórico via `POST /cities`), cards sem foto da Pexels, 400 em português, `traceparent` do cliente ignorado e 503 em até 5 s com o Provider fora.
 
-**Não há:** testes de integração, métricas, deploy.
+**Não há:** testes de integração, métricas, deploy (Fase 08b).
 
 **Stack:** .NET 10 · ASP.NET Core Web API · EF Core 10 + Npgsql · Mapster · OpenAPI + Scalar · Microsoft.Extensions.Http.Resilience · IDistributedCache (Redis opcional) · React 19 · Vite 6 · Ant Design 5 · Recharts · axios · Vitest · Testing Library · xUnit v3 · Shouldly · NSubstitute · Docker · Docker Compose · nginx · GitHub Actions · Serilog · OpenTelemetry · Jaeger.
 
@@ -84,8 +84,11 @@ Dividida em dois blocos:
 Auditoria: A27 (resolvida na 07a).
 
 #### Fase 08 — Vitrine e deploy
-Deploy gratuito, README de portfólio, GIF, diagrama.
-Auditoria: A26.
+Dividida em dois blocos:
+- **08a — Endurecimento** ✅ (2026-11-08): `GET /weathers` só lê e o histórico vem do `POST /cities`; cards com `?image=false`, sem Pexels; rate limiting (auth por IP, API por usuário); usuário de demonstração (`POST /auth/demo` e botão no login); 400 em português; `traceparent` do cliente ignorado; conexão com o Provider limitada (503 em ≤ 5 s) e health check do Provider com 5 s. [Design](features/08-vitrine-deploy/endurecimento-design.md) · [Plano](features/08-vitrine-deploy/endurecimento-plan.md)
+- **08b — Deploy e vitrine** (pendente): deploy gratuito, `ForwardedHeaders`, README de portfólio, GIF, diagrama.
+
+Auditoria: A26 (fica para a 08b).
 
 ---
 
@@ -94,21 +97,19 @@ Auditoria: A26.
 Itens descobertos durante as fases que não pertencem ao escopo delas. Formato: `- [Fase NN] descrição`.
 
 - [Backlog] Mapster: trocar `TypeAdapterConfig.GlobalSettings` por instância própria e validar com `Compile()`/teste
-- [Fase 08] Rate limiting em `/auth/*` (`AddRateLimiter`, janela fixa por IP) — obrigatório antes do deploy público
 - [Backlog] Provider: resposta 200 incompleta da OpenWeather (lista `weather` vazia, `sys` nulo) vira 500 — lançar `ExternalServiceUnavailableException("resposta incompleta")` e cobrir com WireMock; `sys.country` ausente sai como `null`
 - [Backlog] Gateway: 400 do Provider (`cityName` só com espaços em `/weathers` e `/forecasts`) vira 503 — tratar como 404 ou validar no Gateway
 - [Backlog] Extrair a criação do `ValidationProblemDetails` duplicada entre `ValidationFilter` e `InvalidModelStateResponseFactory`
 - [Backlog] Confirmar se o ramo 499 dos `GlobalExceptionHandler` é alcançado (o `ExceptionHandlerMiddleware` do .NET 8+ já trata `OperationCanceledException` com `RequestAborted`); remover ou ajustar o `backend.md`
-- [Backlog] Índice único (`userid`, `name`) em `city`: duas buscas simultâneas da mesma cidade nova gravam duplicata
-- [Fase 08] 400 automático expõe mensagens do System.Text.Json em inglês e nomes de tipo .NET em `errors` — desligar `AllowInputFormatterExceptionMessages` ou mapear para "JSON inválido."
-- [Fase 08] Health checks: com Redis travado, o check do Gateway (3 s) pode estourar junto com o do Provider (3 s) e virar Unhealthy, contrariando "Redis fora não derruba o ready do Gateway" — dar ao Gateway um timeout maior que o do Provider; o `client.Timeout` de 5 s do health do Provider ficou inalcançável
+- [Backlog] Índice único (`userid`, `name`) em `city`: dois `POST /cities` simultâneos da mesma cidade nova gravam duplicata — acontece em toda primeira visita ao detalhe em dev (StrictMode roda o efeito duas vezes) e com duas abas; tratar o conflito como 200
 - [Backlog] Previsão: resposta 200 da OpenWeather com `list` vazia ou `weather` vazio em algum ponto vira 500 — mesma correção da resposta incompleta do clima atual
 - [Backlog] Testes de integração (WebApplicationFactory + Testcontainers Postgres/Redis + WireMock), plano em [`integracao-plan.md`](features/04-testes/integracao-plan.md); ao executar, incluir no CI da Fase 05 (Docker no runner)
-- [Fase 08] `traceparent` vindo do cliente é aceito pelo Gateway (borda pública): o cliente escolhe o TraceId devolvido em `X-Correlation-ID` e pode desligar a amostragem da cadeia com a flag `-00` — avaliar descartar o `traceparent` de entrada no Gateway ou um sampler que ignore o pai remoto
 - [Backlog] Bootstrap logger do Serilog (`CreateBootstrapLogger` + `try/catch`/`Log.CloseAndFlush` no `Program.cs`): falha no `MigrateAsync` ou antes do `Build()` sai como texto no stderr, fora do JSON; exige exceção da BE-30 para o `Program.cs`
 - [Backlog] Teste de integração (junto do [`integracao-plan.md`](features/04-testes/integracao-plan.md)) garantindo que o `traceId` do JSON de erro é o TraceId puro e igual ao `X-Correlation-ID` (hoje só `ProblemDetailsTraceId.Apply` é testado isolado)
 - [Backlog] Testes de componentes do web (render de telas com Testing Library)
-- [Fase 08] Provider fora do ar: o Gateway leva ~30 s (retentativas + timeout total da resiliência) para devolver o 503, e a tela fica no skeleton esse tempo todo — reduzir o timeout total do client do Provider no Gateway
 - [Backlog] Homônimos ("Springfield"): a busca mostra estado/país, mas clima e previsão usam a primeira cidade do geocoding — identificar por coordenadas exige mudar contrato, URL e entidade City
-- [Fase 08] `GET /weathers/{nome}` tem efeito colateral (o Gateway grava a cidade no histórico quando `weather.City` não existe) e agora é chamado por cada card da Home: se o nome resolvido mudar (histórico gravado em inglês antes da 07b, `local_names.pt` ou primeiro resultado do geocoding mudando na OpenWeather), abrir a Home cria linhas novas sem ação do usuário — separar leitura de clima e registro no histórico (ex.: endpoint ou parâmetro sem persistência) e limpar duplicatas antes do deploy
-- [Fase 08] Cards da Home fazem uma chamada `/weathers` por cidade (OpenWeather + Pexels com cache frio); com histórico grande e o cache de 10 min, isso pesa na cota gratuita — avaliar limite de cards com temperatura ou endpoint agregado no deploy público
+- [Fase 08] `ForwardedHeaders` no Gateway atrás do proxy da hospedagem: sem ele o rate limit por IP vê só o IP do proxy e todos os visitantes dividem o mesmo limite
+- [Backlog] Health check de Redis do Provider não respeita o timeout de 3 s logo depois que o Redis trava (checks de 4–8 s nos primeiros segundos, `RedisTimeoutException` do StackExchange.Redis): nesse intervalo o check do Gateway (client de 4 s) cai em timeout e o `ready` dele vira Unhealthy; em regime fica `Degraded`/`Healthy` em ~3 s — avaliar `syncTimeout`/`asyncTimeout` curtos na connection string do check ou check próprio com `PingAsync` + `WaitAsync`
+- [Backlog] Limpar duplicatas do histórico gravadas antes da 08a (nomes em inglês de antes da 07b e linhas criadas pelos cards) antes de abrir o deploy público
+- [Backlog] Demo: dois `POST /auth/demo` simultâneos com o usuário ausente → o segundo bate no e-mail único e recebe 409; usuário e cidades iniciais são gravados em `SaveChanges` separados — capturar o conflito e reler o usuário, gravar tudo numa transação
+- [Backlog] `required` implícito do MVC em DTOs com `string` não anulável responde "Valor inválido." antes do FluentValidation (ex.: `POST /cities` sem `name`) — avaliar `SuppressImplicitRequiredAttributeForNonNullableReferenceTypes`

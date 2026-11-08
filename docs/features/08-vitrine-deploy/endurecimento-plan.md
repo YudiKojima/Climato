@@ -1411,19 +1411,19 @@ foreach (var registration in options.Registrations)
 **Files:**
 - Modify: `docs/architecture/backend.md`, `docs/architecture/frontend.md`, `docs/architecture/review-checklist.md`, `docs/architecture/system-design.md`, `docs/runbook.md`, `docs/project-overview.md`, `.env.example` (se precisar), este plano (notas de execução).
 
-- [ ] **Step 1: `backend.md`**
+- [x] **Step 1: `backend.md`**
   - Comunicação HTTP: `ConnectTimeout` de 2 s no client do Provider, retentativa com 500 ms, timeout de conexão tratado como falha de transporte.
   - Health checks: Provider no Gateway com 5 s (client 4 s); demais 3 s.
   - Observabilidade: o Gateway ignora `traceparent` de entrada (`IncomingTraceContextBlocker` + `TraceContextPropagator`).
   - Nova subseção **Rate limiting**: políticas `auth` (IP) e `api` (usuário), `[EnableRateLimiting]` em todo controller, 429 com `Retry-After`, limites em `RateLimiting:*`; atrás de proxy depende do `ForwardedHeaders` (08b).
   - Erros: 400 de binding sanitizado (`InvalidRequest`), sem mensagens do System.Text.Json.
   - Decisões: `GET` não grava; histórico via `POST /cities` idempotente; usuário demo (`Demo:*`, `POST /auth/demo`, criado sob demanda).
-- [ ] **Step 2: `frontend.md`** — o detalhe registra a cidade (`addCity`) quando o clima carrega; cards usam `useWeather(nome, { image: false })`; botão de demonstração com `VITE_DEMO_ENABLED`.
-- [ ] **Step 3: `review-checklist.md`** — novas linhas: `BE-31 🔴 08 GET com efeito colateral` (GET que grava/alterar estado) e `BE-32 🔴 08 Rota sem rate limit` (controller sem `[EnableRateLimiting]`).
-- [ ] **Step 4: `system-design.md`** — fluxo "Consulta de clima" sem gravação e novo passo de registro no histórico; menção ao usuário demo e ao rate limit.
-- [ ] **Step 5: `runbook.md`** — `Demo__Enabled`, `VITE_DEMO_ENABLED`, `RateLimiting__*` (como aumentar em desenvolvimento).
-- [ ] **Step 6: `project-overview.md`** — remover as pendências `[Fase 08]` resolvidas (rate limiting, 400, health, `traceparent`, Provider fora, efeito colateral do `GET /weathers`, custo dos cards); adicionar `[Fase 08] ForwardedHeaders no Gateway atrás do proxy da hospedagem (IP real para o rate limit)`; Estado Atual e Fase 08 com "08a concluída (AAAA-MM-DD); 08b pendente" (a fase só ganha ✅ na 08b).
-- [ ] **Step 7: Verificação completa**
+- [x] **Step 2: `frontend.md`** — o detalhe registra a cidade (`addCity`) quando o clima carrega; cards usam `useWeather(nome, { image: false })`; botão de demonstração com `VITE_DEMO_ENABLED`.
+- [x] **Step 3: `review-checklist.md`** — novas linhas: `BE-31 🔴 08 GET com efeito colateral` (GET que grava/alterar estado) e `BE-32 🔴 08 Rota sem rate limit` (controller sem `[EnableRateLimiting]`).
+- [x] **Step 4: `system-design.md`** — fluxo "Consulta de clima" sem gravação e novo passo de registro no histórico; menção ao usuário demo e ao rate limit.
+- [x] **Step 5: `runbook.md`** — `Demo__Enabled`, `VITE_DEMO_ENABLED`, `RateLimiting__*` (como aumentar em desenvolvimento).
+- [x] **Step 6: `project-overview.md`** — remover as pendências `[Fase 08]` resolvidas (rate limiting, 400, health, `traceparent`, Provider fora, efeito colateral do `GET /weathers`, custo dos cards); adicionar `[Fase 08] ForwardedHeaders no Gateway atrás do proxy da hospedagem (IP real para o rate limit)`; Estado Atual e Fase 08 com "08a concluída (AAAA-MM-DD); 08b pendente" (a fase só ganha ✅ na 08b).
+- [x] **Step 7: Verificação completa**
 
 ```bash
 dotnet build Climato.slnx
@@ -1436,10 +1436,40 @@ docker compose build
 
 (`docker compose build` com `.env` temporário de build, apagado em seguida, como na 07.)
 
-- [ ] **Step 8: Notas de execução** — registrar no fim deste plano desvios e o que foi conferido manualmente.
-- [ ] **Step 9: `/revisar-padrao`, `/requesting-code-review` e commit final**
+- [x] **Step 8: Notas de execução** — registrar no fim deste plano desvios e o que foi conferido manualmente.
+- [x] **Step 9: `/revisar-padrao`, `/requesting-code-review` e commit final**
 
 ```bash
 git add docs .env.example
 git commit -m "Documenta o endurecimento e fecha a Fase 08a"
 ```
+
+---
+
+## Notas de execução (2026-11-08)
+
+**Desvios do plano**
+- Task 2: o `CapturingHandler` do `WeatherProviderClientTests` devolve 404 em vez de um JSON parcial (o `WeatherDto` tem propriedades `required` e o JSON do plano virava `ProviderUnavailableException`); o teste só confere a URL.
+- Task 3: `RateLimitingOptions` registrada com `AddOptions().BindConfiguration().ValidateDataAnnotations().ValidateOnStart()` e `[Range]` (BE-20), lida por `IOptions` dentro das políticas; `RateLimitPolicies.IpPartitionKey` extraído para a política `auth`.
+- Task 4: design ajustado para o usuário demo sob demanda (sem seeder).
+- Task 5: corpo vazio gera a chave `""` no `ModelState`; o `Sanitize` também a trata como corpo (teste `Sanitize_CorpoVazio_ViraSoJsonInvalido`).
+- Task 6: teste extra de `ExtractBaggage`.
+
+**Conferido manualmente** (Gateway/Provider com `dotnet run`, web com `npm run dev`, Postgres local)
+- Home não grava histórico; detalhe dispara `POST /cities` (201) e a cidade aparece na Home; `POST` repetido → 200; `name` vazio → 400 em português; sem token → 401.
+- Cards pedem `?image=false` (`imageUrl: null`); o detalhe mantém a foto.
+- 10 logins → 401, 11º → 429 com `Retry-After` e título em português; `/health/live` fora do limite.
+- Demo desligada → 404; ligada → botão entra com as 4 cidades; após `DELETE /users/me`, novo acesso recria usuário e cidades.
+- 400: JSON malformado, tipo errado e corpo vazio → só `body: ["JSON inválido."]`; `id` inválido na rota → "Valor inválido.".
+- `traceparent` próprio do cliente → `X-Correlation-ID` diferente; o Provider loga o mesmo TraceId do Gateway.
+- Provider fora: porta recusada 9,7 s → 4,4 s; host inalcançável (`10.255.255.1`) → 4,8 s; `/health/ready` 503 em 2 s.
+- Compose (`docker compose up -d gateway`, sem o `web`) com `docker compose pause redis`: em regime `Healthy` 200 em ~3 s. Nos primeiros segundos após a pausa o check de Redis do Provider passa dos 3 s (4–8 s, `RedisTimeoutException`) e o Gateway fica Unhealthy por esse intervalo — registrado como pendência `[Backlog]` no `project-overview.md` (correção no Provider, fora desta fase).
+
+**Verificação final:** `dotnet build` (0 avisos), `dotnet test` 126/126, `npm run lint`, `npm test` 50/50, `npm run build` e `docker compose build` com `.env` temporário (apagado em seguida).
+
+**Correções depois do code review** (os trechos de código das tasks acima ficaram como planejados; o código atual reflete estas correções)
+- `POST /auth/register` recusa `Demo:Email` (409), com a demo ligada ou não: depois de um `DELETE /users/me` da demo, ninguém registra o e-mail com senha própria e passa a receber os visitantes do botão.
+- Política `api`: o usuário de demonstração é particionado por `sub` + IP (todos os visitantes usam o mesmo `sub`); `ApiPermitLimit` padrão 120/min, folga para a Home (uma chamada por card). O card de temperatura já mostra "—" sem `message.error` quando recebe 429.
+- `POST /cities` recebe só `{ name }` (≤ 100): o Gateway resolve no Provider (`GetWeatherAsync(nome, includeImage: false)`) e grava o nome e o país devolvidos; inexistente → 404. Texto livre não entra no histórico compartilhado da demo. Web: `addCity(weather.city)`.
+- Ficaram como pendência `[Backlog]` no `project-overview.md`: corrida na criação da demo, duplicata do `POST /cities` simultâneo (StrictMode) junto do índice único e o `required` implícito antes do FluentValidation.
+- Conferido: cadastro com `demo@climato.dev` → 409; `POST /cities` com texto inventado → 404; "sao paulo" → 201 "São Paulo"/BR; repetido → 200; detalhe no navegador → 201 e a cidade aparece na Home.

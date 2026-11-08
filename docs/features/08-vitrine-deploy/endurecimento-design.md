@@ -25,7 +25,7 @@ Deixar o Climato pronto para ficar exposto na internet: proteger as cotas da Ope
 |---|---|---|
 | Histórico | `GET /weathers/{nome}` **só lê**; registro via `POST /cities` explícito e idempotente, chamado pelo detalhe com o nome resolvido | `?record=false` nos cards (GET com efeito colateral continua); endpoint agregado (detalhe continua gravando via GET) |
 | Custo dos cards | Cards pedem `GET /weathers/{nome}?image=false`: só OpenWeather, sem Pexels | Limitar cards com temperatura; endpoint agregado (mesmo nº de chamadas na OpenWeather); só rate limit |
-| Rate limiting | `/auth/*`: 10 req/min por IP (janela fixa). Rotas autenticadas: 60 req/min por usuário (`sub`) | Limite global único (um visitante esgota a demo de todos) |
+| Rate limiting | `/auth/*`: 10 req/min por IP (janela fixa). Rotas autenticadas: 120 req/min por usuário (`sub`; a demo por `sub` + IP) | Limite global único (um visitante esgota a demo de todos) |
 | Usuário demo | `Demo:Enabled` liga a demo; o usuário é criado no primeiro `POST /auth/demo` (e recriado se for excluído) com senha aleatória e cidades iniciais; `POST /auth/demo` devolve o token; botão no login | Credenciais públicas no README; sem usuário demo |
 | `traceparent` | Gateway ignora o `traceparent` de entrada e sempre inicia trace novo; propagação Gateway → Provider igual | Sampler que ignora o pai remoto (o cliente ainda escolhe o TraceId) |
 
@@ -33,8 +33,8 @@ Deixar o Climato pronto para ficar exposto na internet: proteger as cotas da Ope
 
 ### 1. Histórico sem efeito colateral
 - **Gateway:** `WeatherAppService.GetByCityAsync` deixa de receber `userId` e de gravar. `WeatherController` atualiza o `<summary>`.
-- **Gateway:** `POST /cities` com `{ name, country }` (FluentValidation: `name` e `country` obrigatórios, ≤ 255, como as colunas de `city`). Cidade já no histórico do usuário → `200` com a existente; nova → `201` com a cidade no corpo (não há `GET /cities/{id}` para o `Location`). Usuário das claims.
-- **Web:** `services/cities.js` ganha `addCity({ name, country })`; `WeatherDetails` chama ao carregar o clima (efeito sobre `weather.city`/`weather.country`). Falha no registro não derruba a tela: só `useApiFeedback` (erro inesperado).
+- **Gateway:** `POST /cities` com `{ name }` (FluentValidation: obrigatório, ≤ 100, como a busca). O Gateway resolve o nome no Provider (clima sem imagem) e grava o nome e o país devolvidos — texto livre não entra no histórico; cidade inexistente → 404. Cidade já no histórico do usuário → `200` com a existente; nova → `201` com a cidade no corpo (não há `GET /cities/{id}` para o `Location`). Usuário das claims.
+- **Web:** `services/cities.js` ganha `addCity(name)`; `WeatherDetails` chama com `weather.city` ao carregar o clima. Falha no registro não derruba a tela: só `useApiFeedback` (erro inesperado).
 - Sem migration. Concorrência (duas abas) continua no backlog do índice único.
 
 ### 2. Cards sem Pexels
@@ -43,12 +43,12 @@ Deixar o Climato pronto para ficar exposto na internet: proteger as cotas da Ope
 - **Web:** `getWeatherByCity(name, { image: false })`; `CityTemperature` usa essa forma (hook próprio ou parâmetro no `useWeather`).
 
 ### 3. Rate limiting (Gateway)
-- `AddRateLimiter` com duas políticas nomeadas: `auth` (janela fixa, 10/min, partição por `RemoteIpAddress`) no `AuthController`; `api` (janela fixa, 60/min, partição pela claim `sub`) nos controllers autenticados. Health checks fora.
+- `AddRateLimiter` com duas políticas nomeadas: `auth` (janela fixa, 10/min, partição por `RemoteIpAddress`) no `AuthController`; `api` (janela fixa, 120/min; usuário demo por `sub` + IP; partição pela claim `sub`) nos controllers autenticados. Health checks fora.
 - Rejeição: `429` com `ProblemDetails` (`title`: "Muitas requisições. Tente novamente em instantes.") e `Retry-After`. Limites em `RateLimiting:*` no `appsettings.json` (Options validadas).
 - Web: 429 é erro de negócio (status < 500) → `message.error` com o `title`, já coberto pelo `useApiFeedback`.
 
 ### 4. Usuário de demonstração
-- **Gateway:** `Demo:Enabled` (padrão `false`; compose liga), `Demo:Email`, `Demo:Name`, `Demo:Cities` (lista inicial). Sem seeder: o `POST /auth/demo` cria o usuário se não existir (inclusive depois de um `DELETE /users/me`), com senha aleatória descartada (ninguém faz login por senha), e as cidades iniciais só quando o usuário é criado.
+- **Gateway:** `Demo:Enabled` (padrão `false`; compose liga), `Demo:Email`, `Demo:Name`, `Demo:Cities` (lista inicial). Sem seeder: o `POST /auth/demo` cria o usuário se não existir (inclusive depois de um `DELETE /users/me`), com senha aleatória descartada (ninguém faz login por senha), e as cidades iniciais só quando o usuário é criado. `POST /auth/register` recusa `Demo:Email` (409), para ninguém tomar a conta da demo depois de excluída.
 - `POST /auth/demo` (`[AllowAnonymous]`, política `auth`): demo ligada → mesmo contrato do login `{ token, expiresAt, user }`; desligada → `404`.
 - **Web:** `VITE_DEMO_ENABLED=true` mostra o botão "Entrar como demonstração" no `SignIn`; usa o mesmo fluxo de sessão do login. Variável no `.env.example` e no build arg da imagem.
 - Dados do demo são compartilhados entre visitantes — aceito; o README da 08b avisa.
